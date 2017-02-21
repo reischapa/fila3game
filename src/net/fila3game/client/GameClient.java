@@ -96,9 +96,7 @@ public class GameClient implements InputReceiver {
                         ServerConnectionWorker.this.datagramSocket.receive(packet);
                         String string = new String(packet.getData(), 0, packet.getLength(), "UTF-8");
 
-                        synchronized (GameClient.this.field) {
-                            GameClient.this.field.constructFromString(string);
-                        }
+                        GameClient.this.display.receiveData(new GameState(string));
 
                         System.out.println(string);
 

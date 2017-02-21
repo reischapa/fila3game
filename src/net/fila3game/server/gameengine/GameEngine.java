@@ -7,6 +7,9 @@ import net.fila3game.server.Instruction;
  */
 public class GameEngine {
 
+    public enum Tiletypes {
+    }
+
     private Field battlefield;
 
     public void receiveInstruction(Instruction i) {

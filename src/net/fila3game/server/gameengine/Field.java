@@ -15,6 +15,10 @@ public class Field {
     private ConcurrentMap<Coord, Character> statusMap;
     private final int xMin, xMax, yMin, yMax;
 
+    public Field(int width, int height) {
+        this(0, 0, width, height);
+    }
+
     public Field(int xMin, int yMin, int width, int height) {
         this.xMin = xMin;
         this.xMax = xMin + width;
@@ -96,6 +100,10 @@ public class Field {
                 this.statusMap.put(new Coord(i, j), c);
             }
         }
+
+    }
+
+    public void addField(Field field, int x, int y) {
 
     }
 

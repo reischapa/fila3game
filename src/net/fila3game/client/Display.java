@@ -5,6 +5,6 @@ package net.fila3game.client;
  */
 public interface Display  {
 
-    void receiveData(String data);
+    void receiveData(GameState state);
 
 }
