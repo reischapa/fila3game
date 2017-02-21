@@ -1,4 +1,4 @@
-package net.fila3game.gameengine;
+package net.fila3game.server.gameengine;
 
 
 import java.util.*;

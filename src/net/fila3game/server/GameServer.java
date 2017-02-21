@@ -1,6 +1,6 @@
 package net.fila3game.server;
 
-import net.fila3game.gameengine.Field;
+import net.fila3game.server.gameengine.Field;
 //import net.jchapa.chapautils.FileIOManager;
 
 import java.io.*;

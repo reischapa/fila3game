@@ -1,6 +1,6 @@
 package net.fila3game.client;
 
-import net.fila3game.gameengine.Field;
+import net.fila3game.server.gameengine.Field;
 import net.fila3game.server.GameServer;
 //import net.jchapa.chapautils.RandomGen;
 
@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by chapa on 2/19/2017.
  */
-public class GameClient {
+public class GameClient implements InputReceiver {
 
     public static void main(String[] args) {
         GameClient gc = new GameClient();
@@ -29,6 +29,9 @@ public class GameClient {
     private final Field field;
     private DatagramSocket datagramSocket;
     private ExecutorService executorService;
+
+
+    private Display display;
 
     public GameClient() {
         this.field = new Field(0, 0, GameServer.FIELD_WIDTH, GameServer.FIELD_HEIGHT);
@@ -46,6 +49,11 @@ public class GameClient {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+    }
+
+    @Override
+    public void receiveInput(Key key) {
 
     }
 
@@ -134,5 +142,8 @@ public class GameClient {
         }
     }
 
+    public void setDisplay(Display display) {
+        this.display = display;
+    }
 
 }
