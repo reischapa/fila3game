@@ -70,7 +70,6 @@ public class GameClient implements InputReceiver {
 
             this.scheduledExecutorService.scheduleAtFixedRate(new ServerStateReceiverWorker(this.incomingDatagramSocket),0, CLIENT_LISTEN_INTERVAL_MILLIS, TimeUnit.MILLISECONDS);
 
-
         } catch (UnknownHostException e) {
             //TODO no host
             e.printStackTrace();
