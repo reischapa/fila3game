@@ -19,4 +19,8 @@ public interface GameObject {
 
     void setOrientation(RepresentationFactory.Orientation orientation);
 
+    int getHeight();
+
+    int getWidth();
+
 }

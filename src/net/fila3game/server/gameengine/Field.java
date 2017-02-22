@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentMap;
  * Created by codecadet on 2/1/17.
  */
 public class Field {
+
     public static final char FIELD_LINE_SEPARATOR = '\n';
     public static final char EMPTY_CELL_CHARACTER = '0';
 
