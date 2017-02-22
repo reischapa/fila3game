@@ -15,8 +15,8 @@ import java.util.concurrent.TimeUnit;
 public class GameClient implements InputReceiver {
 
     public static final int SERVER_TCP_CONNECTION_PORT = 8080;
-    public static final int RECEIVING_UDP_CONNECTION_PORT = 55355;
-    public static final int SENDING_UDP_CONNECTION_PORT = 55356;
+    public static final int RECEIVING_UDP_CONNECTION_PORT = 55356;
+    public static final int SENDING_UDP_CONNECTION_PORT = 55355;
     public static final String STRING_ENCODING = "UTF-8";
     public static final int CLIENT_LISTEN_INTERVAL_MILLIS = 10;
     public static final int NUMBER_MULTIPLES_SENT = 5;
