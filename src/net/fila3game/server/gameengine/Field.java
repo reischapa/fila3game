@@ -19,6 +19,7 @@ public class Field {
         this(0, 0, width, height);
     }
 
+    @Deprecated
     public Field(int xMin, int yMin, int width, int height) {
         this.xMin = xMin;
         this.xMax = xMin + width;
@@ -103,8 +104,12 @@ public class Field {
 
     }
 
-    public void addField(Field field, int x, int y) {
-
+    public void addField(Field field, int posX, int posY) {
+        for (int y = field.yMin; y < field.yMax ; y++) {
+            for (int x = field.xMin; x < field.xMax ; x++) {
+                this.set(posX + x, posY + y, field.get(x, y));
+            }
+        }
     }
 
     private String createPaddingString(int length) {
