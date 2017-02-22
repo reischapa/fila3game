@@ -8,7 +8,7 @@ import net.fila3game.server.gameengine.Field;
 public class RepresentationFactory {
 
     public enum Orientation {
-        NORTH
+        NORTH,
     }
 
     public enum GameObjectType {
