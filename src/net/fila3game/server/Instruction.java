@@ -6,7 +6,7 @@ package net.fila3game.server;
 public class Instruction {
 
     public enum Type {
-        N,D,
+        U,D,R,L,S;
     }
 
     private int playerNumber;
