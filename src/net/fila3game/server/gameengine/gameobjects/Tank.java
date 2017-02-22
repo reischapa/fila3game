@@ -7,6 +7,12 @@ import net.fila3game.server.gameengine.Field;
  */
 public class Tank implements GameObject {
 
+    private int player;
+
+    public Tank(int x, int y) {
+
+    }
+
     @Override
     public int player() {
         return 0;
@@ -35,5 +41,19 @@ public class Tank implements GameObject {
     @Override
     public void setOrientation(RepresentationFactory.Orientation orientation) {
 
+    }
+
+    @Override
+    public int getHeight() {
+        return 0;
+    }
+
+    @Override
+    public int getWidth() {
+        return 0;
+    }
+
+    public void setPlayer(int player) {
+        this.player = player;
     }
 }
