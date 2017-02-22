@@ -5,6 +5,7 @@ import net.fila3game.server.GameServer;
 //import net.jchapa.chapautils.RandomGen;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.DatagramPacket;
@@ -21,51 +22,49 @@ import java.util.concurrent.TimeUnit;
  */
 public class GameClient implements InputReceiver {
 
+    public static final int SERVER_TCP_CONNECTION_PORT = GameServer.TCP_CONNECTION_PORT;
+
     public static void main(String[] args) {
         GameClient gc = new GameClient();
-        gc.connect();
+        gc.connect("localhost");
     }
 
-    private final Field field;
-    private DatagramSocket datagramSocket;
-    private ExecutorService executorService;
-
-
+//    private DatagramSocket datagramSocket;
+//    private ExecutorService executorService;
     private Display display;
 
     public GameClient() {
-        this.field = new Field(0, 0, GameServer.FIELD_WIDTH, GameServer.FIELD_HEIGHT);
-        this.executorService = Executors.newFixedThreadPool(10);
-
     }
 
-    public void connect() {
+    public void connect(String address) {
 
         try {
-            Socket socket = new Socket("localhost", GameServer.TCP_CONNECTION_PORT);
+            Socket socket = new Socket(address, SERVER_TCP_CONNECTION_PORT);
             ServerConnectionWorker worker = new ServerConnectionWorker(socket);
             worker.run();
-
         } catch (IOException e) {
+            //TODO failed connection error handling
             e.printStackTrace();
         }
 
     }
 
     @Override
-    public void receiveInput(Key key) {
+    public void receiveInput(InputReceiver.Key key) {
 
     }
 
+    public void setDisplay(Display display) {
+        this.display = display;
+    }
 
     private class ServerConnectionWorker implements Runnable {
-        private Socket socket;
         private DatagramSocket datagramSocket;
         private BufferedReader reader;
+        private BufferedWriter writer;
         private ScheduledThreadPoolExecutor executorService;
 
         public ServerConnectionWorker(Socket socket) throws IOException {
-            this.socket = socket;
             this.datagramSocket = new DatagramSocket(GameServer.OUTGOING_UDP_CONNECTION_PORT);
             this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.executorService = new ScheduledThreadPoolExecutor(4);
@@ -80,6 +79,7 @@ public class GameClient implements InputReceiver {
                     try {
                         ServerConnectionWorker.this.reader.readLine();
                     } catch (IOException e) {
+                        //TODO sudden disconnect error handling
                         e.printStackTrace();
                     }
                 }
@@ -112,10 +112,6 @@ public class GameClient implements InputReceiver {
                 @Override
                 public void run() {
                     String sent = null;
-//                    int x = RandomGen.getBoundedRandomInt(0, GameServer.FIELD_WIDTH - 1);
-//                    int y = RandomGen.getBoundedRandomInt(0, GameServer.FIELD_HEIGHT - 1);
-
-//                    sent = x + " " + y + " G";
 
                     try {
                         byte[] bytes = sent.getBytes("UTF-8");
@@ -126,8 +122,6 @@ public class GameClient implements InputReceiver {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-
-
 
                 }
             };
@@ -140,8 +134,5 @@ public class GameClient implements InputReceiver {
         }
     }
 
-    public void setDisplay(Display display) {
-        this.display = display;
-    }
 
 }

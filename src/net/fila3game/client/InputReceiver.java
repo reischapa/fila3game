@@ -6,7 +6,7 @@ package net.fila3game.client;
 public interface InputReceiver {
 
     public enum Key {
-
+        KEY_SPACE, KEY_A,
     }
 
     void receiveInput(InputReceiver.Key key);

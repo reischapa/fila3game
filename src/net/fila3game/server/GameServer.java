@@ -39,7 +39,7 @@ public class GameServer {
     private Timer timer;
 
     public GameServer() throws IOException{
-        this.field = new Field(0, 0, FIELD_WIDTH, FIELD_HEIGHT);
+        this.field = new Field(FIELD_WIDTH, FIELD_HEIGHT);
         this.serverSocket = new ServerSocket(TCP_CONNECTION_PORT);
         this.executorService = Executors.newFixedThreadPool(100);
         this.timer = new Timer();
