@@ -19,6 +19,7 @@ public class GameClient implements InputReceiver {
     public static final int SENDING_UDP_CONNECTION_PORT = 55356;
     public static final String STRING_ENCODING = "UTF-8";
     public static final int CLIENT_LISTEN_INTERVAL_MILLIS = 10;
+    public static final int NUMBER_MULTIPLES_SENT = 5;
 
     public static void main(String[] args) {
         GameClient gc = new GameClient();
@@ -26,6 +27,8 @@ public class GameClient implements InputReceiver {
     }
 
     private Display display;
+
+    private final Object displayLock = new Object();
 
     private InetAddress serverAddress;
     private Socket socket;
@@ -56,10 +59,11 @@ public class GameClient implements InputReceiver {
             this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 
+            System.out.println(this.reader.readLine());
+
             this.scheduledExecutorService = new ScheduledThreadPoolExecutor(4);
             this.normalExecutorService = Executors.newFixedThreadPool(4);
 
-            System.out.println(this.reader.readLine());
 
             this.incomingDatagramSocket = new DatagramSocket(RECEIVING_UDP_CONNECTION_PORT);
             this.outgoingDatagramSocket = new DatagramSocket();
@@ -79,7 +83,7 @@ public class GameClient implements InputReceiver {
 
     @Override
     public void receiveInput(InputReceiver.Key key) {
-        this.normalExecutorService.execute(new ServerCommandSenderWorker(this.outgoingDatagramSocket,this.serverAddress,"0 S"));
+        this.normalExecutorService.execute(new ServerCommandSenderWorker(this.outgoingDatagramSocket,this.serverAddress,this.multiplyCommands("0 S")));
     }
 
     public void setDisplay(Display display) {
@@ -104,10 +108,13 @@ public class GameClient implements InputReceiver {
                 this.datagramSocket.receive(packet);
                 String string = new String(packet.getData(), 0, packet.getLength(), STRING_ENCODING);
 
-                if (string.startsWith("shoot")) {
-                    System.out.println("dksldkdkssdk");
-                    GameClient.this.receiveInput(null);
-                }
+//                synchronized (GameClient.this.displayLock) {
+//                    GameClient.this.display.receiveData(new GameState(string));
+//                }
+
+//                if (string.startsWith("shot")) {
+//                    GameClient.this.receiveInput(null);
+//                }
 
                 System.out.print(string);
 
@@ -122,9 +129,9 @@ public class GameClient implements InputReceiver {
 
         private DatagramSocket datagramSocket;
         private InetAddress inetAddress;
-        private String data;
+        private String[] data;
 
-        public ServerCommandSenderWorker(DatagramSocket datagramSocket, InetAddress inetAddress, String data)  {
+        public ServerCommandSenderWorker(DatagramSocket datagramSocket, InetAddress inetAddress, String[] data)  {
             this.inetAddress = inetAddress;
             this.data = data;
             this.datagramSocket = datagramSocket;
@@ -135,15 +142,29 @@ public class GameClient implements InputReceiver {
         public void run() {
 
             try {
-                byte[] bytes = this.data.getBytes("UTF-8");
-                DatagramPacket packet = new DatagramPacket(bytes, bytes.length, this.inetAddress, GameClient.SENDING_UDP_CONNECTION_PORT);
 
-                this.datagramSocket.send(packet);
+                for (String s : this.data) {
+                    byte[] bytes = s.getBytes("UTF-8");
+                    System.out.println(s);
+                    DatagramPacket packet = new DatagramPacket(bytes, bytes.length, this.inetAddress, GameClient.SENDING_UDP_CONNECTION_PORT);
+
+                    this.datagramSocket.send(packet);
+                }
 
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    private String[] multiplyCommands(String in) {
+        Long time = System.currentTimeMillis();
+        in = in.concat(" " + Long.toString(time));
+        String[] result = new String[NUMBER_MULTIPLES_SENT];
+        for (int i = 0; i < NUMBER_MULTIPLES_SENT; i++) {
+            result[i] = in;
+        }
+        return result;
     }
 
 

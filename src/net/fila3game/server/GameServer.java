@@ -15,8 +15,8 @@ public class GameServer {
     public static final int SEND_INTERVAL = 10000;
     public static final int KEEPALIVE_INTERVAL = 100;
     public static final int TCP_CONNECTION_PORT = 8080;
-    public static final int INCOMING_UDP_CONNECTION_PORT = 55354;
-    public static final int OUTGOING_UDP_CONNECTION_PORT = 55355;
+    public static final int RECEIVING_UDP_CONNECTION_PORT = 55356;
+    public static final int SENDING_UDP_CONNECTION_PORT = 55354;
     public static final int FIELD_WIDTH = 10;
     public static final int FIELD_HEIGHT = 10;
 
@@ -66,7 +66,7 @@ public class GameServer {
             this.socket = socket;
             this.tcpWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.tcpReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            this.datagramSocket = new DatagramSocket(INCOMING_UDP_CONNECTION_PORT);
+            this.datagramSocket = new DatagramSocket(RECEIVING_UDP_CONNECTION_PORT);
             this.executorService = new ScheduledThreadPoolExecutor(2);
             this.clientIPAddress = (Inet4Address) Inet4Address.getByName(socket.getInetAddress().toString().substring(1));
         }
@@ -103,7 +103,7 @@ public class GameServer {
                         System.out.println(message);
 
                         byte[] messagebytes = message.getBytes("UTF-8");
-                        DatagramPacket packet = new DatagramPacket(messagebytes, messagebytes.length, ClientConnectionWorker.this.clientIPAddress,OUTGOING_UDP_CONNECTION_PORT);
+                        DatagramPacket packet = new DatagramPacket(messagebytes, messagebytes.length, ClientConnectionWorker.this.clientIPAddress, SENDING_UDP_CONNECTION_PORT);
                         ClientConnectionWorker.this.datagramSocket.send(packet);
 
                     } catch (IOException e) {
