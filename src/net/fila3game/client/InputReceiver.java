@@ -5,8 +5,8 @@ package net.fila3game.client;
  */
 public interface InputReceiver {
 
-    public enum Key {
-        KEY_SPACE, KEY_A,
+    enum Key {
+        KEY_SPACE, KEY_ARROWUP, KEY_ARROWDOWN, KEY_ARROWLEFT, KEY_ARROWRIGHT;
     }
 
     void receiveInput(InputReceiver.Key key);
