@@ -6,12 +6,11 @@ import net.fila3game.server.gameengine.GameEngine;
 /**
  * Created by codecadet on 2/21/17.
  */
-public class Bullet implements GameObject{
+public class Bullet implements GameObject {
 
     public static final int BULLET_HEIGHT = 1;
     public static final int BULLET_WIDTH = 1;
 
-    private Field bulletField;
     private int player;
     private int x;
     private int y;
@@ -21,8 +20,6 @@ public class Bullet implements GameObject{
         this.player = player;
         this.x = x;
         this.y = y;
-
-        bulletField = new Field(BULLET_WIDTH,BULLET_HEIGHT);
     }
 
     @Override
@@ -47,7 +44,8 @@ public class Bullet implements GameObject{
 
     @Override
     public void move(int x, int y) {
-        bulletField.set(x,y, GameEngine.Tiletypes.BULLET.getSymbol());
+        this.x = x;
+        this.y = y;
     }
 
     @Override

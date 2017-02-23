@@ -1,6 +1,9 @@
 package net.fila3game.client;
 
+import com.googlecode.lanterna.TerminalFacade;
 import com.googlecode.lanterna.input.Key;
+import com.googlecode.lanterna.screen.ScreenWriter;
+import com.googlecode.lanterna.terminal.Terminal;
 import net.fila3game.server.gameengine.Field;
 import com.googlecode.lanterna.screen.Screen;
 
@@ -15,12 +18,29 @@ public class LanternaDisplayController implements Display, Controller {
     public static void main(String[] args) {
         LanternaDisplayController d = new LanternaDisplayController();
         Field f = new Field(10, 10);
-        d.receiveData(new GameState(f.returnAsString()));
-
+//        d.receiveData(new GameState(f.returnAsString()));
+        d.init();
     }
 
     private InputReceiver receiver;
     private Screen screen;
+
+
+    public void init() {
+        screen = TerminalFacade.createScreen();
+        screen.getTerminal().getTerminalSize().setColumns(60);
+        screen.getTerminal().getTerminalSize().setRows(30);
+
+        screen.getTerminal().setCursorVisible(false);
+        ScreenWriter screenWriter = new ScreenWriter(screen);
+        screenWriter.setBackgroundColor(Terminal.Color.BLUE);
+        screenWriter.setForegroundColor(Terminal.Color.WHITE);
+
+        screen.startScreen();
+
+        Thread t = new Thread(new KeyListener());
+        t.start();
+    }
 
     @Override
     public void receiveData(GameState state) {
@@ -44,14 +64,15 @@ public class LanternaDisplayController implements Display, Controller {
 
             while (true) {
                 key = screen.readInput();
-                k = translateKey(key);
 
                 if (key == null) {
                     continue;
                 }
 
+                k = translateKey(key);
+
                 System.out.println("key " + k + " pressed!");
-                receiver.receiveInput(k);
+//                receiver.receiveInput(k);
 
             }
         }
@@ -69,13 +90,18 @@ public class LanternaDisplayController implements Display, Controller {
             case ArrowRight:
                 return InputReceiver.Key.KEY_ARROWRIGHT;
             case NormalKey:
-                switch (key.getCharacter()) {
-                    case ' ':
-                        return InputReceiver.Key.KEY_SPACE;
-                }
+                return getNormalKeyCharacter(key);
         }
 
         System.err.println("Keystroke is not mapped, returning null...");
+        return null;
+}
+
+    private InputReceiver.Key getNormalKeyCharacter(Key key) {
+        switch (key.getCharacter()) {
+            case ' ':
+                return InputReceiver.Key.KEY_SPACE;
+        }
         return null;
     }
 
