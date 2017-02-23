@@ -11,7 +11,6 @@ public class Tank implements GameObject {
     public static final int TANK_HEIGHT = 3;
     public static final int TANK_WIDTH = 3;
 
-    private Field tankField;
     private int player;
     private int x;
     private int y;
@@ -21,8 +20,6 @@ public class Tank implements GameObject {
         this.player = player;
         this.x = x;
         this.y = y;
-
-        tankField = new Field(TANK_WIDTH, TANK_HEIGHT);
     }
 
     @Override
@@ -47,7 +44,8 @@ public class Tank implements GameObject {
 
     @Override
     public void move(int x, int y) {
-        tankField.set(x,y, GameEngine.Tiletypes.TANK.getSymbol());
+        this.x = x;
+        this.y = y;
     }
 
     @Override
