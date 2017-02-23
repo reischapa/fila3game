@@ -45,6 +45,7 @@ public class GameEngine {
         Tank tank = tankList.get(i.getPlayerNumber());
 
         if(i.getType().equals(Instruction.Type.R)) {
+            tank.setOrientation(RepresentationFactory.Orientation.EAST);
             tank.move(tank.getX()+1,tank.getY());
 
             if(checkCollision(tank)){
@@ -52,6 +53,7 @@ public class GameEngine {
                 tank.move(tank.getX()-1,tank.getY());
 
             }
+
         }
 
     }
@@ -78,7 +80,7 @@ public class GameEngine {
 
     //calculate and return the state
     public String calculateState() {
-        throw new UnsupportedOperationException();
+        return battlefield.returnAsString();
     }
 
     private boolean checkCollision(GameObject object){
@@ -99,7 +101,8 @@ public class GameEngine {
 
         Field field = new Field(20,20);
         GameEngine gameEngine = new GameEngine(field);
-        Instruction i = new Instruction(2, Instruction.Type.U);
+        gameEngine.addTank();
+        Instruction i = new Instruction(2, Instruction.Type.R);
         gameEngine.receiveInstruction(i);
 
     }
