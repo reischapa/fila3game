@@ -28,7 +28,6 @@ public class GameClient implements InputReceiver {
 
     private Display display;
 
-    private final Object displayLock = new Object();
 
     private InetAddress serverAddress;
     private Socket socket;
@@ -69,7 +68,7 @@ public class GameClient implements InputReceiver {
             this.incomingDatagramSocket = new DatagramSocket(RECEIVING_UDP_CONNECTION_PORT);
             this.outgoingDatagramSocket = new DatagramSocket();
 
-            this.scheduledExecutorService.scheduleAtFixedRate(new ServerReceiverWorker(this.incomingDatagramSocket),0, CLIENT_LISTEN_INTERVAL_MILLIS, TimeUnit.MILLISECONDS);
+            this.scheduledExecutorService.scheduleAtFixedRate(new ServerReceiverWorker(this.incomingDatagramSocket, this.display),0, CLIENT_LISTEN_INTERVAL_MILLIS, TimeUnit.MILLISECONDS);
 
 
         } catch (UnknownHostException e) {
@@ -98,15 +97,18 @@ public class GameClient implements InputReceiver {
         for (int i = 0; i < NUMBER_MULTIPLES_SENT; i++) {
             result[i] = in;
         }
+        System.out.println(result[0]);
         return result;
     }
 
     private class ServerReceiverWorker implements Runnable {
 
         private DatagramSocket datagramSocket;
+        private Display display;
 
-        public ServerReceiverWorker(DatagramSocket datagramSocket) {
+        public ServerReceiverWorker(DatagramSocket datagramSocket, Display display) {
             this.datagramSocket = datagramSocket;
+            this.display = display;
         }
 
         @Override
@@ -119,13 +121,8 @@ public class GameClient implements InputReceiver {
                 String string = new String(packet.getData(), 0, packet.getLength(), STRING_ENCODING);
 
                 System.out.println(string);
-//                synchronized (GameClient.this.displayLock) {
-//                    GameClient.this.display.receiveData(new GameState(string));
-//                }
 
-                if (string.startsWith("Hello")) {
-                    GameClient.this.receiveInput(null);
-                }
+                this.display.receiveData(new GameState(string));
 
             } catch (IOException e) {
                 e.printStackTrace();

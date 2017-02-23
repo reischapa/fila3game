@@ -44,39 +44,26 @@ public class LanternaDisplayController implements Display, Controller {
 
     @Override
     public void receiveData(GameState state) {
-        //TODO SEND DATA
-        Thread t = new Thread(new KeyListener());
-        t.start();
+        System.out.println(state.getFieldString());
 
-    }
+        this.screen.clear();
 
-    @Override
-    public void setInputReceiver(InputReceiver receiver) {
-        this.receiver = receiver;
-    }
+        String[] lines = state.getFieldString().split("\n");
 
-    private class KeyListener implements Runnable {
+        for (int y = 0; y < lines.length; y++) {
+            char[] chars = lines[y].toCharArray();
 
-        @Override
-        public void run() {
-            Key key;
-            InputReceiver.Key k;
-
-            while (true) {
-                key = screen.readInput();
-
-                if (key == null) {
-                    continue;
-                }
-
-                k = translateKey(key);
-
-                System.out.println("key " + k + " pressed!");
-//                receiver.receiveInput(k);
-
+            for (int x = 0; x < chars.length; x++ ) {
+                this.screen.putString(x * 2, y, "" + chars[x] + chars[x], Terminal.Color.MAGENTA, Terminal.Color.YELLOW);
             }
+
         }
+
+        this.screen.refresh();
+
     }
+
+
 
     private InputReceiver.Key translateKey(Key key) {
         System.out.println("got key! " + key);
@@ -102,7 +89,35 @@ public class LanternaDisplayController implements Display, Controller {
             case ' ':
                 return InputReceiver.Key.KEY_SPACE;
         }
-        return null;
+        return InputReceiver.Key.KEY_SPACE;
+    }
+
+    @Override
+    public void setInputReceiver(InputReceiver receiver) {
+        this.receiver = receiver;
+    }
+
+    private class KeyListener implements Runnable {
+
+        @Override
+        public void run() {
+            Key key;
+            InputReceiver.Key k;
+
+            while (true) {
+                key = screen.readInput();
+
+                if (key == null) {
+                    continue;
+                }
+
+                k = translateKey(key);
+
+                System.out.println("key " + k + " pressed!");
+                receiver.receiveInput(k);
+
+            }
+        }
     }
 
 }

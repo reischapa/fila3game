@@ -180,7 +180,8 @@ public class GameServer {
                 ClientStatusWorker worker = serverClients.get(iterator.next());
 
                 //TODO get data from the gameEngine
-                String message = "Hello world";
+                String message = "TTT\nTTT\n0T0";
+                System.out.println(message);
 
                 byte[] b = message.getBytes();
                 DatagramPacket p = new DatagramPacket(b, 0, b.length, worker.getClientIPAddress(), SENDING_UDP_CONNECTION_PORT);
