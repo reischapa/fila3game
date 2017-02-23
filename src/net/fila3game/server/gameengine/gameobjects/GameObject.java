@@ -7,7 +7,7 @@ import net.fila3game.server.gameengine.Field;
  */
 public interface GameObject {
 
-    int player();
+    int getPlayer();
 
     int getX();
 

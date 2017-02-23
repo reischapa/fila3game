@@ -27,22 +27,22 @@ public class RepresentationFactory {
 
                 switch (orientation) {
                     case NORTH:
-                        fieldRepresentation = new Field(3, 3);
+                        fieldRepresentation = new Field(Tank.TANK_WIDTH, Tank.TANK_HEIGHT);
                         fieldRepresentation.constructFromString("0T0\nTTT\nTTT");
                         break;
 
                     case SOUTH:
-                        fieldRepresentation = new Field(3, 3);
+                        fieldRepresentation = new Field(Tank.TANK_WIDTH, Tank.TANK_HEIGHT);
                         fieldRepresentation.constructFromString("TTT\nTTT\n0T0");
                         break;
 
                     case EAST:
-                        fieldRepresentation = new Field(3, 3);
+                        fieldRepresentation = new Field(Tank.TANK_WIDTH, Tank.TANK_HEIGHT);
                         fieldRepresentation.constructFromString("TT0\nTTT\nTT0");
                         break;
 
                     case WEST:
-                        fieldRepresentation = new Field(3, 3);
+                        fieldRepresentation = new Field(Tank.TANK_WIDTH, Tank.TANK_HEIGHT);
                         fieldRepresentation.constructFromString("0TT\nTTT\n0TT");
                         break;
 
@@ -55,25 +55,25 @@ public class RepresentationFactory {
 
                 switch (orientation) {
                     case NORTH:
-                        fieldRepresentation = new Field(1, 1);
+                        fieldRepresentation = new Field(Bullet.BULLET_WIDTH, Bullet.BULLET_HEIGHT);
                         fieldRepresentation.constructFromString("A");
                         break;
 
                     case SOUTH:
-                        fieldRepresentation = new Field(1, 1);
+                        fieldRepresentation = new Field(Bullet.BULLET_WIDTH, Bullet.BULLET_HEIGHT);
                         fieldRepresentation.constructFromString("V");
                         break;
 
                     case EAST:
-                        fieldRepresentation = new Field(1, 1);
+                        fieldRepresentation = new Field(Bullet.BULLET_WIDTH, Bullet.BULLET_HEIGHT);
                         fieldRepresentation.constructFromString(">");
                         break;
 
                     case WEST:
-                        fieldRepresentation = new Field(1, 1);
+                        fieldRepresentation = new Field(Bullet.BULLET_WIDTH, Bullet.BULLET_HEIGHT);
                         fieldRepresentation.constructFromString("<");
                         break;
-                    
+
                     default:
                         System.out.println("Something went terribly wrong");
                 }

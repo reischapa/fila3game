@@ -102,7 +102,6 @@ public class Field {
                 this.statusMap.put(new Coord(i, j), c);
             }
         }
-
     }
 
     public void addField(Field field, int posX, int posY) {
@@ -143,7 +142,6 @@ public class Field {
 
             if (x != coord.x) return false;
             return y == coord.y;
-
         }
 
         @Override
