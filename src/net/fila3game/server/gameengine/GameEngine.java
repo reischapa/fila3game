@@ -62,7 +62,7 @@ public class GameEngine {
 
         if(numberOfTanks == 0){
 
-            Tank tank = new Tank(0,0);
+            Tank tank = new Tank(0,0,0);
 
             if(!checkCollision(tank)){
                 battlefield.addField(tank.getRepresentation(),tank.getX(),tank.getY());

@@ -1,12 +1,15 @@
 package net.fila3game.server;
 
+import com.sun.xml.internal.ws.api.pipe.Engine;
 import net.fila3game.server.gameengine.GameEngine;
 //import net.jchapa.chapautils.FileIOManager;
 
-import javax.xml.crypto.Data;
 import java.io.*;
 import java.net.*;
+import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.*;
 
 /**
@@ -14,14 +17,19 @@ import java.util.concurrent.*;
  */
 public class GameServer {
     public static final int SEND_INTERVAL = 25;
+    public static final int GAME_ENGINE_SENDING_INTERVAL = 100;
     public static final int KEEPALIVE_INTERVAL = 100;
-    public static final String KEEPALIVE_MESSAGE = "a";
+    public static final String KEEPALIVE_MESSAGE = "a\n";
     public static final int TCP_CONNECTION_PORT = 8080;
     public static final int RECEIVING_UDP_CONNECTION_PORT = 55355;
     public static final int SENDING_UDP_CONNECTION_PORT = 55356;
     public static final String STRING_ENCODING = "UTF-8";
+    public static final String COMMAND_TOKEN_SEPARATOR = " ";
 
     public static final int RECEIVE_INTERVAL = 25;
+
+    //debug toggles
+    private static boolean D_REQUIRE_ENGINE = false;
 
 
     public static void main(String[] args) {
@@ -40,33 +48,37 @@ public class GameServer {
     private DatagramSocket incomingDatagramSocket;
     private DatagramSocket outgoingDatagramSocket;
     private GameEngine engine;
-    private ConcurrentMap<String, ClientStatusAndReceiverWorker> currentClients;
+    private ConcurrentMap<String, ClientStatusWorker> currentClients;
+    private ConcurrentMap<String, Instruction> currentInstructions;
     private ExecutorService normalExecutorService;
     private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
 
     public GameServer() throws IOException {
         this.serverSocket = new ServerSocket(TCP_CONNECTION_PORT);
         this.currentClients = new ConcurrentHashMap<>();
+        this.currentInstructions = new ConcurrentHashMap<>();
         this.normalExecutorService = Executors.newFixedThreadPool(100);
         this.scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(4);
     }
 
     private void start() throws IOException {
 
-//        if (this.engine == null) {
-//            throw new IllegalStateException("no engine");
-//        }
+        if (D_REQUIRE_ENGINE && this.engine == null) {
+            throw new IllegalStateException("no engine");
+        }
 
         this.incomingDatagramSocket = new DatagramSocket(RECEIVING_UDP_CONNECTION_PORT);
         this.outgoingDatagramSocket = new DatagramSocket();
 
-        this.scheduledThreadPoolExecutor.scheduleAtFixedRate(new ClientCommandReceiverWorker(this.incomingDatagramSocket, null), 0, SEND_INTERVAL, TimeUnit.MILLISECONDS);
         this.scheduledThreadPoolExecutor.scheduleAtFixedRate(new ClientBroadcastWorker(this.outgoingDatagramSocket, this.currentClients), 0, RECEIVE_INTERVAL, TimeUnit.MILLISECONDS);
+        this.scheduledThreadPoolExecutor.scheduleAtFixedRate(new InstructionTableCleaner(this.currentInstructions, this.engine), 0, GAME_ENGINE_SENDING_INTERVAL, TimeUnit.MILLISECONDS);
+
+        this.normalExecutorService.execute(new ClientReceiverWorker(this.incomingDatagramSocket, this.currentInstructions));
 
 
         while (true) {
             Socket socket = this.serverSocket.accept();
-            this.normalExecutorService.execute(new ClientStatusAndReceiverWorker(socket));
+            this.normalExecutorService.execute(new ClientStatusWorker(socket));
         }
 
     }
@@ -76,15 +88,14 @@ public class GameServer {
     }
 
 
-
-    private class ClientCommandReceiverWorker implements Runnable {
+    private class ClientReceiverWorker implements Runnable {
 
         private DatagramSocket datagramSocket;
-        private GameEngine engine;
+        private ConcurrentMap<String, Instruction> instructionTable;
 
-        public ClientCommandReceiverWorker(DatagramSocket datagramSocket, GameEngine engine) {
+        public ClientReceiverWorker(DatagramSocket datagramSocket, ConcurrentMap<String, Instruction> instructionTable) {
             this.datagramSocket = datagramSocket;
-            this.engine = engine;
+            this.instructionTable = instructionTable;
         }
 
         @Override
@@ -92,22 +103,58 @@ public class GameServer {
 
             try {
 
-                byte[] buf = new byte[20000];
+                while (true) {
+                    byte[] buf = new byte[20000];
 
-                DatagramPacket dp = new DatagramPacket(buf, buf.length);
+                    DatagramPacket dp = new DatagramPacket(buf, buf.length);
 
-                this.datagramSocket.receive(dp);
+                    this.datagramSocket.receive(dp);
 
-                String command = new String(buf, 0, dp.getLength(), STRING_ENCODING);
-                System.out.println(command);
+                    String command = new String(buf, 0, dp.getLength(), STRING_ENCODING).trim();
+                    ClientReceiverWorker.this.parseCommand(command);
+                }
+
 
             } catch (IOException e) {
                 // not handled here
             }
         }
 
-        private Instruction parseCommand(String command) {
-            return null;
+        private void parseCommand(String command) {
+            String[] tokens = command.split(COMMAND_TOKEN_SEPARATOR);
+
+            if (!this.isValidCommand(tokens)) {
+                return;
+            }
+
+            String identifier = tokens[0] + " " + tokens[tokens.length - 1];
+
+            if (this.instructionTable.containsKey(identifier)) {
+                return;
+            }
+
+            this.instructionTable.put(identifier, new Instruction(Integer.parseInt(tokens[0]), Instruction.Type.D) );
+
+//            System.out.println(identifier);
+
+        }
+
+        private boolean isValidCommand(String[] commandTokens) {
+            if (commandTokens.length < 3) {
+                return false;
+            }
+
+            //TODO with regex
+
+            try {
+                Integer.parseInt(commandTokens[0]);
+                Long.parseLong(commandTokens[commandTokens.length - 1]);
+            } catch (NumberFormatException nfe) {
+                nfe.printStackTrace();
+                return false;
+            }
+
+            return true;
         }
 
     }
@@ -115,11 +162,11 @@ public class GameServer {
 
     private class ClientBroadcastWorker implements Runnable {
 
-        private ConcurrentMap<String, ClientStatusAndReceiverWorker> serverClients;
+        private ConcurrentMap<String, ClientStatusWorker> serverClients;
         private DatagramSocket outgoingDatagramSocket;
 
 
-        public ClientBroadcastWorker(DatagramSocket outgoingDatagramSocket, ConcurrentMap<String, ClientStatusAndReceiverWorker> serverClients ) {
+        public ClientBroadcastWorker(DatagramSocket outgoingDatagramSocket, ConcurrentMap<String, ClientStatusWorker> serverClients ) {
             this.outgoingDatagramSocket = outgoingDatagramSocket;
             this.serverClients = serverClients;
         }
@@ -130,15 +177,15 @@ public class GameServer {
             Iterator<String> iterator = this.serverClients.keySet().iterator();
 
             while (iterator.hasNext()) {
-                ClientStatusAndReceiverWorker worker = serverClients.get(iterator.next());
+                ClientStatusWorker worker = serverClients.get(iterator.next());
 
+                //TODO get data from the gameEngine
                 String message = "Hello world";
+
                 byte[] b = message.getBytes();
                 DatagramPacket p = new DatagramPacket(b, 0, b.length, worker.getClientIPAddress(), SENDING_UDP_CONNECTION_PORT);
-
                 try {
                     this.outgoingDatagramSocket.send(p);
-                    System.out.println(message);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -149,19 +196,24 @@ public class GameServer {
     }
 
 
-    private class ClientStatusAndReceiverWorker implements Runnable {
+    private class ClientStatusWorker implements Runnable {
 
         private Socket socket;
+        private InetAddress clientIPAddress;
+
+        private BufferedReader reader;
+        private BufferedWriter writer;
 
         private ScheduledThreadPoolExecutor executorService;
 
-        private InetAddress clientIPAddress;
         private String identifier;
 
-        public ClientStatusAndReceiverWorker(Socket socket) throws UnknownHostException, IOException {
+        public ClientStatusWorker(Socket socket) throws UnknownHostException, IOException {
             this.socket = socket;
-            this.executorService = new ScheduledThreadPoolExecutor(2);
             this.clientIPAddress = InetAddress.getByName(socket.getInetAddress().toString().substring(1));
+            this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), STRING_ENCODING));
+            this.writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), STRING_ENCODING));
+            this.executorService = new ScheduledThreadPoolExecutor(2);
             this.identifier = this.clientIPAddress.toString().concat(" " + Long.toString(System.currentTimeMillis()));
             this.registerSelf();
         }
@@ -169,20 +221,27 @@ public class GameServer {
         @Override
         public void run() {
 
+
             try {
+                //TODO server side comunication with client
+                //define protocol?
+                this.performHandshake();
 
-                this.executorService.scheduleAtFixedRate( new ClientStatusCheckerWorker(this.socket) ,0, KEEPALIVE_INTERVAL, TimeUnit.MILLISECONDS );
-
-            } catch (IOException e) {
+            } catch (InterruptedException e) {
                 e.printStackTrace();
-                this.safelyShutdownClientConnection();
+            } catch (IOException e) {
             }
 
+            this.safelyShutdownClientConnection();
 
         }
 
-        public InetAddress getClientIPAddress() {
-            return clientIPAddress;
+        public void performHandshake() throws InterruptedException, IOException {
+            while (true) {
+                writer.write(this.getKeepAliveMessage());
+                writer.flush();
+                Thread.sleep(KEEPALIVE_INTERVAL);
+            }
         }
 
         public void safelyShutdownClientConnection() {
@@ -212,31 +271,49 @@ public class GameServer {
             GameServer.this.currentClients.remove(this.identifier);
         }
 
-
-        private class ClientStatusCheckerWorker implements Runnable {
-
-            private BufferedWriter tcpWriter;
-            private BufferedReader tcpReader;
-
-            public ClientStatusCheckerWorker(Socket socket) throws IOException {
-                this.tcpReader = new BufferedReader(new InputStreamReader(socket.getInputStream(), STRING_ENCODING));
-                this.tcpWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), STRING_ENCODING));
-            }
-
-            @Override
-            public void run() {
-                try {
-                    tcpWriter.write(KEEPALIVE_MESSAGE);
-                    tcpWriter.flush();
-                } catch (IOException e) {
-                    ClientStatusAndReceiverWorker.this.safelyShutdownClientConnection();
-                }
-            }
-
+        private String getKeepAliveMessage() {
+            return KEEPALIVE_MESSAGE;
         }
 
 
+        public InetAddress getClientIPAddress() {
+            return clientIPAddress;
+        }
 
     }
+
+
+    private class InstructionTableCleaner implements Runnable {
+
+        private final ConcurrentMap<String, Instruction> instructionTable;
+        private GameEngine engine;
+
+        public InstructionTableCleaner(ConcurrentMap<String, Instruction> instructionTable, GameEngine engine) {
+            this.instructionTable = instructionTable;
+            this.engine = engine;
+        }
+
+        @Override
+        public void run() {
+
+
+            synchronized (this.instructionTable) {
+                StringBuilder sb = new StringBuilder();
+                Iterator<String> iter = this.instructionTable.keySet().iterator();
+                while (iter.hasNext()) {
+                    String elem = iter.next();
+                    sb.append("\n" + elem);
+                }
+
+                System.out.println(sb.toString());
+                this.instructionTable.clear();
+            }
+
+
+
+
+        }
+    }
+
 
 }

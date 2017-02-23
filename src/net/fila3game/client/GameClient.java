@@ -51,15 +51,16 @@ public class GameClient implements InputReceiver {
 
 
         try {
-
             this.serverAddress = InetAddress.getByName(address);
 
             this.socket = new Socket(this.serverAddress, SERVER_TCP_CONNECTION_PORT);
 
             this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-
+            //TODO client side handshake with server?
             System.out.println(this.reader.readLine());
+
+            System.out.println("dlksjfdlskdjf");
 
             this.scheduledExecutorService = new ScheduledThreadPoolExecutor(4);
             this.normalExecutorService = Executors.newFixedThreadPool(4);
@@ -68,7 +69,8 @@ public class GameClient implements InputReceiver {
             this.incomingDatagramSocket = new DatagramSocket(RECEIVING_UDP_CONNECTION_PORT);
             this.outgoingDatagramSocket = new DatagramSocket();
 
-            this.scheduledExecutorService.scheduleAtFixedRate(new ServerStateReceiverWorker(this.incomingDatagramSocket),0, CLIENT_LISTEN_INTERVAL_MILLIS, TimeUnit.MILLISECONDS);
+            this.scheduledExecutorService.scheduleAtFixedRate(new ServerReceiverWorker(this.incomingDatagramSocket),0, CLIENT_LISTEN_INTERVAL_MILLIS, TimeUnit.MILLISECONDS);
+
 
         } catch (UnknownHostException e) {
             //TODO no host
@@ -82,19 +84,28 @@ public class GameClient implements InputReceiver {
 
     @Override
     public void receiveInput(InputReceiver.Key key) {
-        this.normalExecutorService.execute(new ServerCommandSenderWorker(this.outgoingDatagramSocket,this.serverAddress,this.multiplyCommands("0 S")));
+        this.normalExecutorService.execute(new ServerSenderWorker(this.outgoingDatagramSocket,this.serverAddress,this.multiplyCommands("0 S")));
     }
 
     public void setDisplay(Display display) {
         this.display = display;
     }
 
+    private String[] multiplyCommands(String in) {
+        Long time = System.currentTimeMillis();
+        in = in.concat(" " + Long.toString(time));
+        String[] result = new String[NUMBER_MULTIPLES_SENT];
+        for (int i = 0; i < NUMBER_MULTIPLES_SENT; i++) {
+            result[i] = in;
+        }
+        return result;
+    }
 
-    private class ServerStateReceiverWorker implements Runnable {
+    private class ServerReceiverWorker implements Runnable {
 
         private DatagramSocket datagramSocket;
 
-        public ServerStateReceiverWorker(DatagramSocket datagramSocket) {
+        public ServerReceiverWorker(DatagramSocket datagramSocket) {
             this.datagramSocket = datagramSocket;
         }
 
@@ -107,15 +118,14 @@ public class GameClient implements InputReceiver {
                 this.datagramSocket.receive(packet);
                 String string = new String(packet.getData(), 0, packet.getLength(), STRING_ENCODING);
 
+                System.out.println(string);
 //                synchronized (GameClient.this.displayLock) {
 //                    GameClient.this.display.receiveData(new GameState(string));
 //                }
 
-//                if (string.startsWith("shot")) {
-//                    GameClient.this.receiveInput(null);
-//                }
-
-                System.out.print(string);
+                if (string.startsWith("Hello")) {
+                    GameClient.this.receiveInput(null);
+                }
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -124,13 +134,13 @@ public class GameClient implements InputReceiver {
 
     }
 
-    private class ServerCommandSenderWorker implements Runnable {
+    private class ServerSenderWorker implements Runnable {
 
         private DatagramSocket datagramSocket;
         private InetAddress inetAddress;
         private String[] data;
 
-        public ServerCommandSenderWorker(DatagramSocket datagramSocket, InetAddress inetAddress, String[] data)  {
+        public ServerSenderWorker(DatagramSocket datagramSocket, InetAddress inetAddress, String[] data)  {
             this.inetAddress = inetAddress;
             this.data = data;
             this.datagramSocket = datagramSocket;
@@ -156,15 +166,6 @@ public class GameClient implements InputReceiver {
         }
     }
 
-    private String[] multiplyCommands(String in) {
-        Long time = System.currentTimeMillis();
-        in = in.concat(" " + Long.toString(time));
-        String[] result = new String[NUMBER_MULTIPLES_SENT];
-        for (int i = 0; i < NUMBER_MULTIPLES_SENT; i++) {
-            result[i] = in;
-        }
-        return result;
-    }
 
 
 
