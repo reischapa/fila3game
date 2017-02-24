@@ -105,7 +105,6 @@ public class LanternaDisplayController implements Display, Controller {
                 return getNormalKeyCharacter(key);
         }
 
-        System.err.println("Keystroke is not mapped, returning null...");
         return null;
     }
 
@@ -114,6 +113,8 @@ public class LanternaDisplayController implements Display, Controller {
             case ' ':
                 return InputReceiver.Key.KEY_SPACE;
         }
+
+        System.err.println("Keystroke is not mapped, returning null...");
         return null;
     }
 
