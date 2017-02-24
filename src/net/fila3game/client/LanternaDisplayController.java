@@ -1,6 +1,7 @@
 package net.fila3game.client;
 
 import com.googlecode.lanterna.TerminalFacade;
+import com.googlecode.lanterna.gui.GUIScreen;
 import com.googlecode.lanterna.input.Key;
 import com.googlecode.lanterna.screen.ScreenWriter;
 import com.googlecode.lanterna.terminal.Terminal;
@@ -24,7 +25,6 @@ public class LanternaDisplayController implements Display, Controller {
 
     private InputReceiver receiver;
     private Screen screen;
-
 
     public void init() {
         screen = TerminalFacade.createScreen();
@@ -50,8 +50,8 @@ public class LanternaDisplayController implements Display, Controller {
         for (int y = 0; y < lines.length; y++) {
             char[] chars = lines[y].toCharArray();
 
-            for (int x = 0; x < chars.length; x++ ) {
-                this.screen.putString( state.getPlayerX() + x * 2, y, "" + chars[x] + chars[x], Terminal.Color.MAGENTA, Terminal.Color.YELLOW);
+            for (int x = 0; x < chars.length; x++) {
+                lanternaConstructCellfromChar(x * 2, y, chars[x]);
             }
 
         }
@@ -60,7 +60,35 @@ public class LanternaDisplayController implements Display, Controller {
 
     }
 
+    private void lanternaConstructCellfromChar(int x, int y, char c) {
+        Terminal.Color back = null;
+        Terminal.Color front = null;
+        char actualChar = ' ';
 
+        switch (c) {
+            case 'T':
+                back = Terminal.Color.GREEN;
+                front = Terminal.Color.GREEN;
+                actualChar = 'T';
+                break;
+            case 'B':
+                back = Terminal.Color.MAGENTA;
+                front = Terminal.Color.MAGENTA;
+                actualChar = 'B';
+                break;
+            case 'W':
+                back = Terminal.Color.BLUE;
+                front = Terminal.Color.BLUE;
+                actualChar = 'W';
+                break;
+            case '0':
+                back = Terminal.Color.BLACK;
+                front = Terminal.Color.BLACK;
+                actualChar = ' ';
+                break;
+        }
+        this.screen.putString(x, y, "" + actualChar + actualChar, back, front);
+    }
 
     private InputReceiver.Key translateKey(Key key) {
         System.out.println("got key! " + key);
@@ -79,14 +107,14 @@ public class LanternaDisplayController implements Display, Controller {
 
         System.err.println("Keystroke is not mapped, returning null...");
         return null;
-}
+    }
 
     private InputReceiver.Key getNormalKeyCharacter(Key key) {
         switch (key.getCharacter()) {
             case ' ':
                 return InputReceiver.Key.KEY_SPACE;
         }
-        return InputReceiver.Key.KEY_SPACE;
+        return null;
     }
 
     @Override

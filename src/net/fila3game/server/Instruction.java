@@ -12,7 +12,9 @@ public class Instruction {
     private int playerNumber;
     private Instruction.Type type;
 
-    public Instruction(int playerNumber, Type type) {
+    public Instruction(String in) {
+        this.type = Type.R;
+        this.playerNumber = 0;
         this.playerNumber = playerNumber;
         this.type = type;
     }
