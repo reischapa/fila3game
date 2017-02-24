@@ -13,6 +13,8 @@ import java.util.LinkedList;
 public class GameEngine {
 
     private static final int MAX_NUMBER_TANKS = 2;
+    public static final int DEFAULT_BATTLEFIELD_COLUMNS = 30;
+    public static final int DEFAULT_BATTLEFIELD_ROWS = 30;
 
     public enum Tiletypes {
 
@@ -142,7 +144,7 @@ public class GameEngine {
     }
 
     private Field createDefaultField(){
-        Field mainField = new Field(25,25);
+        Field mainField = new Field(DEFAULT_BATTLEFIELD_COLUMNS,DEFAULT_BATTLEFIELD_ROWS);
         for(int x = 0; x < mainField.getWidth(); x++){
             for(int y = 0; y < mainField.getHeight(); y++ ){
                 if(x == 0 || y == 0 || x == mainField.getWidth()-1 || y == mainField.getHeight()-1) {

@@ -62,7 +62,7 @@ public class GameServer {
         this.currentInstructions = new ConcurrentHashMap<>();
         this.normalExecutorService = Executors.newFixedThreadPool(100);
         this.scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(4);
-        this.engine = new GameEngine(new Field(60, 30));
+        this.engine = new GameEngine();
         this.engine.addTank();
     }
 

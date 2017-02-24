@@ -93,7 +93,30 @@ public class GameClient implements InputReceiver {
         if (!this.isConnected) {
             return;
         }
-        this.normalExecutorService.execute(new ServerSenderWorker(this.multiplyCommands("0 S")));
+        String result = "";
+        String topMovement = "0 U";
+        String downMovement = "0 D";
+        String rightMovement = "0 R";
+        String leftMovement  = "0 L";
+
+        switch (key) {
+            case KEY_ARROWDOWN:
+                result = downMovement;
+                break;
+            case KEY_ARROWRIGHT:
+                result = rightMovement;
+                break;
+            case KEY_ARROWUP:
+                result = topMovement;
+                break;
+            case KEY_ARROWLEFT:
+                result = leftMovement;
+                break;
+        }
+
+        this.normalExecutorService.execute(new ServerSenderWorker(this.multiplyCommands(result)));
+
+
     }
 
     public void setDisplay(Display display) {
