@@ -13,7 +13,7 @@ import java.util.LinkedList;
  */
 public class GameEngine {
 
-    private static final int MAX_NUMBER_TANKS = 2;
+    private static final int MAX_NUMBER_TANKS = 4;
     public static final int DEFAULT_BATTLEFIELD_COLUMNS = 30;
     public static final int DEFAULT_BATTLEFIELD_ROWS = 30;
 
@@ -86,7 +86,6 @@ public class GameEngine {
 
 
                 Bullet bullet = createBullet(tank);
-                moveBullet(bullet,1,0);
 
             }
         }
@@ -98,35 +97,45 @@ public class GameEngine {
 
         if(tank.getOrientation().equals(RepresentationFactory.Orientation.WEST)){
 
-            bullet = new Bullet(tank.getPlayer(),tank.getX()+4,tank.getY()+1, RepresentationFactory.Orientation.WEST);
+            bullet = new Bullet(tank.getPlayer(),tank.getX()-1,tank.getY()+1, RepresentationFactory.Orientation.WEST);
 
         }else if(tank.getOrientation().equals(RepresentationFactory.Orientation.EAST)){
 
-            bullet = new Bullet(tank.getPlayer(),tank.getX()+4,tank.getY()+1, RepresentationFactory.Orientation.EAST);
+            bullet = new Bullet(tank.getPlayer(),tank.getX()+3,tank.getY()+1, RepresentationFactory.Orientation.EAST);
 
+        }else if(tank.getOrientation().equals(RepresentationFactory.Orientation.SOUTH)){
+
+            bullet = new Bullet(tank.getPlayer(),tank.getX()+1,tank.getY()+3, RepresentationFactory.Orientation.SOUTH);
+
+        }else {
+
+            bullet = new Bullet(tank.getPlayer(),tank.getX()+1,tank.getY()-1, RepresentationFactory.Orientation.NORTH);
 
         }
 
         bullets.add(bullet);
+        battlefield.addField(bullet.getRepresentation(),bullet.getX(),bullet.getY());
 
         return bullet;
     }
 
-    private void moveBullet(Bullet bullet, int x, int y){
+    private synchronized void moveBullet(Bullet bullet, int x, int y){
 
         battlefield.addField(EMPTYMASK, bullet.getX(), bullet.getY());
         bullet.move(bullet.getX()+x,bullet.getY()+y);
 
-//        for(Tank t : tankList) {
-//            if (checkTankCollision(t)) {
-//                System.out.println("cock");
-//                battlefield.addField(EMPTYMASK,t.getX(), t.getY());
-//                battlefield.addField(EMPTYMASK,bullet.getX(),bullet.getY());
-//                tankList.remove(t);
-//                bullets.remove(bullet);
-//                numberOfTanks--;
-//            }
-//        }
+        for(Tank t : tankList) {
+            System.out.println("how many times");
+            battlefield.addField(EMPTYMASK,t.getX(),t.getY());
+            if (checkTankCollision(t)) {
+                battlefield.addField(EMPTYMASK,t.getX(), t.getY());
+                battlefield.addField(EMPTYMASK,bullet.getX(),bullet.getY());
+                tankList.remove(t);
+                bullets.remove(bullet);
+                numberOfTanks--;
+            }
+            battlefield.addField(t.getRepresentation(),t.getX(),t.getY());
+        }
         if(checkBulletCollision(bullet)){
             System.out.println("bitch");
             battlefield.addField(EMPTYMASK,bullet.getX(), bullet.getY());
@@ -160,6 +169,8 @@ public class GameEngine {
         battlefield.addField(tank.getRepresentation(), tank.getX(), tank.getY());
     }
 
+    //TODO Tanques teem que morrer e o server teem que saber;
+
 
     public synchronized int addTank(){
 
@@ -174,6 +185,16 @@ public class GameEngine {
 
                 Tank tank = new Tank(1, battlefield.getWidth() - 2 - RepresentationFactory.TANK_WIDTH, battlefield.getHeight() / 2, RepresentationFactory.Orientation.WEST);
                 return createTank(tank);
+            } else if(tankList.size() == 2){
+
+                Tank tank = new Tank(2, battlefield.getWidth()/2 , 2 , RepresentationFactory.Orientation.SOUTH);
+                return createTank(tank);
+
+            }else{
+
+                Tank tank = new Tank(3, battlefield.getWidth()/2, battlefield.getHeight() - 2 , RepresentationFactory.Orientation.NORTH);
+                return createTank(tank);
+
             }
         }
 
