@@ -17,6 +17,7 @@ import java.io.IOException;
 public class LanternaDisplayController implements Display, Controller {
 
     public static void main(String[] args) {
+
         LanternaDisplayController d = new LanternaDisplayController();
         Field f = new Field(10, 10);
 //        d.receiveData(new GameState(f.returnAsString()));
@@ -27,6 +28,7 @@ public class LanternaDisplayController implements Display, Controller {
     private Screen screen;
 
     public void init() {
+
         screen = TerminalFacade.createScreen();
         screen.getTerminal().getTerminalSize().setColumns(60);
         screen.getTerminal().getTerminalSize().setRows(30);
@@ -37,9 +39,11 @@ public class LanternaDisplayController implements Display, Controller {
         screenWriter.setForegroundColor(Terminal.Color.WHITE);
 
         screen.startScreen();
+        screen.clear();
 
         Thread t = new Thread(new KeyListener());
         t.start();
+
     }
 
     @Override
@@ -52,7 +56,6 @@ public class LanternaDisplayController implements Display, Controller {
 
             for (int x = 0; x < chars.length; x++) {
                 lanternaConstructCellfromChar(x * 2, y, chars[x]);
-//                screen.putString(y, screen.getTerminal().getTerminalSize().getRows()-1, "-", Terminal.Color.BLUE, Terminal.Color.BLUE);
             }
 
         }
@@ -75,12 +78,12 @@ public class LanternaDisplayController implements Display, Controller {
             case 'B':
                 back = Terminal.Color.BLACK;
                 front = Terminal.Color.MAGENTA;
-                actualChar = '|';
+                actualChar = 'B';
                 break;
             case 'W':
                 back = Terminal.Color.BLACK;
                 front = Terminal.Color.BLUE;
-                actualChar = 'V';
+                actualChar = '|';
                 break;
             case '0':
                 back = Terminal.Color.BLACK;

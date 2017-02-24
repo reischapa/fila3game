@@ -15,6 +15,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class FrontPage {
 
+    public static void main(String[] args) {
+
+        FrontPage frontPage = new FrontPage();
+    }
+
     private Screen SCREEN;
 
     private static final String title =
@@ -43,11 +48,6 @@ public class FrontPage {
                     "╔═╗╦═╗╔═╗╔═╗╔═╗  ╔═╗╔╗╔╦ ╦  ╦╔═╔═╗╦ ╦  ╔╦╗╔═╗  ╔═╗╔╦╗╔═╗╦═╗╔╦╗\n" +
                     "╠═╝╠╦╝║╣ ╚═╗╚═╗  ╠═╣║║║╚╦╝  ╠╩╗║╣ ╚╦╝   ║ ║ ║  ╚═╗ ║ ╠═╣╠╦╝ ║ \n" +
                     "╩  ╩╚═╚═╝╚═╝╚═╝  ╩ ╩╝╚╝ ╩   ╩ ╩╚═╝ ╩    ╩ ╚═╝  ╚═╝ ╩ ╩ ╩╩╚═ ╩ ";
-
-    public static void main(String[] args) {
-
-        FrontPage frontPage = new FrontPage();
-    }
 
     public FrontPage() {
 
@@ -85,10 +85,10 @@ public class FrontPage {
                 if (key != null) {
                     executorService.shutdownNow();
                     SCREEN.stopScreen();
+
                 }
             }
         }, 0, 500, TimeUnit.MILLISECONDS);
-
 
     }
 
