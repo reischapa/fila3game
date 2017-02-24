@@ -18,13 +18,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class LanternaDisplayController implements Display, Controller {
 
-    public static void main(String[] args) {
 
-        LanternaDisplayController d = new LanternaDisplayController();
-        Field f = new Field(10, 10);
-//        d.receiveData(new GameState(f.returnAsString()));
-        d.init();
+    private enum State {
+        MAIN_SCREEN, IN_GAME,
     }
+
 
     public LanternaDisplayController() {
         this.executorService = new ScheduledThreadPoolExecutor(2);
@@ -66,6 +64,7 @@ public class LanternaDisplayController implements Display, Controller {
 
     private InputReceiver receiver;
     private Screen screen;
+    private State state = State.MAIN_SCREEN;
 
     public void init() {
         showFrontPage();
@@ -171,6 +170,11 @@ public class LanternaDisplayController implements Display, Controller {
                     continue;
                 }
 
+                if (LanternaDisplayController.this.state == State.MAIN_SCREEN) {
+                    LanternaDisplayController.this.setGameLayout();
+                    LanternaDisplayController.this.executorService.shutdownNow();
+                    LanternaDisplayController.this.state = State.IN_GAME;
+                }
                 k = translateKey(key);
 
                 System.out.println("key " + k + " pressed!");
@@ -178,6 +182,10 @@ public class LanternaDisplayController implements Display, Controller {
 
             }
         }
+    }
+
+    private void setGameLayout() {
+        //IF LAYOUT NEEDS CHANGES
     }
 
     private void showFrontPage() {

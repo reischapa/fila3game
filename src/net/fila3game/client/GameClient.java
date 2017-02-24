@@ -15,6 +15,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class GameClient implements InputReceiver {
 
+    private enum State {
+        WAITING, CONNECTED,
+    }
+
+
     public static final int SERVER_TCP_CONNECTION_PORT = 8080;
     public static final int RECEIVING_UDP_CONNECTION_PORT = 55356;
     public static final int SENDING_UDP_CONNECTION_PORT = 55355;
@@ -28,7 +33,6 @@ public class GameClient implements InputReceiver {
         ln.setInputReceiver(gc);
         gc.setDisplay(ln);
         ln.init();
-        gc.connect("localhost");
     }
 
     private Display display;
@@ -50,10 +54,16 @@ public class GameClient implements InputReceiver {
 
     private boolean isConnected = false;
 
+    private State state = State.WAITING;
+
     public GameClient() {
     }
 
     public void connect(String address) {
+
+        if (this.state == State.CONNECTED) {
+            return;
+        }
 
 
         try {
@@ -106,9 +116,15 @@ public class GameClient implements InputReceiver {
 
     @Override
     public void receiveInput(InputReceiver.Key key) {
-        if (!this.isConnected) {
-            return;
+
+        synchronized (this) {
+            if (this.state == State.WAITING) {
+                this.connect("localhost");
+                this.state = State.CONNECTED;
+                return;
+            }
         }
+
 
         if (key == null) {
             return;
