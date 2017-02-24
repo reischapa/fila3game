@@ -8,6 +8,7 @@ import net.fila3game.server.gameengine.Field;
 import com.googlecode.lanterna.screen.Screen;
 
 import java.util.Scanner;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -25,8 +26,12 @@ public class LanternaDisplayController implements Display, Controller {
         d.init();
     }
 
+    public LanternaDisplayController() {
+        this.executorService = new ScheduledThreadPoolExecutor(2);
+    }
+
     private static final String title =
-            "██╗    ██╗ ██████╗ ██████╗ ██╗     ██████╗  \n" +
+                    "██╗    ██╗ ██████╗ ██████╗ ██╗     ██████╗  \n" +
                     "██║    ██║██╔═══██╗██╔══██╗██║     ██╔══██╗ \n" +
                     "██║ █╗ ██║██║   ██║██████╔╝██║     ██║  ██║ \n" +
                     "██║███╗██║██║   ██║██╔══██╗██║     ██║  ██║ \n" +
@@ -41,49 +46,35 @@ public class LanternaDisplayController implements Display, Controller {
                     "   ╚═════╝ ╚═╝            ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝╚══════╝\n" +
                     "                                                                    ";
     private static final String tank =
-            "░░░░░░███████ ]▄▄▄▄▄▄▄▄▃\n" +
+                    "░░░░░░███████ ]▄▄▄▄▄▄▄▄▃\n" +
                     "▂▄▅█████████▅▄▃▂\n" +
                     "I███████████████████].\n" +
                     "◥⊙▲⊙▲⊙▲⊙▲⊙▲⊙▲⊙◤...";
 
     private static final String message =
-            "╔═╗╦═╗╔═╗╔═╗╔═╗  ╔═╗╔╗╔╦ ╦  ╦╔═╔═╗╦ ╦  ╔╦╗╔═╗  ╔═╗╔╦╗╔═╗╦═╗╔╦╗\n" +
+                    "╔═╗╦═╗╔═╗╔═╗╔═╗  ╔═╗╔╗╔╦ ╦  ╦╔═╔═╗╦ ╦  ╔╦╗╔═╗  ╔═╗╔╦╗╔═╗╦═╗╔╦╗\n" +
                     "╠═╝╠╦╝║╣ ╚═╗╚═╗  ╠═╣║║║╚╦╝  ╠╩╗║╣ ╚╦╝   ║ ║ ║  ╚═╗ ║ ╠═╣╠╦╝ ║ \n" +
                     "╩  ╩╚═╚═╝╚═╝╚═╝  ╩ ╩╝╚╝ ╩   ╩ ╩╚═╝ ╩    ╩ ╚═╝  ╚═╝ ╩ ╩ ╩╩╚═ ╩ ";
+
     private static final int titlePosX = 5;
     private static final int titlePosY = 5;
     private static final int tankPosX = 70;
     private static final int tankPosY = 20;
     private static final int messagePosX = 5;
     private static final int messagePosY = 20;
-
+    ScheduledThreadPoolExecutor executorService;
 
     private InputReceiver receiver;
     private Screen screen;
 
-    public void showGamePage(){
-
-    }
-
-
     public void init() {
-
-        screen = TerminalFacade.createScreen();
-        screen.getTerminal().getTerminalSize().setColumns(60);
-        screen.getTerminal().getTerminalSize().setRows(30);
-
-        screen.getTerminal().setCursorVisible(false);
-        ScreenWriter screenWriter = new ScreenWriter(screen);
-        screenWriter.setBackgroundColor(Terminal.Color.BLUE);
-        screenWriter.setForegroundColor(Terminal.Color.WHITE);
-
-        screen.startScreen();
-        screen.clear();
+        showFrontPage();
 
         Thread t = new Thread(new KeyListener());
         t.start();
 
     }
+
 
     @Override
     public void receiveData(GameState state) {
@@ -190,16 +181,15 @@ public class LanternaDisplayController implements Display, Controller {
     }
 
     private void showFrontPage() {
-
+        screen = TerminalFacade.createScreen();
         screen.startScreen();
         screen.getTerminal().getTerminalSize().setColumns(100);
         screen.getTerminal().getTerminalSize().setRows(30);
         screen.setCursorPosition(99, 29);
+        screen.getTerminal().setCursorVisible(false);
 
         createScreenElements(titlePosX, titlePosY, title, Terminal.Color.WHITE);
         createScreenElements(tankPosX, tankPosY, tank, Terminal.Color.GREEN);
-
-        ScheduledThreadPoolExecutor executorService = new ScheduledThreadPoolExecutor(1);
 
         executorService.scheduleAtFixedRate(new Runnable() {
             @Override
@@ -219,13 +209,6 @@ public class LanternaDisplayController implements Display, Controller {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                }
-
-                Key key = screen.readInput();
-
-                if (key != null) {
-                    executorService.shutdownNow();
-                    screen.clear();
                 }
             }
         }, 0, 500, TimeUnit.MILLISECONDS);
