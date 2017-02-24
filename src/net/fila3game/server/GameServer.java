@@ -1,18 +1,11 @@
 package net.fila3game.server;
 
-import com.sun.org.apache.xpath.internal.SourceTree;
-import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
-import com.sun.xml.internal.ws.api.pipe.Engine;
-import net.fila3game.server.gameengine.Field;
 import net.fila3game.server.gameengine.GameEngine;
 //import net.jchapa.chapautils.FileIOManager;
 
 import java.io.*;
 import java.net.*;
-import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.concurrent.*;
 
 /**
@@ -63,7 +56,6 @@ public class GameServer {
         this.normalExecutorService = Executors.newFixedThreadPool(100);
         this.scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(4);
         this.engine = new GameEngine();
-        this.engine.addTank();
     }
 
     private void start() throws IOException {
@@ -171,7 +163,10 @@ public class GameServer {
             while (iterator.hasNext()) {
                 ClientStatusWorker worker = GameServer.this.currentClients.get(iterator.next());
 
-                //TODO get data from the gameEngine
+                if (worker == null) {
+                    continue;
+                }
+
 //                System.out.println("Server sending message:");
 
                 String message =  GameServer.this.engine.calculateState();
@@ -209,17 +204,27 @@ public class GameServer {
             this.clientIPAddress = InetAddress.getByName(socket.getInetAddress().toString().substring(1));
             this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), STRING_ENCODING));
             this.writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), STRING_ENCODING));
-            this.identifier = this.clientIPAddress.toString().concat(" " + Long.toString(System.currentTimeMillis()));
         }
 
         @Override
         public void run() {
 
 
+//            this.engine.addTank();
+
             try {
-                //TODO server side comunication with client
-                //define protocol?
-                this.performHandshake();
+
+
+                int playerNumber = this.addPlayer();
+
+                if (playerNumber < 0) {
+                    this.handleGameFull();
+                }
+
+                this.constructClientIdentifier(playerNumber);
+
+                this.send(playerNumber + "");
+
                 this.registerSelf();
 
             } catch (IOException e) {
@@ -229,9 +234,22 @@ public class GameServer {
 
         }
 
-        public void performHandshake() throws  IOException {
-            writer.write(this.getKeepAliveMessage());
-            writer.flush();
+        public void constructClientIdentifier(int playerNumber) {
+            this.identifier =  this.clientIPAddress.toString().concat(" " + Long.toString(System.currentTimeMillis()));
+        }
+
+        public int addPlayer() {
+            return GameServer.this.engine.addTank();
+        }
+
+        public void handleGameFull() throws IOException{
+            throw new IOException();
+            //TODO
+        }
+
+        public void send(String msg) throws IOException {
+            this.writer.write(msg + "\n");
+            this.writer.flush();
         }
 
         public void safelyShutdownClientConnection() {

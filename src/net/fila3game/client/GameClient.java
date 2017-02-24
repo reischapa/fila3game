@@ -63,8 +63,10 @@ public class GameClient implements InputReceiver {
 
             this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+
             //TODO client side handshake with server?
-            System.out.println(this.reader.read());
+
+            System.out.print(this.tcpReceive());
 
             System.out.println("Connected to server");
 
@@ -87,6 +89,19 @@ public class GameClient implements InputReceiver {
             e.printStackTrace();
         }
 
+    }
+
+    private void handshake() {
+
+    }
+
+    private void tcpSend(String message) throws IOException {
+        this.writer.write(message + "\n");
+        this.writer.flush();
+    }
+
+    private String tcpReceive() throws  IOException {
+        return this.reader.readLine();
     }
 
     @Override
@@ -141,15 +156,15 @@ public class GameClient implements InputReceiver {
             try {
                 byte[] buffer = new byte[20000];
                 DatagramPacket packet = new DatagramPacket(buffer,buffer.length);
-                System.out.println("Receiving message:");
+//                System.out.println("Receiving message:");
                 GameClient.this.incomingDatagramSocket.receive(packet);
                 String string = new String(packet.getData(), 0, packet.getLength(), STRING_ENCODING);
 
-                System.out.println(string);
+//                System.out.println(string);
 
                 GameState state = new GameState(string);
 
-                System.out.println("Transmitting state to display");
+//                System.out.println("Transmitting state to display");
 
                 GameClient.this.display.receiveData(state);
 
