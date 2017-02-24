@@ -1,7 +1,6 @@
 package net.fila3game.server.gameengine;
 
 
-import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -9,6 +8,9 @@ import java.util.concurrent.ConcurrentMap;
  * Created by codecadet on 2/1/17.
  */
 public class Field {
+
+    private int width;
+    private int height;
 
     public static void main(String[] args) {
         Field f = new Field(3, 3);
@@ -107,6 +109,13 @@ public class Field {
         }
     }
 
+    public int getWidth() {
+        return xMax;
+    }
+
+    public int getHeight() {
+        return yMax;
+    }
 
 
     private static class Coord {

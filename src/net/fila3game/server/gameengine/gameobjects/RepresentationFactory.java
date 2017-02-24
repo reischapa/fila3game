@@ -7,6 +7,9 @@ import net.fila3game.server.gameengine.Field;
  */
 public class RepresentationFactory {
 
+    public static final int TANK_WIDTH = 3;
+    public static final int TANK_HEIGHT = 3;
+
     public enum Orientation {
 
         NORTH, SOUTH, EAST, WEST
