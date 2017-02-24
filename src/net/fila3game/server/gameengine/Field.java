@@ -10,6 +10,19 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class Field {
 
+    public static void main(String[] args) {
+        Field f = new Field(3, 3);
+        f.constructFromString("TTT\nTTT\n0T0\n");
+
+
+        for (int y = 0; y < f.yMax ; y++) {
+            for (int x = 0; x < f.xMax; x++) {
+                System.out.println(f.get(x,y));
+            }
+
+        }
+    }
+
     public static final char FIELD_LINE_SEPARATOR = '\n';
     public static final char EMPTY_CELL_CHARACTER = '0';
 
@@ -17,14 +30,9 @@ public class Field {
     private final int xMin, xMax, yMin, yMax;
 
     public Field(int width, int height) {
-        this(0, 0, width, height);
-    }
-
-    @Deprecated
-    public Field(int xMin, int yMin, int width, int height) {
-        this.xMin = xMin;
+        this.xMin = 0;
         this.xMax = xMin + width;
-        this.yMin = yMin;
+        this.yMin = 0;
         this.yMax = yMin + height;
         this.statusMap = new ConcurrentHashMap<>();
         this.init();
@@ -79,27 +87,14 @@ public class Field {
             this.statusMap = new ConcurrentHashMap<>();
         }
 
-        String[] rows = input.split("" + FIELD_LINE_SEPARATOR + "\\+");
+        String[] rows = input.split("" + FIELD_LINE_SEPARATOR );
 
-        List<String> wordList = Arrays.asList(rows);
 
-        Iterator<String> iter = wordList.iterator();
 
-        for (int j = this.yMin; j < this.yMax; j++ ) {
-            String word = "";
-            if (iter.hasNext()) {
-                word = iter.next();
-            } else {
-                word = this.createPaddingString(xMax);
-            }
-            for (int i = this.xMin; i < this.xMax; i++) {
-                char c;
-                if (i >= word.length()) {
-                    c = EMPTY_CELL_CHARACTER;
-                } else {
-                    c = word.charAt(i);
-                }
-                this.statusMap.put(new Coord(i, j), c);
+        for (int y = this.yMin; y < this.yMax; y++ ) {
+            char[] chars = rows[y].toCharArray();
+            for (int x = this.xMin; x < this.xMax; x++) {
+                this.statusMap.put(new Coord(x, y), chars[x]);
             }
         }
     }
@@ -112,14 +107,6 @@ public class Field {
         }
     }
 
-    private String createPaddingString(int length) {
-        char[] c = new char[length];
-
-        for (int i = 0; i < c.length; i++) {
-            c[i] = EMPTY_CELL_CHARACTER;
-        }
-        return String.valueOf(c);
-    }
 
 
     private static class Coord {

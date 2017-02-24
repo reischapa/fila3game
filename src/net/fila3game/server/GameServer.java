@@ -174,7 +174,9 @@ public class GameServer {
 
                 //TODO get data from the gameEngine
 //                System.out.println("Server sending message:");
-                String message = GameServer.this.x + " 0\r\nTTT\nTTT\n0T0\n";
+                Field f = new Field(3, 3);
+                f.constructFromString("TTT\nTTT\n0T0\n");
+                String message = GameServer.this.x + " 0\r\n" + f.returnAsString();
 
 //                System.out.println(message);
 
