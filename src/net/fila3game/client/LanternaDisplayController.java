@@ -1,14 +1,15 @@
 package net.fila3game.client;
 
 import com.googlecode.lanterna.TerminalFacade;
-import com.googlecode.lanterna.gui.GUIScreen;
 import com.googlecode.lanterna.input.Key;
 import com.googlecode.lanterna.screen.ScreenWriter;
 import com.googlecode.lanterna.terminal.Terminal;
 import net.fila3game.server.gameengine.Field;
 import com.googlecode.lanterna.screen.Screen;
 
-import java.io.IOException;
+import java.util.Scanner;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -23,6 +24,39 @@ public class LanternaDisplayController implements Display, Controller {
 //        d.receiveData(new GameState(f.returnAsString()));
         d.init();
     }
+
+    private static final String title =
+                    "██╗    ██╗ ██████╗ ██████╗ ██╗     ██████╗  \n" +
+                    "██║    ██║██╔═══██╗██╔══██╗██║     ██╔══██╗ \n" +
+                    "██║ █╗ ██║██║   ██║██████╔╝██║     ██║  ██║ \n" +
+                    "██║███╗██║██║   ██║██╔══██╗██║     ██║  ██║ \n" +
+                    "╚███╔███╔╝╚██████╔╝██║  ██║███████╗██████╔╝ \n" +
+                    " ╚══╝╚══╝  ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═════╝  \n" +
+                    "                                            \n" +
+                    "   ██████╗ ███████╗    ████████╗ █████╗ ███╗   ██╗██╗  ██╗███████╗\n" +
+                    "  ██╔═══██╗██╔════╝    ╚══██╔══╝██╔══██╗████╗  ██║██║ ██╔╝██╔════╝\n" +
+                    "  ██║   ██║█████╗         ██║   ███████║██╔██╗ ██║█████╔╝ ███████╗\n" +
+                    "  ██║   ██║██╔══╝         ██║   ██╔══██║██║╚██╗██║██╔═██╗ ╚════██║\n" +
+                    "  ╚██████╔╝██║            ██║   ██║  ██║██║ ╚████║██║  ██╗███████║\n" +
+                    "   ╚═════╝ ╚═╝            ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝╚══════╝\n" +
+                    "                                                                    ";
+    private static final String tank =
+                    "░░░░░░███████ ]▄▄▄▄▄▄▄▄▃\n" +
+                    "▂▄▅█████████▅▄▃▂\n" +
+                    "I███████████████████].\n" +
+                    "◥⊙▲⊙▲⊙▲⊙▲⊙▲⊙▲⊙◤...";
+
+    private static final String message =
+                    "╔═╗╦═╗╔═╗╔═╗╔═╗  ╔═╗╔╗╔╦ ╦  ╦╔═╔═╗╦ ╦  ╔╦╗╔═╗  ╔═╗╔╦╗╔═╗╦═╗╔╦╗\n" +
+                    "╠═╝╠╦╝║╣ ╚═╗╚═╗  ╠═╣║║║╚╦╝  ╠╩╗║╣ ╚╦╝   ║ ║ ║  ╚═╗ ║ ╠═╣╠╦╝ ║ \n" +
+                    "╩  ╩╚═╚═╝╚═╝╚═╝  ╩ ╩╝╚╝ ╩   ╩ ╩╚═╝ ╩    ╩ ╚═╝  ╚═╝ ╩ ╩ ╩╩╚═ ╩ ";
+    private static final int titlePosX = 5;
+    private static final int titlePosY = 5;
+    private static final int tankPosX = 70;
+    private static final int tankPosY = 20;
+    private static final int messagePosX = 5;
+    private static final int messagePosY = 20;
+
 
     private InputReceiver receiver;
     private Screen screen;
@@ -147,6 +181,58 @@ public class LanternaDisplayController implements Display, Controller {
                 receiver.receiveInput(k);
 
             }
+        }
+    }
+
+    private void showFrontPage() {
+
+        screen = TerminalFacade.createScreen();
+        screen.startScreen();
+        screen.setCursorPosition(99, 29);
+
+        createScreenElements(titlePosX, titlePosY, title, Terminal.Color.WHITE);
+        createScreenElements(tankPosX, tankPosY, tank, Terminal.Color.GREEN);
+
+        ScheduledThreadPoolExecutor executorService = new ScheduledThreadPoolExecutor(1);
+
+        executorService.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+
+                createScreenElements(messagePosX, messagePosY, message, Terminal.Color.YELLOW);
+                screen.refresh();
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                createScreenElements(messagePosX, messagePosY, message, Terminal.Color.BLACK);
+                screen.refresh();
+
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                Key key = screen.readInput();
+
+                if (key != null) {
+                    executorService.shutdownNow();
+                    screen.clear();
+                }
+            }
+        }, 0, 500, TimeUnit.MILLISECONDS);
+    }
+
+    private void createScreenElements(int x, int y, String text, Terminal.Color color) {
+
+        Scanner scanner = new Scanner(text);
+
+        while (scanner.hasNextLine()) {
+
+            screen.putString(x, y, scanner.nextLine(), color, Terminal.Color.BLACK);
+            y++;
         }
     }
 
