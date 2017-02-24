@@ -44,9 +44,6 @@ public class LanternaDisplayController implements Display, Controller {
 
     @Override
     public void receiveData(GameState state) {
-        System.out.println(state.getFieldString());
-
-        this.screen.clear();
 
         String[] lines = state.getFieldString().split("\n");
 
