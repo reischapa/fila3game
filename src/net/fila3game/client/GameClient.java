@@ -66,7 +66,7 @@ public class GameClient implements InputReceiver {
 
             //TODO client side handshake with server?
 
-            System.out.print(this.tcpReceive());
+            this.playerNumber = Integer.parseInt(this.tcpReceive());
 
             System.out.println("Connected to server");
 
