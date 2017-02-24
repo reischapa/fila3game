@@ -15,10 +15,11 @@ public class Bullet implements GameObject {
     private int y;
     private RepresentationFactory.Orientation orientation;
 
-    public Bullet(int player, int x, int y) {
+    public Bullet(int player, int x, int y, RepresentationFactory.Orientation orientation) {
         this.player = player;
         this.x = x;
         this.y = y;
+        this.orientation = orientation;
     }
 
     @Override
@@ -50,6 +51,11 @@ public class Bullet implements GameObject {
     @Override
     public void setOrientation(RepresentationFactory.Orientation orientation) {
         this.orientation = orientation;
+    }
+
+    @Override
+    public RepresentationFactory.Orientation getOrientation() {
+        return this.orientation;
     }
 
     @Override
