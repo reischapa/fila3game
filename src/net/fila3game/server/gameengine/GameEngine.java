@@ -13,6 +13,8 @@ import java.util.LinkedList;
 public class GameEngine {
 
     private static final int MAX_NUMBER_TANKS = 2;
+    public static final int DEFAULT_BATTLEFIELD_COLUMNS = 30;
+    public static final int DEFAULT_BATTLEFIELD_ROWS = 30;
 
     public enum Tiletypes {
 
@@ -43,7 +45,13 @@ public class GameEngine {
         numberOfTanks = 0;
         tankList = new LinkedList<>();
 
+    }
 
+    public GameEngine (){
+
+        this.battlefield = createDefaultField();
+        numberOfTanks = 0;
+        tankList = new LinkedList<>();
 
     }
 
@@ -66,8 +74,6 @@ public class GameEngine {
             moveTank(tank,-1,0);
 
         }else if(i.getType().equals(Instruction.Type.U)) {
-            System.out.println("entrei");
-            System.out.println(tank.getY());
             tank.setOrientation(RepresentationFactory.Orientation.NORTH);
             moveTank(tank,0,-1);
 
@@ -104,8 +110,6 @@ public class GameEngine {
                 Tank tank = new Tank(1, battlefield.getWidth() - 2 - RepresentationFactory.TANK_WIDTH, battlefield.getHeight() / 2, RepresentationFactory.Orientation.WEST);
 
 //            if(!checkCollision(tank)){
-                System.out.println(tank.getX());
-                System.out.println(tank.getY());
                 battlefield.addField(tank.getRepresentation(), tank.getX(), tank.getY());
                 tank.setPlayer(1);
                 tankList.add(tank);
@@ -139,29 +143,27 @@ public class GameEngine {
         return false;
     }
 
-    public static void main(String[] args) {
-
-        Field field = new Field(25,25);
-        Field mainField = new Field(25,25);
-        for(int puta = 0; puta < mainField.getWidth(); puta++){
-            for(int cona = 0; cona < mainField.getHeight(); cona++ ){
-                if(puta == 0 || cona == 0 || puta == mainField.getWidth()-1 || cona == mainField.getHeight()-1) {
-                    mainField.set(puta, cona, Tiletypes.WALL.getSymbol());
+    private Field createDefaultField(){
+        Field mainField = new Field(DEFAULT_BATTLEFIELD_COLUMNS,DEFAULT_BATTLEFIELD_ROWS);
+        for(int x = 0; x < mainField.getWidth(); x++){
+            for(int y = 0; y < mainField.getHeight(); y++ ){
+                if(x == 0 || y == 0 || x == mainField.getWidth()-1 || y == mainField.getHeight()-1) {
+                    mainField.set(x, y, Tiletypes.WALL.getSymbol());
                 }
             }
         }
-        GameEngine gameEngine = new GameEngine(mainField);
+        return mainField;
+    }
+
+    public static void main(String[] args) {
+
+        Field field = new Field(25,25);
+
+        GameEngine gameEngine = new GameEngine();
         gameEngine.addTank();
         gameEngine.addTank();
-        System.out.println(mainField.returnAsString());
-        Instruction i = new Instruction(0, Instruction.Type.R);
-        Instruction i2 = new Instruction(1,Instruction.Type.L);
-        gameEngine.receiveInstruction(i);
-        gameEngine.receiveInstruction(i2);
-        System.out.println(mainField.returnAsString());
-        gameEngine.receiveInstruction(new Instruction(1, Instruction.Type.U));
-        gameEngine.receiveInstruction(new Instruction(1, Instruction.Type.U));
-        System.out.println(mainField.returnAsString());
+        System.out.println(gameEngine.calculateState());
+
 
     }
 

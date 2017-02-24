@@ -5,6 +5,11 @@ package net.fila3game.server;
  */
 public class Instruction {
 
+    public static void main(String[] args) {
+        Instruction i = new Instruction("0 D");
+        System.out.println(i.getType());
+    }
+
     public enum Type {
         U,D,R,L,S;
     }
@@ -13,10 +18,11 @@ public class Instruction {
     private Instruction.Type type;
 
     public Instruction(String in) {
-        this.type = Type.R;
+
+        String[] results = in.split(" ");
+
+        this.type = Type.valueOf(results[1]);
         this.playerNumber = 0;
-        this.playerNumber = playerNumber;
-        this.type = type;
     }
 
     public int getPlayerNumber() {
