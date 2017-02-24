@@ -91,7 +91,7 @@ public class GameClient implements InputReceiver {
 
     }
 
-    private void handshake() {
+    private void receiveInitialConfiguration() throws IOException                                                                                                                                                                                       {
 
     }
 
@@ -110,24 +110,52 @@ public class GameClient implements InputReceiver {
             return;
         }
 
-        String instruction = this.appendMovementInstruction(this.playerNumber + "", key);
+        if (key == null) {
+            return;
+        }
 
-        this.normalExecutorService.execute(new ServerSenderWorker(this.multiplyCommands(instruction)));
+        this.normalExecutorService.execute(new ServerSenderWorker(this.multiplyCommands(this.constructInstructionString(key))));
 
     }
 
+    private String constructInstructionString(InputReceiver.Key key) {
+        String result = this.playerNumber + "";
+
+        result = this.appendMovementInstruction(result, key);
+        result = this.appendShootInstruction(result, key);
+        return result;
+    }
+
+
     public String appendMovementInstruction(String base, InputReceiver.Key key) {
+
+
         switch (key) {
             case KEY_ARROWDOWN:
-                return base + " " + Instruction.Type.D.toString();
+                base = base + " " + Instruction.Type.D.toString();
+                break;
             case KEY_ARROWRIGHT:
-                return base + " " + Instruction.Type.R.toString();
+                base = base + " " + Instruction.Type.R.toString();
+                break;
             case KEY_ARROWUP:
-                return base + " " + Instruction.Type.U.toString();
+                base = base + " " + Instruction.Type.U.toString();
+                break;
             case KEY_ARROWLEFT:
-                return base + " " + Instruction.Type.L.toString();
+                base = base + " " + Instruction.Type.L.toString();
+                break;
             default:
-                throw new UnsupportedOperationException();
+        }
+
+        return base;
+    }
+
+    public String appendShootInstruction(String base, InputReceiver.Key key) {
+        switch (key) {
+            case KEY_SPACE:
+                return base + " " + Instruction.Type.S;
+            default:
+                return base;
+
         }
     }
 
