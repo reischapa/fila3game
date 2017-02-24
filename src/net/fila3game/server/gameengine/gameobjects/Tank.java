@@ -1,7 +1,6 @@
 package net.fila3game.server.gameengine.gameobjects;
 
 import net.fila3game.server.gameengine.Field;
-import net.fila3game.server.gameengine.GameEngine;
 
 /**
  * Created by codecadet on 2/21/17.
@@ -16,10 +15,11 @@ public class Tank implements GameObject {
     private int y;
     private RepresentationFactory.Orientation orientation;
 
-    public Tank(int player, int x, int y) {
+    public Tank(int player, int x, int y, RepresentationFactory.Orientation orientation) {
         this.player = player;
         this.x = x;
         this.y = y;
+        this.orientation = orientation;
     }
 
     @Override
