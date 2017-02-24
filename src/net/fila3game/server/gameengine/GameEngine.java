@@ -36,7 +36,7 @@ public class GameEngine {
     private Field battlefield;
     private int numberOfTanks;
     private LinkedList<Tank> tankList;
-    private final Field EMPTYMASK = new Field(3,3);
+    private static final Field EMPTYMASK = new Field(RepresentationFactory.TANK_WIDTH,RepresentationFactory.TANK_HEIGHT);
 
 
     public GameEngine(Field battlefield){
@@ -78,14 +78,18 @@ public class GameEngine {
     }
 
     private void moveTank(Tank tank, int x, int y){
+
+        battlefield.addField(EMPTYMASK, tank.getX(), tank.getY());
         tank.move(tank.getX()+x, tank.getY()+y);
+
         if(checkCollision(tank)){
+
             System.out.println("colision");
             tank.move(tank.getX()-x,tank.getY()-y);
             return;
 
         }
-        battlefield.addField(EMPTYMASK, tank.getX(), tank.getY());
+
         battlefield.addField(tank.getRepresentation(), tank.getX(), tank.getY());
     }
 
@@ -112,12 +116,16 @@ public class GameEngine {
     }
 
     private int createTank(Tank tank){
+
         if(!checkCollision(tank)){
+
             battlefield.addField(tank.getRepresentation(), tank.getX(), tank.getY());
             tankList.add(tank);
             numberOfTanks++;
             return tank.getPlayer();
+
         }
+
         return -1;
     }
 
@@ -128,31 +136,37 @@ public class GameEngine {
 
     private synchronized boolean checkCollision(GameObject object){
 
-        for(int i = object.getX(); i < object.getWidth(); i++) {
+        for(int i = object.getX(); i < object.getX()+object.getWidth(); i++) {
 
-            for(int j = object.getY(); i < object.getHeight(); j++) {
-
-                System.out.println(i);
-                System.out.println(j);
+            for(int j = object.getY(); j < object.getY()+3; j++) {
 
                 if (battlefield.get(i,j) == Tiletypes.WALL.getSymbol() || battlefield.get(i,j) == Tiletypes.BULLET.getSymbol()|| battlefield.get(i,j) == Tiletypes.TANK.getSymbol()) {
+                    System.out.println("why dude wtf");
                     return true;
                 }
             }
         }
+
         return false;
     }
 
     private Field createDefaultField(){
+
         Field mainField = new Field(DEFAULT_BATTLEFIELD_COLUMNS,DEFAULT_BATTLEFIELD_ROWS);
+
         for(int x = 0; x < mainField.getWidth(); x++){
+
             for(int y = 0; y < mainField.getHeight(); y++ ){
+
                 if(x == 0 || y == 0 || x == mainField.getWidth()-1 || y == mainField.getHeight()-1) {
+
                     mainField.set(x, y, Tiletypes.WALL.getSymbol());
                 }
             }
         }
+
         return mainField;
+
     }
 
     public static void main(String[] args) {
@@ -162,20 +176,31 @@ public class GameEngine {
         gameEngine.addTank();
         gameEngine.addTank();
         System.out.println(gameEngine.calculateState());
-        gameEngine.receiveInstruction(new Instruction("D"));
-        gameEngine.receiveInstruction(new Instruction("R"));
-        gameEngine.receiveInstruction(new Instruction("R"));
-        gameEngine.receiveInstruction(new Instruction("R"));
-        gameEngine.receiveInstruction(new Instruction("R"));
-        gameEngine.receiveInstruction(new Instruction("R"));
-        gameEngine.receiveInstruction(new Instruction("R"));
-        gameEngine.receiveInstruction(new Instruction("R"));
-        gameEngine.receiveInstruction(new Instruction("R"));
-        gameEngine.receiveInstruction(new Instruction("R"));
-        gameEngine.receiveInstruction(new Instruction("R"));
-        gameEngine.receiveInstruction(new Instruction("R"));
-        gameEngine.receiveInstruction(new Instruction("R"));
-        gameEngine.receiveInstruction(new Instruction("R"));
+        gameEngine.receiveInstruction(new Instruction("0 D"));
+        gameEngine.receiveInstruction(new Instruction("0 R"));
+        gameEngine.receiveInstruction(new Instruction("0 R"));
+        gameEngine.receiveInstruction(new Instruction("0 R"));
+        gameEngine.receiveInstruction(new Instruction("0 R"));
+        gameEngine.receiveInstruction(new Instruction("0 R"));
+        gameEngine.receiveInstruction(new Instruction("0 R"));
+        gameEngine.receiveInstruction(new Instruction("0 R"));
+        gameEngine.receiveInstruction(new Instruction("0 R"));
+        gameEngine.receiveInstruction(new Instruction("0 R"));
+        gameEngine.receiveInstruction(new Instruction("0 R"));
+        gameEngine.receiveInstruction(new Instruction("0 R"));
+        gameEngine.receiveInstruction(new Instruction("0 R"));
+        gameEngine.receiveInstruction(new Instruction("0 R"));
+        gameEngine.receiveInstruction(new Instruction("0 R"));
+        gameEngine.receiveInstruction(new Instruction("0 R"));
+        gameEngine.receiveInstruction(new Instruction("0 R"));
+        gameEngine.receiveInstruction(new Instruction("0 R"));
+        gameEngine.receiveInstruction(new Instruction("0 R"));
+        gameEngine.receiveInstruction(new Instruction("0 R"));
+        gameEngine.receiveInstruction(new Instruction("0 R"));
+        gameEngine.receiveInstruction(new Instruction("0 R"));
+        gameEngine.receiveInstruction(new Instruction("0 R"));
+        gameEngine.receiveInstruction(new Instruction("0 R"));
+        gameEngine.receiveInstruction(new Instruction("0 R"));
         System.out.println(gameEngine.calculateState());
 
 
