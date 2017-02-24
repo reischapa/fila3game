@@ -26,7 +26,7 @@ public class LanternaDisplayController implements Display, Controller {
     }
 
     private static final String title =
-                    "██╗    ██╗ ██████╗ ██████╗ ██╗     ██████╗  \n" +
+            "██╗    ██╗ ██████╗ ██████╗ ██╗     ██████╗  \n" +
                     "██║    ██║██╔═══██╗██╔══██╗██║     ██╔══██╗ \n" +
                     "██║ █╗ ██║██║   ██║██████╔╝██║     ██║  ██║ \n" +
                     "██║███╗██║██║   ██║██╔══██╗██║     ██║  ██║ \n" +
@@ -41,13 +41,13 @@ public class LanternaDisplayController implements Display, Controller {
                     "   ╚═════╝ ╚═╝            ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝╚══════╝\n" +
                     "                                                                    ";
     private static final String tank =
-                    "░░░░░░███████ ]▄▄▄▄▄▄▄▄▃\n" +
+            "░░░░░░███████ ]▄▄▄▄▄▄▄▄▃\n" +
                     "▂▄▅█████████▅▄▃▂\n" +
                     "I███████████████████].\n" +
                     "◥⊙▲⊙▲⊙▲⊙▲⊙▲⊙▲⊙◤...";
 
     private static final String message =
-                    "╔═╗╦═╗╔═╗╔═╗╔═╗  ╔═╗╔╗╔╦ ╦  ╦╔═╔═╗╦ ╦  ╔╦╗╔═╗  ╔═╗╔╦╗╔═╗╦═╗╔╦╗\n" +
+            "╔═╗╦═╗╔═╗╔═╗╔═╗  ╔═╗╔╗╔╦ ╦  ╦╔═╔═╗╦ ╦  ╔╦╗╔═╗  ╔═╗╔╦╗╔═╗╦═╗╔╦╗\n" +
                     "╠═╝╠╦╝║╣ ╚═╗╚═╗  ╠═╣║║║╚╦╝  ╠╩╗║╣ ╚╦╝   ║ ║ ║  ╚═╗ ║ ╠═╣╠╦╝ ║ \n" +
                     "╩  ╩╚═╚═╝╚═╝╚═╝  ╩ ╩╝╚╝ ╩   ╩ ╩╚═╝ ╩    ╩ ╚═╝  ╚═╝ ╩ ╩ ╩╩╚═ ╩ ";
     private static final int titlePosX = 5;
@@ -60,6 +60,11 @@ public class LanternaDisplayController implements Display, Controller {
 
     private InputReceiver receiver;
     private Screen screen;
+
+    public void showGamePage(){
+
+    }
+
 
     public void init() {
 
@@ -186,8 +191,9 @@ public class LanternaDisplayController implements Display, Controller {
 
     private void showFrontPage() {
 
-        screen = TerminalFacade.createScreen();
         screen.startScreen();
+        screen.getTerminal().getTerminalSize().setColumns(100);
+        screen.getTerminal().getTerminalSize().setRows(30);
         screen.setCursorPosition(99, 29);
 
         createScreenElements(titlePosX, titlePosY, title, Terminal.Color.WHITE);
