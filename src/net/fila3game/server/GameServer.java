@@ -55,7 +55,6 @@ public class GameServer {
     private ExecutorService normalExecutorService;
     private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
 
-    private int x;
 
     public GameServer() throws IOException {
         this.serverSocket = new ServerSocket(TCP_CONNECTION_PORT);
@@ -63,6 +62,8 @@ public class GameServer {
         this.currentInstructions = new ConcurrentHashMap<>();
         this.normalExecutorService = Executors.newFixedThreadPool(100);
         this.scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(4);
+        this.engine = new GameEngine(new Field(60, 30));
+        this.engine.addTank();
     }
 
     private void start() throws IOException {
@@ -82,11 +83,12 @@ public class GameServer {
 
         while (true) {
             Socket socket = this.serverSocket.accept();
-            System.out.println("Server accepted connection");
+//            System.out.println("Server accepted connection");
             this.normalExecutorService.execute(new ClientStatusWorker(socket));
         }
 
     }
+
 
     public void setEngine(GameEngine engine) {
         this.engine = engine;
@@ -108,7 +110,7 @@ public class GameServer {
                     GameServer.this.incomingDatagramSocket.receive(dp);
 
                     String command = new String(buf, 0, dp.getLength(), STRING_ENCODING).trim();
-                    System.out.println("System recieved message: " + command );
+//                    System.out.println("System recieved message: " + command );
                     ClientReceiverWorker.this.parseCommand(command);
                 }
 
@@ -131,10 +133,7 @@ public class GameServer {
                 return;
             }
 
-            GameServer.this.x += 1;
-            System.out.println(GameServer.this.x);
-
-            GameServer.this.currentInstructions.put(identifier, new Instruction(Integer.parseInt(tokens[0]), Instruction.Type.D) );
+            GameServer.this.currentInstructions.put(identifier, new Instruction(command) );
 
 //            System.out.println(identifier);
 
@@ -174,11 +173,9 @@ public class GameServer {
 
                 //TODO get data from the gameEngine
 //                System.out.println("Server sending message:");
-                Field f = new Field(3, 3);
-                f.constructFromString("TTT\nTTT\n0T0\n");
-                String message = GameServer.this.x + " 0\r\n" + f.returnAsString();
 
-//                System.out.println(message);
+                String message =  GameServer.this.engine.calculateState();
+//                String message = "hello";
 
                 byte[] b = message.getBytes();
                 DatagramPacket p = new DatagramPacket(b, 0, b.length, worker.getClientIPAddress(), SENDING_UDP_CONNECTION_PORT);
@@ -191,6 +188,9 @@ public class GameServer {
             }
 
         }
+
+
+
     }
 
 
@@ -280,18 +280,18 @@ public class GameServer {
                 Iterator<String> iter = GameServer.this.currentInstructions.keySet().iterator();
                 while (iter.hasNext()) {
                     String elem = iter.next();
-                    sb.append("\n" + elem);
+                    sb.append(elem);
+
+                    GameServer.this.engine.receiveInstruction(GameServer.this.currentInstructions.get(elem));
                 }
 
                 if (sb.length() > 0) {
                     System.out.println(sb.toString());
                 }
 
+
                 GameServer.this.currentInstructions.clear();
             }
-
-
-
 
         }
     }

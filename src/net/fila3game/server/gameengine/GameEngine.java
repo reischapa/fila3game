@@ -108,9 +108,9 @@ public class GameEngine {
         Field field = new Field(20,20);
         GameEngine gameEngine = new GameEngine(field);
         gameEngine.addTank();
-        System.out.println(field.returnAsString());
-        Instruction i = new Instruction(0, Instruction.Type.R);
-        gameEngine.receiveInstruction(i);
+//        System.out.println(field.returnAsString());
+//        Instruction i = new Instruction(0, Instruction.Type.R);
+//        gameEngine.receiveInstruction(i);
         System.out.println(field.returnAsString());
 
     }
