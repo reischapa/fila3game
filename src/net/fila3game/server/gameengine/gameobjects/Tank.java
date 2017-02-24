@@ -54,6 +54,11 @@ public class Tank implements GameObject {
     }
 
     @Override
+    public RepresentationFactory.Orientation getOrientation() {
+        return this.orientation;
+    }
+
+    @Override
     public int getHeight() {
         return TANK_HEIGHT;
     }

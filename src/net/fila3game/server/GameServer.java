@@ -102,7 +102,7 @@ public class GameServer {
                     GameServer.this.incomingDatagramSocket.receive(dp);
 
                     String command = new String(buf, 0, dp.getLength(), STRING_ENCODING).trim();
-//                    System.out.println("System recieved message: " + command );
+                    System.out.println("System recieved message: " + command );
                     ClientReceiverWorker.this.parseCommand(command);
                 }
 
@@ -219,6 +219,8 @@ public class GameServer {
                 if (playerNumber < 0) {
                     this.handleGameFull();
                 }
+
+                System.out.println(playerNumber);
 
                 this.constructClientIdentifier(playerNumber);
 
