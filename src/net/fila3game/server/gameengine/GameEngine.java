@@ -48,11 +48,11 @@ public class GameEngine {
             tank.setOrientation(RepresentationFactory.Orientation.EAST);
             tank.move(tank.getX()+1,tank.getY());
 
-            if(checkCollision(tank)){
-
-                tank.move(tank.getX()-1,tank.getY());
-
-            }
+//            if(checkCollision(tank)){
+//
+//                tank.move(tank.getX()-1,tank.getY());
+//
+//            }
 
         }
 
@@ -62,15 +62,16 @@ public class GameEngine {
 
         if(numberOfTanks == 0){
 
-            Tank tank = new Tank(0,0,0);
+            Tank tank = new Tank(0,2,2, RepresentationFactory.Orientation.EAST);
 
-            if(!checkCollision(tank)){
+//            if(!checkCollision(tank)){
+            System.out.println(RepresentationFactory.returnRepresentation(RepresentationFactory.Orientation.EAST, RepresentationFactory.GameObjectType.TANK).returnAsString());
                 battlefield.addField(tank.getRepresentation(),tank.getX(),tank.getY());
                 tank.setPlayer(0);
                 tankList.add(tank);
                 numberOfTanks++;
                 return true;
-            }
+   //         }
         }
 
         return false;
@@ -85,9 +86,9 @@ public class GameEngine {
 
     private boolean checkCollision(GameObject object){
 
-        for(int i = 0; i < object.getWidth(); i++) {
+        for(int i = object.getX(); i < object.getWidth(); i++) {
 
-            for(int j = 0; i < object.getHeight(); j++) {
+            for(int j = object.getY(); i < object.getHeight(); j++) {
 
                 if (battlefield.get(i,j) == Tiletypes.WALL.getSymbol() || battlefield.get(i,j) == Tiletypes.BULLET.getSymbol()|| battlefield.get(i,j) == Tiletypes.TANK.getSymbol()) {
                     return true;
@@ -101,9 +102,11 @@ public class GameEngine {
 
         Field field = new Field(20,20);
         GameEngine gameEngine = new GameEngine(field);
+        System.out.println(field.returnAsString());
         gameEngine.addTank();
-        Instruction i = new Instruction(2, Instruction.Type.R);
+        Instruction i = new Instruction(0, Instruction.Type.R);
         gameEngine.receiveInstruction(i);
+        System.out.println(field.returnAsString());
 
     }
 
