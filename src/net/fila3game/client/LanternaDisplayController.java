@@ -51,7 +51,7 @@ public class LanternaDisplayController implements Display, Controller {
             char[] chars = lines[y].toCharArray();
 
             for (int x = 0; x < chars.length; x++ ) {
-                this.screen.putString(x * 2, y, "" + chars[x] + chars[x], Terminal.Color.MAGENTA, Terminal.Color.YELLOW);
+                this.screen.putString( state.getPlayerX() + x * 2, y, "" + chars[x] + chars[x], Terminal.Color.MAGENTA, Terminal.Color.YELLOW);
             }
 
         }

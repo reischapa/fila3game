@@ -115,7 +115,6 @@ public class GameClient implements InputReceiver {
 
         @Override
         public void run() {
-            System.out.println("hello");
             try {
                 byte[] buffer = new byte[20000];
                 DatagramPacket packet = new DatagramPacket(buffer,buffer.length);
@@ -125,7 +124,11 @@ public class GameClient implements InputReceiver {
 
                 System.out.println(string);
 
-                GameClient.this.display.receiveData(new GameState(string));
+                GameState state = new GameState(string);
+
+                System.out.println("Transmitting state to display");
+
+                GameClient.this.display.receiveData(state);
 
             } catch (IOException e) {
                 e.printStackTrace();

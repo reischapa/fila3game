@@ -3,6 +3,7 @@ package net.fila3game.server;
 import com.sun.org.apache.xpath.internal.SourceTree;
 import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import com.sun.xml.internal.ws.api.pipe.Engine;
+import net.fila3game.server.gameengine.Field;
 import net.fila3game.server.gameengine.GameEngine;
 //import net.jchapa.chapautils.FileIOManager;
 
@@ -53,6 +54,8 @@ public class GameServer {
     private final ConcurrentMap<String, Instruction> currentInstructions;
     private ExecutorService normalExecutorService;
     private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
+
+    private int x;
 
     public GameServer() throws IOException {
         this.serverSocket = new ServerSocket(TCP_CONNECTION_PORT);
@@ -128,6 +131,9 @@ public class GameServer {
                 return;
             }
 
+            GameServer.this.x += 1;
+            System.out.println(GameServer.this.x);
+
             GameServer.this.currentInstructions.put(identifier, new Instruction(Integer.parseInt(tokens[0]), Instruction.Type.D) );
 
 //            System.out.println(identifier);
@@ -167,9 +173,10 @@ public class GameServer {
                 ClientStatusWorker worker = GameServer.this.currentClients.get(iterator.next());
 
                 //TODO get data from the gameEngine
-                System.out.println("Server sending message:");
-                String message = "TTT\nTTT\n0T0";
-                System.out.println(message);
+//                System.out.println("Server sending message:");
+                String message = GameServer.this.x + " 0\r\nTTT\nTTT\n0T0\n";
+
+//                System.out.println(message);
 
                 byte[] b = message.getBytes();
                 DatagramPacket p = new DatagramPacket(b, 0, b.length, worker.getClientIPAddress(), SENDING_UDP_CONNECTION_PORT);
