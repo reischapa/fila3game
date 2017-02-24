@@ -28,7 +28,7 @@ public class GameClient implements InputReceiver {
         ln.setInputReceiver(gc);
         gc.setDisplay(ln);
         ln.init();
-        gc.connect("localhost");
+        gc.connect("192.168.0.132");
     }
 
     private Display display;
