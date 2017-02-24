@@ -31,12 +31,16 @@ public class GameEngine {
     private Field battlefield;
     private int numberOfTanks;
     private LinkedList<Tank> tankList;
+    private final Field EMPTYMASK = new Field(3,3);
+
 
     public GameEngine(Field battlefield){
 
         this.battlefield = battlefield;
         numberOfTanks = 0;
         tankList = new LinkedList<>();
+
+
 
     }
 
@@ -46,7 +50,9 @@ public class GameEngine {
 
         if(i.getType().equals(Instruction.Type.R)) {
             tank.setOrientation(RepresentationFactory.Orientation.EAST);
+            battlefield.addField(EMPTYMASK,tank.getX(),tank.getY());
             tank.move(tank.getX()+1,tank.getY());
+            battlefield.addField(tank.getRepresentation(),tank.getX(),tank.getY());
 
 //            if(checkCollision(tank)){
 //
@@ -62,10 +68,9 @@ public class GameEngine {
 
         if(numberOfTanks == 0){
 
-            Tank tank = new Tank(0,2,2, RepresentationFactory.Orientation.EAST);
+            Tank tank = new Tank(0,3,2, RepresentationFactory.Orientation.EAST);
 
 //            if(!checkCollision(tank)){
-            System.out.println(RepresentationFactory.returnRepresentation(RepresentationFactory.Orientation.EAST, RepresentationFactory.GameObjectType.TANK).returnAsString());
                 battlefield.addField(tank.getRepresentation(),tank.getX(),tank.getY());
                 tank.setPlayer(0);
                 tankList.add(tank);
@@ -102,8 +107,8 @@ public class GameEngine {
 
         Field field = new Field(20,20);
         GameEngine gameEngine = new GameEngine(field);
-        System.out.println(field.returnAsString());
         gameEngine.addTank();
+        System.out.println(field.returnAsString());
         Instruction i = new Instruction(0, Instruction.Type.R);
         gameEngine.receiveInstruction(i);
         System.out.println(field.returnAsString());
