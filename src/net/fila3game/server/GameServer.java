@@ -210,7 +210,6 @@ public class GameServer {
         public void run() {
 
 
-//            this.engine.addTank();
 
             try {
 
@@ -228,6 +227,7 @@ public class GameServer {
                 this.registerSelf();
 
             } catch (IOException e) {
+                e.printStackTrace();
                 this.safelyShutdownClientConnection();
             }
 
@@ -235,7 +235,8 @@ public class GameServer {
         }
 
         public void constructClientIdentifier(int playerNumber) {
-            this.identifier =  this.clientIPAddress.toString().concat(" " + Long.toString(System.currentTimeMillis()));
+            this.identifier =  playerNumber + " " +  this.clientIPAddress.toString().concat(" " + Long.toString(System.currentTimeMillis()));
+            System.out.println(this.identifier);
         }
 
         public int addPlayer() {
@@ -243,7 +244,7 @@ public class GameServer {
         }
 
         public void handleGameFull() throws IOException{
-            throw new IOException();
+            throw new IOException("Game Full");
             //TODO
         }
 
@@ -300,12 +301,16 @@ public class GameServer {
                     String elem = iter.next();
                     sb.append(elem);
 
-                    GameServer.this.engine.receiveInstruction(GameServer.this.currentInstructions.get(elem));
+                    Instruction i = GameServer.this.currentInstructions.get(elem);
+
+                    System.out.println(i.getPlayerNumber());
+
+                    GameServer.this.engine.receiveInstruction(i);
                 }
 
-                if (sb.length() > 0) {
-                    System.out.println(sb.toString());
-                }
+//                if (sb.length() > 0) {
+//                    System.out.println(sb.toString());
+//                }
 
 
                 GameServer.this.currentInstructions.clear();
