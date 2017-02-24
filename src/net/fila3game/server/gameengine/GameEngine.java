@@ -14,7 +14,7 @@ import java.util.LinkedList;
 public class GameEngine {
 
     private static final int MAX_NUMBER_TANKS = 4;
-    public static final int DEFAULT_BATTLEFIELD_COLUMNS = 30;
+    public static final int DEFAULT_BATTLEFIELD_COLUMNS = 50;
     public static final int DEFAULT_BATTLEFIELD_ROWS = 30;
 
     public enum Tiletypes {
