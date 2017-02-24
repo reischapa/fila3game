@@ -63,12 +63,6 @@ public class GameEngine {
             tank.setOrientation(RepresentationFactory.Orientation.EAST);
             moveTank(tank,1,0);
 
-//            if(checkCollision(tank)){
-//
-//                tank.move(tank.getX()-1,tank.getY());
-//
-//            }
-
         }else if(i.getType().equals(Instruction.Type.L)){
             tank.setOrientation(RepresentationFactory.Orientation.WEST);
             moveTank(tank,-1,0);
@@ -84,44 +78,47 @@ public class GameEngine {
     }
 
     private void moveTank(Tank tank, int x, int y){
-        battlefield.addField(EMPTYMASK, tank.getX(), tank.getY());
         tank.move(tank.getX()+x, tank.getY()+y);
+        if(checkCollision(tank)){
+            System.out.println("colision");
+            tank.move(tank.getX()-x,tank.getY()-y);
+            return;
+
+        }
+        battlefield.addField(EMPTYMASK, tank.getX(), tank.getY());
         battlefield.addField(tank.getRepresentation(), tank.getX(), tank.getY());
     }
 
 
-    public synchronized boolean addTank(){
+    public synchronized int addTank(){
 
         if( numberOfTanks < MAX_NUMBER_TANKS) {
 
             if (tankList.size() == 0) {
 
                 Tank tank = new Tank(0, 3, 2, RepresentationFactory.Orientation.EAST);
+                return createTank(tank);
 
-//            if(!checkCollision(tank)){
-                battlefield.addField(tank.getRepresentation(), tank.getX(), tank.getY());
-                tank.setPlayer(0);
-                tankList.add(tank);
-                numberOfTanks++;
-                return true;
-                //         }
             } else if (tankList.size() == 1) {
 
                 Tank tank = new Tank(1, battlefield.getWidth() - 2 - RepresentationFactory.TANK_WIDTH, battlefield.getHeight() / 2, RepresentationFactory.Orientation.WEST);
-
-//            if(!checkCollision(tank)){
-                battlefield.addField(tank.getRepresentation(), tank.getX(), tank.getY());
-                tank.setPlayer(1);
-                tankList.add(tank);
-                numberOfTanks++;
-                return true;
-                //         }
+                return createTank(tank);
             }
         }
 
-        return false;
+        return -1;
 
 
+    }
+
+    private int createTank(Tank tank){
+        if(!checkCollision(tank)){
+            battlefield.addField(tank.getRepresentation(), tank.getX(), tank.getY());
+            tankList.add(tank);
+            numberOfTanks++;
+            return tank.getPlayer();
+        }
+        return -1;
     }
 
     //calculate and return the state
@@ -134,6 +131,9 @@ public class GameEngine {
         for(int i = object.getX(); i < object.getWidth(); i++) {
 
             for(int j = object.getY(); i < object.getHeight(); j++) {
+
+                System.out.println(i);
+                System.out.println(j);
 
                 if (battlefield.get(i,j) == Tiletypes.WALL.getSymbol() || battlefield.get(i,j) == Tiletypes.BULLET.getSymbol()|| battlefield.get(i,j) == Tiletypes.TANK.getSymbol()) {
                     return true;
@@ -157,11 +157,25 @@ public class GameEngine {
 
     public static void main(String[] args) {
 
-        Field field = new Field(25,25);
 
         GameEngine gameEngine = new GameEngine();
         gameEngine.addTank();
         gameEngine.addTank();
+        System.out.println(gameEngine.calculateState());
+        gameEngine.receiveInstruction(new Instruction("D"));
+        gameEngine.receiveInstruction(new Instruction("R"));
+        gameEngine.receiveInstruction(new Instruction("R"));
+        gameEngine.receiveInstruction(new Instruction("R"));
+        gameEngine.receiveInstruction(new Instruction("R"));
+        gameEngine.receiveInstruction(new Instruction("R"));
+        gameEngine.receiveInstruction(new Instruction("R"));
+        gameEngine.receiveInstruction(new Instruction("R"));
+        gameEngine.receiveInstruction(new Instruction("R"));
+        gameEngine.receiveInstruction(new Instruction("R"));
+        gameEngine.receiveInstruction(new Instruction("R"));
+        gameEngine.receiveInstruction(new Instruction("R"));
+        gameEngine.receiveInstruction(new Instruction("R"));
+        gameEngine.receiveInstruction(new Instruction("R"));
         System.out.println(gameEngine.calculateState());
 
 

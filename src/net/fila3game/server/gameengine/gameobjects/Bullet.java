@@ -1,7 +1,6 @@
 package net.fila3game.server.gameengine.gameobjects;
 
 import net.fila3game.server.gameengine.Field;
-import net.fila3game.server.gameengine.GameEngine;
 
 /**
  * Created by codecadet on 2/21/17.

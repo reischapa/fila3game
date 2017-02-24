@@ -12,6 +12,8 @@ public class Instruction {
 
     public enum Type {
         U,D,R,L,S;
+
+
     }
 
     private int playerNumber;

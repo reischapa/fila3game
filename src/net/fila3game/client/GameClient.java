@@ -1,6 +1,7 @@
 package net.fila3game.client;
 
-//import net.jchapa.chapautils.RandomGen;
+
+import net.fila3game.server.Instruction;
 
 import java.io.*;
 import java.net.*;
@@ -45,7 +46,7 @@ public class GameClient implements InputReceiver {
     private ScheduledThreadPoolExecutor scheduledExecutorService;
     private ExecutorService normalExecutorService;
 
-    private int playerID = 0;
+    private int playerNumber = 0;
 
     private boolean isConnected = false;
 
@@ -93,31 +94,30 @@ public class GameClient implements InputReceiver {
         if (!this.isConnected) {
             return;
         }
-        String result = "";
-        String topMovement = "0 U";
-        String downMovement = "0 D";
-        String rightMovement = "0 R";
-        String leftMovement  = "0 L";
 
-        switch (key) {
-            case KEY_ARROWDOWN:
-                result = downMovement;
-                break;
-            case KEY_ARROWRIGHT:
-                result = rightMovement;
-                break;
-            case KEY_ARROWUP:
-                result = topMovement;
-                break;
-            case KEY_ARROWLEFT:
-                result = leftMovement;
-                break;
-        }
+        String instruction = this.appendMovementInstruction(this.playerNumber + "", key);
 
-        this.normalExecutorService.execute(new ServerSenderWorker(this.multiplyCommands(result)));
-
+        this.normalExecutorService.execute(new ServerSenderWorker(this.multiplyCommands(instruction)));
 
     }
+
+    public String appendMovementInstruction(String base, InputReceiver.Key key) {
+        switch (key) {
+            case KEY_ARROWDOWN:
+                return base + " " + Instruction.Type.D.toString();
+            case KEY_ARROWRIGHT:
+                return base + " " + Instruction.Type.R.toString();
+            case KEY_ARROWUP:
+                return base + " " + Instruction.Type.U.toString();
+            case KEY_ARROWLEFT:
+                return base + " " + Instruction.Type.L.toString();
+            default:
+                throw new UnsupportedOperationException();
+        }
+    }
+
+
+
 
     public void setDisplay(Display display) {
         this.display = display;
