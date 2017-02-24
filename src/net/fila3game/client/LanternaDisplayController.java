@@ -52,6 +52,7 @@ public class LanternaDisplayController implements Display, Controller {
 
             for (int x = 0; x < chars.length; x++) {
                 lanternaConstructCellfromChar(x * 2, y, chars[x]);
+//                screen.putString(y, screen.getTerminal().getTerminalSize().getRows()-1, "-", Terminal.Color.BLUE, Terminal.Color.BLUE);
             }
 
         }
@@ -69,17 +70,17 @@ public class LanternaDisplayController implements Display, Controller {
             case 'T':
                 back = Terminal.Color.BLACK;
                 front = Terminal.Color.GREEN;
-                actualChar = 'T';
+                actualChar = ' ';
                 break;
             case 'B':
                 back = Terminal.Color.BLACK;
                 front = Terminal.Color.MAGENTA;
-                actualChar = 'B';
+                actualChar = '|';
                 break;
             case 'W':
                 back = Terminal.Color.BLACK;
                 front = Terminal.Color.BLUE;
-                actualChar = 'W';
+                actualChar = 'V';
                 break;
             case '0':
                 back = Terminal.Color.BLACK;
