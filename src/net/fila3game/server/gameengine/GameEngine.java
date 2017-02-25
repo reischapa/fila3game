@@ -64,7 +64,7 @@ public class GameEngine {
     public synchronized void receiveInstruction(Instruction i) {
 
         if(!tankList.isEmpty()) {
-            Tank tank = tankList.get(i.getPlayerNumber());
+            Tank tank = tankList.get(i.getPlayerNumber()-1);
             if(tank.isAlive()) {
 
                 if (i.getType().equals(Instruction.Type.R)) {
@@ -85,12 +85,25 @@ public class GameEngine {
 
                 } else if (i.getType().equals(Instruction.Type.S)) {
 
-
-                    Bullet bullet = createBullet(tank);
+                    if(!bulletExists(tank.getPlayer())) {
+                        Bullet bullet = createBullet(tank);
+                        bullets.add(bullet);
+                    }
 
                 }
             }
         }
+    }
+
+    private boolean bulletExists(int tankID) {
+        if(!bullets.isEmpty()) {
+            for (Bullet bullet : bullets) {
+                if (bullet.getPlayer() == tankID) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private Bullet createBullet(Tank tank){
@@ -117,7 +130,6 @@ public class GameEngine {
 
         if(!checkWallColistion(bullet) && !checkBulletCollision(bullet)){
 
-            bullets.add(bullet);
             battlefield.addField(bullet.getRepresentation(),bullet.getX(),bullet.getY());
         }
 
@@ -154,7 +166,9 @@ public class GameEngine {
         for(Tank t : tankList) {
 
             battlefield.addField(EMPTYMASK,t.getX(),t.getY());
+
             if (checkTankCollision(t)) {
+                System.out.println("colidiu");
                 battlefield.addField(EMPTYMASK,t.getX(), t.getY());
                 battlefield.addField(new Field(1,1),bullet.getX(),bullet.getY());
                 tankList.remove(t);
@@ -162,13 +176,16 @@ public class GameEngine {
                 bullet.die();
                 bullets.remove(bullet);
                 numberOfTanks--;
+                return;
             }
             battlefield.addField(t.getRepresentation(),t.getX(),t.getY());
         }
 
-        if(checkBulletCollision(bullet) || checkWallColistion(bullet)){
+        if(checkWallColistion(bullet)){
             System.out.println("bitch");
-            battlefield.addField(new Field(1,1),bullet.getX(), bullet.getY());
+            Field wallField = new Field(1,1);
+            wallField.set(0,0,'W');
+            battlefield.addField(wallField,bullet.getX(), bullet.getY());
             bullet.die();
             bullets.remove(bullet);
             return;
@@ -209,21 +226,21 @@ public class GameEngine {
 
             if (tankList.size() == 0) {
 
-                Tank tank = new Tank(0, 3, battlefield.getHeight()/2, RepresentationFactory.Orientation.EAST);
+                Tank tank = new Tank(1, 3, battlefield.getHeight()/2, RepresentationFactory.Orientation.EAST);
                 return createTank(tank);
 
             } else if (tankList.size() == 1) {
 
-                Tank tank = new Tank(1, battlefield.getWidth() - 2 - RepresentationFactory.TANK_WIDTH, battlefield.getHeight() / 2, RepresentationFactory.Orientation.WEST);
+                Tank tank = new Tank(2, battlefield.getWidth() - 2 - RepresentationFactory.TANK_WIDTH, battlefield.getHeight() / 2, RepresentationFactory.Orientation.WEST);
                 return createTank(tank);
             } else if(tankList.size() == 2){
 
-                Tank tank = new Tank(2, battlefield.getWidth()/2 , 2 , RepresentationFactory.Orientation.SOUTH);
+                Tank tank = new Tank(3, battlefield.getWidth()/2 , 2 , RepresentationFactory.Orientation.SOUTH);
                 return createTank(tank);
 
             }else if(tankList.size() == 3){
 
-                Tank tank = new Tank(3, battlefield.getWidth()/2, battlefield.getHeight() - 2 , RepresentationFactory.Orientation.NORTH);
+                Tank tank = new Tank(4, battlefield.getWidth()/2, battlefield.getHeight() - 2 , RepresentationFactory.Orientation.NORTH);
                 return createTank(tank);
 
             }

@@ -148,8 +148,19 @@ public class LanternaDisplayController implements Display, Controller {
                 front = Terminal.Color.GREEN;
                 actualChar = '4';
                 break;
-
+            case '♥':
+                back = Terminal.Color.BLACK;
+                front = Terminal.Color.RED;
+                actualChar = '♥';
+                break;
+            case '@':
+                back = Terminal.Color.BLACK;
+                front = Terminal.Color.CYAN;
+                actualChar = '@';
+            default:
+                System.out.println("Something went terribly wrong");
         }
+
         this.screen.putString(x, y, "" + actualChar + actualChar, back, front);
     }
 
@@ -166,6 +177,8 @@ public class LanternaDisplayController implements Display, Controller {
                 return GUIEvent.Key.KEY_ARROWRIGHT;
             case NormalKey:
                 return getNormalKeyCharacter(key);
+            default:
+                System.out.println("Something went terribly wrong");
         }
 
         return null;
@@ -179,6 +192,8 @@ public class LanternaDisplayController implements Display, Controller {
                 return GUIEvent.Key.KEY_Q;
             case 'r':
                 return GUIEvent.Key.KEY_R;
+            default:
+                System.out.println("Something went terribly wrong");
         }
 
         System.err.println("Keystroke is not mapped, returning null...");

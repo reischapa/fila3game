@@ -136,16 +136,16 @@ public class GameClient implements GUIEventReceiver {
     @Override
     public void receiveGUIEvent(GUIEvent event) {
 
-//        if (event == null) {
-//            return;
-//        }
+        if (event == null) {
+            return;
+        }
 
         System.out.println(event.getType());
 
         switch (event.getType()) {
 
             case CLIENT_CONNECT_SERVER:
-                this.connect("localhost");
+                this.connect("192.168.0.118");
                 this.state = State.CONNECTED;
                 break;
             case CLIENT_DISCONNECT_SERVER:
