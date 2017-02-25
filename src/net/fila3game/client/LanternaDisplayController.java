@@ -18,11 +18,9 @@ import java.util.concurrent.TimeUnit;
  */
 public class LanternaDisplayController implements Display, Controller {
 
-
     private enum State {
         MAIN_SCREEN, IN_GAME,
     }
-
 
     public LanternaDisplayController() {
         this.executorService = new ScheduledThreadPoolExecutor(2);
@@ -60,7 +58,7 @@ public class LanternaDisplayController implements Display, Controller {
     private static final int tankPosY = 20;
     private static final int messagePosX = 5;
     private static final int messagePosY = 20;
-    ScheduledThreadPoolExecutor executorService;
+    private ScheduledThreadPoolExecutor executorService;
 
     private InputReceiver receiver;
     private Screen screen;
@@ -73,7 +71,6 @@ public class LanternaDisplayController implements Display, Controller {
         t.start();
 
     }
-
 
     @Override
     public void receiveData(GameState state) {
@@ -160,6 +157,8 @@ public class LanternaDisplayController implements Display, Controller {
         switch (key.getCharacter()) {
             case ' ':
                 return InputReceiver.Key.KEY_SPACE;
+            case 'q':
+                return InputReceiver.Key.KEY_Q;
         }
 
         System.err.println("Keystroke is not mapped, returning null...");
@@ -190,6 +189,7 @@ public class LanternaDisplayController implements Display, Controller {
                     LanternaDisplayController.this.executorService.shutdownNow();
                     LanternaDisplayController.this.state = State.IN_GAME;
                 }
+                
                 k = translateKey(key);
 
                 System.out.println("key " + k + " pressed!");
