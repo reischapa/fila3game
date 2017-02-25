@@ -50,6 +50,11 @@ public class LanternaDisplayController implements Display, Controller {
                     "╠═╝╠╦╝║╣ ╚═╗╚═╗  ╠═╣║║║╚╦╝  ╠╩╗║╣ ╚╦╝   ║ ║ ║  ╚═╗ ║ ╠═╣╠╦╝ ║ \n" +
                     "╩  ╩╚═╚═╝╚═╝╚═╝  ╩ ╩╝╚╝ ╩   ╩ ╩╚═╝ ╩    ╩ ╚═╝  ╚═╝ ╩ ╩ ╩╩╚═ ╩ ";
 
+    private static final String message2 =
+            "╔═╗╦  ╔═╗╦ ╦  ╔═╗╔═╗╦═╗  ╔═╗╦═╗╔═╗╔═╗┬┬┬\n" +
+            "╠═╝║  ╠═╣╚╦╝  ╠╣ ║ ║╠╦╝  ╠╣ ╠╦╝║╣ ║╣ │││\n" +
+            "╩  ╩═╝╩ ╩ ╩   ╚  ╚═╝╩╚═  ╚  ╩╚═╚═╝╚═╝ooo";
+
     private static final int titlePosX = 5;
     private static final int titlePosY = 5;
     private static final int tankPosX = 70;
@@ -63,12 +68,11 @@ public class LanternaDisplayController implements Display, Controller {
     private State state = State.MAIN_SCREEN;
 
     public void init() {
-        AudioManager.load(new String[]{"sound", /* TODO MORE SOUNDS HERE - GIULIANO */});
+        AudioManager.load(new String[]{"sound", "startMusic","tankFire", "tankWasted"});
         showFrontPage();
-
+        AudioManager.start("startMusic");
         Thread t = new Thread(new KeyListener());
         t.start();
-
     }
 
     @Override
@@ -82,11 +86,8 @@ public class LanternaDisplayController implements Display, Controller {
             for (int x = 0; x < chars.length; x++) {
                 lanternaConstructCellfromChar(x * 2, y, chars[x]);
             }
-
         }
-
         this.screen.refresh();
-
     }
 
     private void lanternaConstructCellfromChar(int x, int y, char c) {
@@ -190,7 +191,7 @@ public class LanternaDisplayController implements Display, Controller {
     private GUIEvent.Key getNormalKeyCharacter(Key key) {
         switch (key.getCharacter()) {
             case ' ':
-                AudioManager.start("sound");
+                AudioManager.start("tankFire");
                 return GUIEvent.Key.KEY_SPACE;
             case 'q':
                 //TODO MORE SOUNDS - GIULIANO
@@ -225,8 +226,19 @@ public class LanternaDisplayController implements Display, Controller {
                 }
 
                 if (LanternaDisplayController.this.state == State.MAIN_SCREEN) {
-                    LanternaDisplayController.this.setGameLayout();
+
+                    AudioManager.start("sound");
                     LanternaDisplayController.this.mainMenuBlinkExecutorService.shutdownNow();
+
+                    try {
+                        Thread.sleep(1500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    AudioManager.stopAll();
+
+                    LanternaDisplayController.this.setGameLayout();
                     LanternaDisplayController.this.state = State.IN_GAME;
                     receiver.receiveGUIEvent(GUIEvent.connect());
                     continue;
@@ -272,7 +284,6 @@ public class LanternaDisplayController implements Display, Controller {
             @Override
             public void run() {
                 //TODO BACKGROUND SOUND - GIULIANO
-                AudioManager.start("sound");
 
                 createScreenElements(messagePosX, messagePosY, message, Terminal.Color.YELLOW);
                 screen.refresh();
