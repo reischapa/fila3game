@@ -111,11 +111,9 @@ public class GameServer {
 
         private String identifier;
 
-        public ClientStatusWorker(Socket socket) throws UnknownHostException, IOException {
+        public ClientStatusWorker(Socket socket) throws UnknownHostException {
             this.socket = socket;
             this.clientIPAddress = InetAddress.getByName(socket.getInetAddress().toString().substring(1));
-            this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), STRING_ENCODING));
-            this.writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), STRING_ENCODING));
         }
 
 
@@ -126,9 +124,9 @@ public class GameServer {
                 try {
 
 
-                    int playerNumber = this.addPlayerToEngine();
+                    int playerNumber = this.addGameEnginePlayerReference();
 
-                    if (playerNumber < 0) {
+                    if (playerNumber < 1) {
                         this.handleGameFull();
                     }
 
@@ -149,11 +147,21 @@ public class GameServer {
         }
 
 
-        private int addPlayerToEngine() {
+        private int addGameEnginePlayerReference() {
             return GameServer.this.engine.addTank();
         }
 
-        private void removePlayerFromEngine(int playerNumber) {
+        private void removeGameEnginePlayerReference() {
+            GameServer.this.engine.removeTankOfPlayerNumber(this.getEnginePlayerNumberFromId());
+        }
+
+        private int getEnginePlayerNumberFromId() {
+            try {
+                return Integer.parseInt(this.identifier.split(" ")[0]);
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+                throw new OutOfMemoryError("FATAL FLAW: YOU FORGOT TO CHANGE A FORMATO");
+            }
         }
 
         private void handleGameFull() throws IOException {
@@ -202,15 +210,22 @@ public class GameServer {
         }
 
         private void tcpSend(String msg) throws IOException {
+            if (this.writer == null) {
+                this.writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), STRING_ENCODING));
+            }
             this.writer.write(msg + "\n");
             this.writer.flush();
         }
 
         public String tcpReceive() throws IOException {
+            if (this.reader == null) {
+                this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), STRING_ENCODING));
+            }
             return this.reader.readLine();
         }
 
         private void safelyShutdownClientConnection() {
+            this.removeGameEnginePlayerReference();
             this.deRegisterSelfFromActiveClientList();
             this.stopHeartbeatReceiver();
             this.safelyShutdownTCP();
@@ -262,7 +277,7 @@ public class GameServer {
                     GameServer.this.incomingDatagramSocket.receive(dp);
 
                     String command = new String(buf, 0, dp.getLength(), STRING_ENCODING).trim();
-                    System.out.println("System recieved message: " + command );
+//                    System.out.println("System recieved message: " + command );
                     ClientReceiverWorker.this.parseCommand(command);
                 }
 
@@ -370,7 +385,7 @@ public class GameServer {
 
                     Instruction i = GameServer.this.currentInstructions.get(elem);
 
-                    System.out.println(i.getPlayerNumber());
+//                    System.out.println(i.getPlayerNumber());
 
                     GameServer.this.engine.receiveInstruction(i);
                 }

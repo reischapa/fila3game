@@ -5,8 +5,11 @@ import net.fila3game.server.gameengine.gameobjects.Bullet;
 import net.fila3game.server.gameengine.gameobjects.GameObject;
 import net.fila3game.server.gameengine.gameobjects.RepresentationFactory;
 import net.fila3game.server.gameengine.gameobjects.Tank;
+import net.jchapa.chapautils.RandomGen;
 
 import java.util.LinkedList;
+
+import static net.fila3game.server.gameengine.gameobjects.RepresentationFactory.Orientation.NORTH;
 
 /**
  * Created by codecadet on 2/21/17.
@@ -77,7 +80,7 @@ public class GameEngine {
                     moveTank(tank, -1, 0);
 
                 } else if (i.getType().equals(Instruction.Type.U)) {
-                    tank.setOrientation(RepresentationFactory.Orientation.NORTH);
+                    tank.setOrientation(NORTH);
                     moveTank(tank, 0, -1);
 
                 } else if (i.getType().equals(Instruction.Type.D)) {
@@ -125,7 +128,7 @@ public class GameEngine {
 
         }else {
 
-            bullet = new Bullet(tank.getPlayer(),tank.getX()+1,tank.getY()-1, RepresentationFactory.Orientation.NORTH);
+            bullet = new Bullet(tank.getPlayer(),tank.getX()+1,tank.getY()-1, NORTH);
 
         }
 
@@ -240,35 +243,66 @@ public class GameEngine {
     //TODO Tanques teem que morrer e o server teem que saber;
 
 
-    public synchronized int addTank(){
+//    public synchronized int addTank(){
+//
+//        if( numberOfTanks < MAX_NUMBER_TANKS) {
+//
+//            if (tankList.size() == 0) {
+//
+//                Tank tank = new Tank(1, 3, battlefield.getHeight()/2, RepresentationFactory.Orientation.EAST);
+//                return createTank(tank);
+//
+//            } else if (tankList.size() == 1) {
+//
+//                Tank tank = new Tank(2, battlefield.getWidth() - 2 - RepresentationFactory.TANK_WIDTH, battlefield.getHeight() / 2, RepresentationFactory.Orientation.WEST);
+//                return createTank(tank);
+//            } else if(tankList.size() == 2){
+//
+//                Tank tank = new Tank(3, battlefield.getWidth()/2 , 2 , RepresentationFactory.Orientation.SOUTH);
+//                return createTank(tank);
+//
+//            }else if(tankList.size() == 3){
+//
+//                Tank tank = new Tank(4, battlefield.getWidth()/2, battlefield.getHeight() - 2 , RepresentationFactory.Orientation.NORTH);
+//                return createTank(tank);
+//
+//            }
+//        }
+//
+//        return -1;
+//
+//    }
 
-        if( numberOfTanks < MAX_NUMBER_TANKS) {
+    public synchronized int addTank() {
 
-            if (tankList.size() == 0) {
+        Tank t = null;
+        do{
+            t = new Tank(tankList.size() + 1, RandomGen.getBoundedRandomInt(1,battlefield.getWidth()-2-RepresentationFactory.TANK_WIDTH),
+                                                RandomGen.getBoundedRandomInt(1,battlefield.getHeight()-2-RepresentationFactory.TANK_HEIGHT),
+                                                RepresentationFactory.Orientation.NORTH);
+        } while (this.createTank(t) < 0);
 
-                Tank tank = new Tank(1, 3, battlefield.getHeight()/2, RepresentationFactory.Orientation.EAST);
-                return createTank(tank);
+        if (t == null) {
+            return -1;
+        }
+        return t.getPlayer();
+    }
 
-            } else if (tankList.size() == 1) {
 
-                Tank tank = new Tank(2, battlefield.getWidth() - 2 - RepresentationFactory.TANK_WIDTH, battlefield.getHeight() / 2, RepresentationFactory.Orientation.WEST);
-                return createTank(tank);
-            } else if(tankList.size() == 2){
+    public synchronized void removeTankOfPlayerNumber(int playerNumber) {
 
-                Tank tank = new Tank(3, battlefield.getWidth()/2 , 2 , RepresentationFactory.Orientation.SOUTH);
-                return createTank(tank);
-
-            }else if(tankList.size() == 3){
-
-                Tank tank = new Tank(4, battlefield.getWidth()/2, battlefield.getHeight() - 2 , RepresentationFactory.Orientation.NORTH);
-                return createTank(tank);
-
-            }
+        if (playerNumber < 1) {
+            return;
         }
 
-        return -1;
+        if (this.tankList.size() == 0) {
+            return;
+        }
 
-
+        Tank last = this.tankList.getLast();
+        this.battlefield.addField(EMPTYMASK, last.getX(), last.getY());
+        this.tankList.remove(playerNumber - 1);
+        System.out.println("Tank removed");
     }
 
     private int createTank(Tank tank){
@@ -335,8 +369,8 @@ public class GameEngine {
 
             for(int j = object.getY(); j < object.getY()+object.getHeight(); j++) {
 
-                System.out.println(i);
-                System.out.println(j);
+//                System.out.println(i);
+//                System.out.println(j);
 
                 if (battlefield.get(i,j) == Tiletypes.BULLET_D.getSymbol() || battlefield.get(i,j) == Tiletypes.BULLET_U.getSymbol() ||
                         battlefield.get(i,j) == Tiletypes.BULLET_L.getSymbol() || battlefield.get(i,j) == Tiletypes.BULLET_R.getSymbol()) {

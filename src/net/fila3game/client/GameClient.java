@@ -315,7 +315,7 @@ public class GameClient implements GUIEventReceiver {
 
                 for (String s : this.data) {
                     byte[] bytes = s.getBytes(STRING_ENCODING);
-                    System.out.println(s);
+//                    System.out.println(s);
                     DatagramPacket packet = new DatagramPacket(bytes, bytes.length, GameClient.this.serverAddress, GameClient.SENDING_UDP_CONNECTION_PORT);
 
                     GameClient.this.outgoingDatagramSocket.send(packet);
