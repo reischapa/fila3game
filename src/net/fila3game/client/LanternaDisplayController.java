@@ -55,8 +55,8 @@ public class LanternaDisplayController implements Display, Controller {
     private static final int tankPosY = 20;
     private static final int messagePosX = 5;
     private static final int messagePosY = 20;
-    private ScheduledThreadPoolExecutor mainMenuBlinkExecutorService;
 
+    private ScheduledThreadPoolExecutor mainMenuBlinkExecutorService;
     private GUIEventReceiver receiver;
     private Screen screen;
     private State state = State.MAIN_SCREEN;
@@ -128,6 +128,27 @@ public class LanternaDisplayController implements Display, Controller {
                 front = Terminal.Color.BLACK;
                 actualChar = ' ';
                 break;
+            case '1':
+                back = Terminal.Color.BLACK;
+                front = Terminal.Color.GREEN;
+                actualChar = '1';
+                break;
+            case '2':
+                back = Terminal.Color.BLACK;
+                front = Terminal.Color.GREEN;
+                actualChar = '2';
+                break;
+            case '3':
+                back = Terminal.Color.BLACK;
+                front = Terminal.Color.GREEN;
+                actualChar = '3';
+                break;
+            case '4':
+                back = Terminal.Color.BLACK;
+                front = Terminal.Color.GREEN;
+                actualChar = '4';
+                break;
+
         }
         this.screen.putString(x, y, "" + actualChar + actualChar, back, front);
     }
@@ -156,6 +177,8 @@ public class LanternaDisplayController implements Display, Controller {
                 return GUIEvent.Key.KEY_SPACE;
             case 'q':
                 return GUIEvent.Key.KEY_Q;
+            case 'r':
+                return GUIEvent.Key.KEY_R;
         }
 
         System.err.println("Keystroke is not mapped, returning null...");
@@ -181,9 +204,6 @@ public class LanternaDisplayController implements Display, Controller {
                     continue;
                 }
 
-                System.out.println("hello");
-
-
                 if (LanternaDisplayController.this.state == State.MAIN_SCREEN) {
                     LanternaDisplayController.this.setGameLayout();
                     LanternaDisplayController.this.mainMenuBlinkExecutorService.shutdownNow();
@@ -200,7 +220,6 @@ public class LanternaDisplayController implements Display, Controller {
                     return;
                 }
 
-
                 System.out.println("key " + k + " pressed!");
                 receiver.receiveGUIEvent(GUIEvent.keyboardInput(k));
 
@@ -216,7 +235,6 @@ public class LanternaDisplayController implements Display, Controller {
         this.mainMenuBlinkExecutorService.shutdownNow();
         this.screen.stopScreen();
     }
-
 
     private void showFrontPage() {
         screen = TerminalFacade.createScreen();
