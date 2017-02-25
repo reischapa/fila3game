@@ -25,4 +25,8 @@ public interface GameObject {
 
     int getWidth();
 
+    boolean isAlive();
+
+    void die();
+
 }

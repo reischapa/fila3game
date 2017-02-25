@@ -65,28 +65,30 @@ public class GameEngine {
 
         if(!tankList.isEmpty()) {
             Tank tank = tankList.get(i.getPlayerNumber());
+            if(tank.isAlive()) {
 
-            if (i.getType().equals(Instruction.Type.R)) {
-                tank.setOrientation(RepresentationFactory.Orientation.EAST);
-                moveTank(tank, 1, 0);
+                if (i.getType().equals(Instruction.Type.R)) {
+                    tank.setOrientation(RepresentationFactory.Orientation.EAST);
+                    moveTank(tank, 1, 0);
 
-            } else if (i.getType().equals(Instruction.Type.L)) {
-                tank.setOrientation(RepresentationFactory.Orientation.WEST);
-                moveTank(tank, -1, 0);
+                } else if (i.getType().equals(Instruction.Type.L)) {
+                    tank.setOrientation(RepresentationFactory.Orientation.WEST);
+                    moveTank(tank, -1, 0);
 
-            } else if (i.getType().equals(Instruction.Type.U)) {
-                tank.setOrientation(RepresentationFactory.Orientation.NORTH);
-                moveTank(tank, 0, -1);
+                } else if (i.getType().equals(Instruction.Type.U)) {
+                    tank.setOrientation(RepresentationFactory.Orientation.NORTH);
+                    moveTank(tank, 0, -1);
 
-            } else if (i.getType().equals(Instruction.Type.D)) {
-                tank.setOrientation(RepresentationFactory.Orientation.SOUTH);
-                moveTank(tank, 0, 1);
+                } else if (i.getType().equals(Instruction.Type.D)) {
+                    tank.setOrientation(RepresentationFactory.Orientation.SOUTH);
+                    moveTank(tank, 0, 1);
 
-            }else if (i.getType().equals(Instruction.Type.S)) {
+                } else if (i.getType().equals(Instruction.Type.S)) {
 
 
-                Bullet bullet = createBullet(tank);
+                    Bullet bullet = createBullet(tank);
 
+                }
             }
         }
     }
@@ -113,33 +115,62 @@ public class GameEngine {
 
         }
 
-        bullets.add(bullet);
-        battlefield.addField(bullet.getRepresentation(),bullet.getX(),bullet.getY());
+        if(!checkWallColistion(bullet) && !checkBulletCollision(bullet)){
+
+            bullets.add(bullet);
+            battlefield.addField(bullet.getRepresentation(),bullet.getX(),bullet.getY());
+        }
 
         return bullet;
     }
 
-    private synchronized void moveBullet(Bullet bullet, int x, int y){
+    private synchronized void moveBullet(Bullet bullet){
 
-        battlefield.addField(EMPTYMASK, bullet.getX(), bullet.getY());
+        battlefield.addField(new Field(1,1), bullet.getX(), bullet.getY());
+        int x = 0;
+        int y = 0;
+
+        switch (bullet.getOrientation()){
+            case NORTH:
+                y = -1;
+                break;
+            case SOUTH:
+                y = 1;
+                break;
+            case EAST:
+                x = 1;
+                break;
+            case WEST:
+                x = -1;
+                break;
+            default:
+                x = 0;
+                y = 0;
+                break;
+        }
+
         bullet.move(bullet.getX()+x,bullet.getY()+y);
 
         for(Tank t : tankList) {
-            System.out.println("how many times");
+
             battlefield.addField(EMPTYMASK,t.getX(),t.getY());
             if (checkTankCollision(t)) {
                 battlefield.addField(EMPTYMASK,t.getX(), t.getY());
-                battlefield.addField(EMPTYMASK,bullet.getX(),bullet.getY());
+                battlefield.addField(new Field(1,1),bullet.getX(),bullet.getY());
                 tankList.remove(t);
+                t.die();
+                bullet.die();
                 bullets.remove(bullet);
                 numberOfTanks--;
             }
             battlefield.addField(t.getRepresentation(),t.getX(),t.getY());
         }
-        if(checkBulletCollision(bullet)){
+
+        if(checkBulletCollision(bullet) || checkWallColistion(bullet)){
             System.out.println("bitch");
-            battlefield.addField(EMPTYMASK,bullet.getX(), bullet.getY());
-            tankList.remove(bullet);
+            battlefield.addField(new Field(1,1),bullet.getX(), bullet.getY());
+            bullet.die();
+            bullets.remove(bullet);
             return;
         }
 
@@ -178,7 +209,7 @@ public class GameEngine {
 
             if (tankList.size() == 0) {
 
-                Tank tank = new Tank(0, 3, 2, RepresentationFactory.Orientation.EAST);
+                Tank tank = new Tank(0, 3, battlefield.getHeight()/2, RepresentationFactory.Orientation.EAST);
                 return createTank(tank);
 
             } else if (tankList.size() == 1) {
@@ -190,7 +221,7 @@ public class GameEngine {
                 Tank tank = new Tank(2, battlefield.getWidth()/2 , 2 , RepresentationFactory.Orientation.SOUTH);
                 return createTank(tank);
 
-            }else{
+            }else if(tankList.size() == 3){
 
                 Tank tank = new Tank(3, battlefield.getWidth()/2, battlefield.getHeight() - 2 , RepresentationFactory.Orientation.NORTH);
                 return createTank(tank);
@@ -219,6 +250,14 @@ public class GameEngine {
 
     //calculate and return the state
     public synchronized String calculateState() {
+
+        if(!bullets.isEmpty()) {
+            for (Bullet bullet : bullets) {
+                if(bullet.isAlive()){
+                    moveBullet(bullet);
+                }
+            }
+        }
         return battlefield.returnAsString();
     }
 
@@ -235,6 +274,21 @@ public class GameEngine {
             }
         }
 
+        return false;
+    }
+
+    private synchronized boolean checkWallColistion(Bullet bullet){
+
+        for(int i = bullet.getX(); i < bullet.getX()+bullet.getWidth(); i++) {
+
+            for (int j = bullet.getY(); j < bullet.getY() + bullet.getHeight(); j++) {
+
+                if (battlefield.get(i, j) == Tiletypes.WALL.getSymbol()) {
+                    System.out.println("Wall Collision");
+                    return true;
+                }
+            }
+        }
         return false;
     }
 

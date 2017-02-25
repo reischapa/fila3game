@@ -14,12 +14,14 @@ public class Tank implements GameObject {
     private int x;
     private int y;
     private RepresentationFactory.Orientation orientation;
+    private boolean alive;
 
     public Tank(int player, int x, int y, RepresentationFactory.Orientation orientation) {
         this.player = player;
         this.x = x;
         this.y = y;
         this.orientation = orientation;
+        this.alive = true;
     }
 
     @Override
@@ -39,7 +41,7 @@ public class Tank implements GameObject {
 
     @Override
     public Field getRepresentation() {
-        return RepresentationFactory.returnRepresentation(this.orientation, RepresentationFactory.GameObjectType.TANK);
+        return RepresentationFactory.returnRepresentation(this.orientation, RepresentationFactory.GameObjectType.TANK, String.valueOf(player));
     }
 
     @Override
@@ -66,6 +68,18 @@ public class Tank implements GameObject {
     @Override
     public int getWidth() {
         return TANK_WIDTH;
+    }
+
+    @Override
+    public boolean isAlive() {
+        return this.alive;
+    }
+
+    @Override
+    public void die() {
+        if(alive){
+            alive = false;
+        }
     }
 
     public void setPlayer(int player) {
