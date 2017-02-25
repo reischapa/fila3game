@@ -5,6 +5,9 @@ package net.fila3game.client;
  */
 public class GUIEvent {
 
+    private Type type;
+    private Key key;
+
     public static GUIEvent keyboardInput(GUIEvent.Key key) {
         GUIEvent e = new GUIEvent(Type.CLIENT_KEYBOARD_INPUT);
         e.setKey(key);
@@ -28,11 +31,6 @@ public class GUIEvent {
     public enum Type {
         CLIENT_KEYBOARD_INPUT, CLIENT_CONNECT_SERVER, CLIENT_DISCONNECT_SERVER,
     }
-
-
-    private Type type;
-    private Key key;
-
 
     public GUIEvent(Type type) {
         this.type = type;
