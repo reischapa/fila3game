@@ -64,7 +64,7 @@ public class GameEngine {
     public synchronized void receiveInstruction(Instruction i) {
 
         if(!tankList.isEmpty()) {
-            Tank tank = tankList.get(i.getPlayerNumber());
+            Tank tank = tankList.get(i.getPlayerNumber()-1);
             if(tank.isAlive()) {
 
                 if (i.getType().equals(Instruction.Type.R)) {
