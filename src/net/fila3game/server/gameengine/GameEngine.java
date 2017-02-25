@@ -209,21 +209,21 @@ public class GameEngine {
 
             if (tankList.size() == 0) {
 
-                Tank tank = new Tank(0, 3, battlefield.getHeight()/2, RepresentationFactory.Orientation.EAST);
+                Tank tank = new Tank(1, 3, battlefield.getHeight()/2, RepresentationFactory.Orientation.EAST);
                 return createTank(tank);
 
             } else if (tankList.size() == 1) {
 
-                Tank tank = new Tank(1, battlefield.getWidth() - 2 - RepresentationFactory.TANK_WIDTH, battlefield.getHeight() / 2, RepresentationFactory.Orientation.WEST);
+                Tank tank = new Tank(2, battlefield.getWidth() - 2 - RepresentationFactory.TANK_WIDTH, battlefield.getHeight() / 2, RepresentationFactory.Orientation.WEST);
                 return createTank(tank);
             } else if(tankList.size() == 2){
 
-                Tank tank = new Tank(2, battlefield.getWidth()/2 , 2 , RepresentationFactory.Orientation.SOUTH);
+                Tank tank = new Tank(3, battlefield.getWidth()/2 , 2 , RepresentationFactory.Orientation.SOUTH);
                 return createTank(tank);
 
             }else if(tankList.size() == 3){
 
-                Tank tank = new Tank(3, battlefield.getWidth()/2, battlefield.getHeight() - 2 , RepresentationFactory.Orientation.NORTH);
+                Tank tank = new Tank(4, battlefield.getWidth()/2, battlefield.getHeight() - 2 , RepresentationFactory.Orientation.NORTH);
                 return createTank(tank);
 
             }
