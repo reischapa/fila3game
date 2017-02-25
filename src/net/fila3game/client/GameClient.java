@@ -55,6 +55,7 @@ public class GameClient implements GUIEventReceiver {
     private ScheduledThreadPoolExecutor heartbeatExecutor;
 
     private String playerIdentifier;
+    private int playerNumber;
 
     private State state = State.WAITING;
 
@@ -97,6 +98,11 @@ public class GameClient implements GUIEventReceiver {
     private void initializeTCPStreams() throws IOException {
         this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         this.writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+    }
+
+    private void receiveInitialConfiguration() throws IOException                                                                                                                                                                                       {
+        this.playerIdentifier = this.tcpReceive();
+        this.playerNumber = Integer.parseInt(this.tcpReceive());
     }
 
     private void initializeUDPSockets() throws IOException {
@@ -167,9 +173,6 @@ public class GameClient implements GUIEventReceiver {
 
     }
 
-    private void receiveInitialConfiguration() throws IOException                                                                                                                                                                                       {
-        this.playerIdentifier = this.tcpReceive();
-    }
 
     private void tcpSend(String message) throws IOException {
         this.writer.write(message + "\n");
@@ -211,7 +214,7 @@ public class GameClient implements GUIEventReceiver {
 
 
     private String constructInstructionString(GUIEvent.Key key) {
-        String result = this.playerIdentifier + "";
+        String result = this.playerNumber + "";
 
         result = this.appendMovementInstruction(result, key);
         result = this.appendShootInstruction(result, key);
@@ -301,7 +304,6 @@ public class GameClient implements GUIEventReceiver {
 
         public ServerSenderWorker( String[] data)  {
             this.data = data;
-
         }
 
         @Override

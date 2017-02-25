@@ -64,7 +64,7 @@ public class GameServer {
             throw new IllegalStateException("no engine");
         }
 
-        this.initializeUDPSockets();
+        this.initializeGeneralUDPSockets();
         this.scheduleGeneralUDPWorkers();
 
 
@@ -75,7 +75,7 @@ public class GameServer {
     }
 
 
-    private void initializeUDPSockets() throws IOException{
+    private void initializeGeneralUDPSockets() throws IOException{
         this.incomingDatagramSocket = new DatagramSocket(RECEIVING_UDP_CONNECTION_PORT);
         this.outgoingDatagramSocket = new DatagramSocket();
     }
@@ -123,18 +123,19 @@ public class GameServer {
 
                 try {
 
-
                     int playerNumber = this.addGameEnginePlayerReference();
 
                     if (playerNumber < 1) {
-                        this.handleGameFull();
+                        Thread.sleep(1000);
+                        this.run();
+                        return;
                     }
 
                     System.out.println(playerNumber);
 
                     this.constructClientIdentifier(playerNumber);
-
-                    this.tcpSend(playerNumber + "");
+                    this.sendInitialConfiguration();
+                    System.out.println("test");
 
                     this.registerSelfToActiveClientList();
                     this.startHeartbeatReceiver();
@@ -142,10 +143,17 @@ public class GameServer {
                 } catch (IOException e) {
                     e.printStackTrace();
                     this.safelyShutdownClientConnection();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
 
         }
 
+        private void sendInitialConfiguration() throws IOException{
+            this.tcpSend(this.identifier + "");
+            this.tcpSend(this.getEnginePlayerNumberFromId() + "");
+            System.out.println("configuration sent");
+        }
 
         private int addGameEnginePlayerReference() {
             return GameServer.this.engine.addTank();
@@ -160,14 +168,12 @@ public class GameServer {
                 return Integer.parseInt(this.identifier.split(" ")[0]);
             } catch (NumberFormatException e) {
                 e.printStackTrace();
-                throw new OutOfMemoryError("FATAL FLAW: YOU FORGOT TO CHANGE A FORMATO");
+                System.out.println("WRONG PLAYER IN COMMAND FORMAT");
+                System.exit(0);
             }
+            return -4;
         }
 
-        private void handleGameFull() throws IOException {
-            throw new IOException("Game Full");
-            //TODO
-        }
 
         private void constructClientIdentifier(int playerNumber) {
             this.identifier = playerNumber + " " + this.clientIPAddress.toString().concat(" " + Long.toString(System.currentTimeMillis()));

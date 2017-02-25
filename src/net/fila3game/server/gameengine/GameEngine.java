@@ -275,11 +275,18 @@ public class GameEngine {
 
     public synchronized int addTank() {
 
+
+
         Tank t = null;
+
+        int newTankX = RandomGen.getBoundedRandomInt(1, battlefield.getWidth() - 2 - RepresentationFactory.TANK_WIDTH);
+        int newTankY = RandomGen.getBoundedRandomInt(1, battlefield.getHeight() - 2 - RepresentationFactory.TANK_HEIGHT);
+        t = new Tank(tankList.size() + 1, newTankX, newTankY, RepresentationFactory.Orientation.NORTH);
+
         do{
-            t = new Tank(tankList.size() + 1, RandomGen.getBoundedRandomInt(1,battlefield.getWidth()-2-RepresentationFactory.TANK_WIDTH),
-                                                RandomGen.getBoundedRandomInt(1,battlefield.getHeight()-2-RepresentationFactory.TANK_HEIGHT),
-                                                RepresentationFactory.Orientation.NORTH);
+            newTankX = RandomGen.getBoundedRandomInt(1, battlefield.getWidth() - 2 - RepresentationFactory.TANK_WIDTH);
+            newTankY = RandomGen.getBoundedRandomInt(1, battlefield.getHeight() - 2 - RepresentationFactory.TANK_HEIGHT);
+            t = new Tank(tankList.size() + 1, newTankX, newTankY, RepresentationFactory.Orientation.NORTH);
         } while (this.createTank(t) < 0);
 
         if (t == null) {
