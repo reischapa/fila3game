@@ -2,13 +2,10 @@ package net.fila3game.client;
 
 import com.googlecode.lanterna.TerminalFacade;
 import com.googlecode.lanterna.input.Key;
-import com.googlecode.lanterna.screen.ScreenWriter;
 import com.googlecode.lanterna.terminal.Terminal;
-import net.fila3game.server.gameengine.Field;
 import com.googlecode.lanterna.screen.Screen;
 
 import java.util.Scanner;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -23,7 +20,7 @@ public class LanternaDisplayController implements Display, Controller {
     }
 
     public LanternaDisplayController() {
-        this.executorService = new ScheduledThreadPoolExecutor(2);
+        this.mainMenuBlinkExecutorService = new ScheduledThreadPoolExecutor(2);
     }
 
     private static final String title =
@@ -58,9 +55,9 @@ public class LanternaDisplayController implements Display, Controller {
     private static final int tankPosY = 20;
     private static final int messagePosX = 5;
     private static final int messagePosY = 20;
-    private ScheduledThreadPoolExecutor executorService;
+    private ScheduledThreadPoolExecutor mainMenuBlinkExecutorService;
 
-    private InputReceiver receiver;
+    private GUIEventReceiver receiver;
     private Screen screen;
     private State state = State.MAIN_SCREEN;
 
@@ -135,17 +132,17 @@ public class LanternaDisplayController implements Display, Controller {
         this.screen.putString(x, y, "" + actualChar + actualChar, back, front);
     }
 
-    private InputReceiver.Key translateKey(Key key) {
+    private GUIEvent.Key translateKey(Key key) {
         System.out.println("got key! " + key);
         switch (key.getKind()) {
             case ArrowDown:
-                return InputReceiver.Key.KEY_ARROWDOWN;
+                return GUIEvent.Key.KEY_ARROWDOWN;
             case ArrowLeft:
-                return InputReceiver.Key.KEY_ARROWLEFT;
+                return GUIEvent.Key.KEY_ARROWLEFT;
             case ArrowUp:
-                return InputReceiver.Key.KEY_ARROWUP;
+                return GUIEvent.Key.KEY_ARROWUP;
             case ArrowRight:
-                return InputReceiver.Key.KEY_ARROWRIGHT;
+                return GUIEvent.Key.KEY_ARROWRIGHT;
             case NormalKey:
                 return getNormalKeyCharacter(key);
         }
@@ -153,12 +150,12 @@ public class LanternaDisplayController implements Display, Controller {
         return null;
     }
 
-    private InputReceiver.Key getNormalKeyCharacter(Key key) {
+    private GUIEvent.Key getNormalKeyCharacter(Key key) {
         switch (key.getCharacter()) {
             case ' ':
-                return InputReceiver.Key.KEY_SPACE;
+                return GUIEvent.Key.KEY_SPACE;
             case 'q':
-                return InputReceiver.Key.KEY_Q;
+                return GUIEvent.Key.KEY_Q;
         }
 
         System.err.println("Keystroke is not mapped, returning null...");
@@ -166,7 +163,7 @@ public class LanternaDisplayController implements Display, Controller {
     }
 
     @Override
-    public void setInputReceiver(InputReceiver receiver) {
+    public void setInputReceiver(GUIEventReceiver receiver) {
         this.receiver = receiver;
     }
 
@@ -175,7 +172,7 @@ public class LanternaDisplayController implements Display, Controller {
         @Override
         public void run() {
             Key key;
-            InputReceiver.Key k;
+            GUIEvent.Key k;
 
             while (true) {
                 key = screen.readInput();
@@ -184,16 +181,28 @@ public class LanternaDisplayController implements Display, Controller {
                     continue;
                 }
 
+                System.out.println("hello");
+
+
                 if (LanternaDisplayController.this.state == State.MAIN_SCREEN) {
                     LanternaDisplayController.this.setGameLayout();
-                    LanternaDisplayController.this.executorService.shutdownNow();
+                    LanternaDisplayController.this.mainMenuBlinkExecutorService.shutdownNow();
                     LanternaDisplayController.this.state = State.IN_GAME;
+                    receiver.receiveGUIEvent(GUIEvent.connect());
+                    continue;
                 }
-                
+
                 k = translateKey(key);
 
+                if (k == GUIEvent.Key.KEY_Q) {
+                    receiver.receiveGUIEvent(GUIEvent.disconnect());
+                    LanternaDisplayController.this.shutdown();
+                    return;
+                }
+
+
                 System.out.println("key " + k + " pressed!");
-                receiver.receiveInput(k);
+                receiver.receiveGUIEvent(GUIEvent.keyboardInput(k));
 
             }
         }
@@ -202,6 +211,12 @@ public class LanternaDisplayController implements Display, Controller {
     private void setGameLayout() {
         //IF LAYOUT NEEDS CHANGES
     }
+
+    private void shutdown() {
+        this.mainMenuBlinkExecutorService.shutdownNow();
+        this.screen.stopScreen();
+    }
+
 
     private void showFrontPage() {
         screen = TerminalFacade.createScreen();
@@ -214,7 +229,7 @@ public class LanternaDisplayController implements Display, Controller {
         createScreenElements(titlePosX, titlePosY, title, Terminal.Color.WHITE);
         createScreenElements(tankPosX, tankPosY, tank, Terminal.Color.GREEN);
 
-        executorService.scheduleAtFixedRate(new Runnable() {
+        mainMenuBlinkExecutorService.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
 

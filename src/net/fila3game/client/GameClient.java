@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by chapa on 2/19/2017.
  */
-public class GameClient implements InputReceiver {
+public class GameClient implements GUIEventReceiver {
 
     private enum State {
         WAITING, CONNECTED,
@@ -52,8 +52,6 @@ public class GameClient implements InputReceiver {
 
     private int playerNumber = 0;
 
-    private boolean isConnected = false;
-
     private State state = State.WAITING;
 
     public GameClient() {
@@ -88,8 +86,6 @@ public class GameClient implements InputReceiver {
 
             this.scheduledExecutorService.scheduleAtFixedRate(new ServerReceiverWorker(),0, CLIENT_LISTEN_INTERVAL_MILLIS, TimeUnit.MILLISECONDS);
 
-            this.isConnected = true;
-
 
         } catch (UnknownHostException e) {
             //TODO no host
@@ -98,6 +94,27 @@ public class GameClient implements InputReceiver {
             //TODO failed connection error handling
             e.printStackTrace();
         }
+
+    }
+
+    private void disconnect() {
+
+        try {
+            this.reader.close();
+            this.writer.close();
+            this.socket.close();
+
+            this.normalExecutorService.shutdownNow();
+            this.scheduledExecutorService.shutdownNow();
+            this.incomingDatagramSocket.close();
+            this.outgoingDatagramSocket.close();
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("Disconnected");
 
     }
 
@@ -115,26 +132,36 @@ public class GameClient implements InputReceiver {
     }
 
     @Override
-    public void receiveInput(InputReceiver.Key key) {
+    public void receiveGUIEvent(GUIEvent event) {
 
-        synchronized (this) {
-            if (this.state == State.WAITING) {
+//        if (event == null) {
+//            return;
+//        }
+
+        System.out.println(event.getType());
+
+        switch (event.getType()) {
+
+            case CLIENT_CONNECT_SERVER:
                 this.connect("localhost");
                 this.state = State.CONNECTED;
-                return;
-            }
+                break;
+            case CLIENT_DISCONNECT_SERVER:
+                this.disconnect();
+                this.state = State.WAITING;
+                break;
+            case CLIENT_KEYBOARD_INPUT:
+                ServerSenderWorker s = new ServerSenderWorker(this.multiplyCommands(this.constructInstructionString(event.getKey())));
+                this.normalExecutorService.execute(s);
+                break;
         }
 
 
-        if (key == null) {
-            return;
-        }
-
-        this.normalExecutorService.execute(new ServerSenderWorker(this.multiplyCommands(this.constructInstructionString(key))));
 
     }
 
-    private String constructInstructionString(InputReceiver.Key key) {
+
+    private String constructInstructionString(GUIEvent.Key key) {
         String result = this.playerNumber + "";
 
         result = this.appendMovementInstruction(result, key);
@@ -143,7 +170,7 @@ public class GameClient implements InputReceiver {
     }
 
 
-    public String appendMovementInstruction(String base, InputReceiver.Key key) {
+    public String appendMovementInstruction(String base, GUIEvent.Key key) {
 
 
         switch (key) {
@@ -165,7 +192,7 @@ public class GameClient implements InputReceiver {
         return base;
     }
 
-    public String appendShootInstruction(String base, InputReceiver.Key key) {
+    public String appendShootInstruction(String base, GUIEvent.Key key) {
         switch (key) {
             case KEY_SPACE:
                 return base + " " + Instruction.Type.S;
