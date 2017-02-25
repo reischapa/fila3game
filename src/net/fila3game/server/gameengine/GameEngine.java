@@ -41,7 +41,8 @@ public class GameEngine {
     private int numberOfTanks;
     private LinkedList<Tank> tankList;
     private LinkedList<Bullet> bullets;
-    private static final Field EMPTYMASK = new Field(RepresentationFactory.TANK_WIDTH,RepresentationFactory.TANK_HEIGHT);
+    private final Field EMPTYMASK = new Field(RepresentationFactory.TANK_WIDTH,RepresentationFactory.TANK_HEIGHT);
+    private final Field EMPTYBULLET = new Field(1,1);
 
 
     public GameEngine(Field battlefield){
@@ -171,7 +172,7 @@ public class GameEngine {
 
                 System.out.println("colidiu");
                 battlefield.addField(EMPTYMASK,t.getX(), t.getY());
-                battlefield.addField(new Field(1,1),bullet.getX(),bullet.getY());
+                battlefield.addField(EMPTYBULLET,bullet.getX(),bullet.getY());
                 tankList.remove(t);
                 t.die();
                 bullet.die();
@@ -187,6 +188,8 @@ public class GameEngine {
             if(otherbullet.getPlayer() != bullet.getPlayer()){
                 if(checkBulletCollision(otherbullet)){
                     System.out.println("bullet on bullet collision");
+                    battlefield.addField(EMPTYBULLET,bullet.getX(), bullet.getY());
+                    battlefield.addField(EMPTYBULLET,otherbullet.getX(), otherbullet.getY());
                     bullet.die();
                     otherbullet.die();
                     bullets.remove(bullet);
