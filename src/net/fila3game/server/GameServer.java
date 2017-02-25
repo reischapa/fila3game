@@ -126,9 +126,10 @@ public class GameServer {
                     int playerNumber = this.addGameEnginePlayerReference();
 
                     if (playerNumber < 1) {
-                        Thread.sleep(1000);
-                        this.run();
-                        return;
+//                        Thread.sleep(1000);
+//                        this.run();
+//                        return;
+                        throw new IOException();
                     }
 
                     System.out.println(playerNumber);
@@ -143,7 +144,7 @@ public class GameServer {
                 } catch (IOException e) {
                     e.printStackTrace();
                     this.safelyShutdownClientConnection();
-                } catch (InterruptedException e) {
+//                } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
 

@@ -224,6 +224,9 @@ public class GameClient implements GUIEventReceiver {
 
     public String appendMovementInstruction(String base, GUIEvent.Key key) {
 
+        if (key == null) {
+            return base;
+        }
 
         switch (key) {
             case KEY_ARROWDOWN:
@@ -245,6 +248,11 @@ public class GameClient implements GUIEventReceiver {
     }
 
     public String appendShootInstruction(String base, GUIEvent.Key key) {
+
+        if (key == null) {
+            return base;
+        }
+
         switch (key) {
             case KEY_SPACE:
                 return base + " " + Instruction.Type.S;
