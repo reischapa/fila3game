@@ -7,6 +7,7 @@ import net.fila3game.server.gameengine.gameobjects.RepresentationFactory;
 import net.fila3game.server.gameengine.gameobjects.Tank;
 import net.jchapa.chapautils.RandomGen;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 
 import static net.fila3game.server.gameengine.gameobjects.RepresentationFactory.Orientation.NORTH;
@@ -306,9 +307,16 @@ public class GameEngine {
             return;
         }
 
-        Tank last = this.tankList.getLast();
-        this.battlefield.addField(EMPTYMASK, last.getX(), last.getY());
-        this.tankList.remove(playerNumber - 1);
+
+
+        for (int i = 0; i < this.tankList.size(); i++) {
+            Tank t = this.tankList.get(i);
+
+            if (t.getPlayer() == playerNumber) {
+                this.tankList.remove(i);
+            }
+        }
+
         System.out.println("Tank removed");
     }
 
