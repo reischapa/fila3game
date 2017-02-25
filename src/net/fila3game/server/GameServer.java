@@ -64,33 +64,193 @@ public class GameServer {
             throw new IllegalStateException("no engine");
         }
 
-        this.incomingDatagramSocket = new DatagramSocket(RECEIVING_UDP_CONNECTION_PORT);
-        this.outgoingDatagramSocket = new DatagramSocket();
-
-        this.scheduledThreadPoolExecutor.scheduleAtFixedRate(new ClientBroadcastWorker(), 0, SEND_INTERVAL, TimeUnit.MILLISECONDS);
-        this.scheduledThreadPoolExecutor.scheduleAtFixedRate(new InstructionTableCleaner(), 0, GAME_ENGINE_SENDING_INTERVAL, TimeUnit.MILLISECONDS);
-
-        this.normalExecutorService.execute(new ClientReceiverWorker());
+        this.initializeUDPSockets();
+        this.scheduleGeneralUDPWorkers();
 
 
         while (true) {
-            Socket socket = this.serverSocket.accept();
-//            System.out.println("Server accepted connection");
-            this.normalExecutorService.execute(new ClientStatusWorker(socket));
+            this.acceptClient();
         }
 
     }
 
 
+    private void initializeUDPSockets() throws IOException{
+        this.incomingDatagramSocket = new DatagramSocket(RECEIVING_UDP_CONNECTION_PORT);
+        this.outgoingDatagramSocket = new DatagramSocket();
+    }
+
+
+    private void scheduleGeneralUDPWorkers() {
+        this.scheduledThreadPoolExecutor.scheduleAtFixedRate(new ClientBroadcastWorker(), 0, SEND_INTERVAL, TimeUnit.MILLISECONDS);
+        this.scheduledThreadPoolExecutor.scheduleAtFixedRate(new InstructionTableCleaner(), 0, GAME_ENGINE_SENDING_INTERVAL, TimeUnit.MILLISECONDS);
+        this.normalExecutorService.execute(new ClientReceiverWorker());
+    }
+
+
+
+    private void acceptClient() throws IOException {
+        Socket socket = this.serverSocket.accept();
+//            System.out.println("Server accepted connection");
+        this.normalExecutorService.execute(new ClientStatusWorker(socket));
+    }
+
     public void setEngine(GameEngine engine) {
         this.engine = engine;
     }
 
+    private class ClientStatusWorker implements Runnable {
+
+        private Socket socket;
+        private InetAddress clientIPAddress;
+
+        private BufferedReader reader;
+        private BufferedWriter writer;
+
+        private ExecutorService heartbeatExecutor;
+
+        private String identifier;
+
+        public ClientStatusWorker(Socket socket) throws UnknownHostException, IOException {
+            this.socket = socket;
+            this.clientIPAddress = InetAddress.getByName(socket.getInetAddress().toString().substring(1));
+            this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), STRING_ENCODING));
+            this.writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), STRING_ENCODING));
+        }
+
+
+
+        @Override
+        public void run() {
+
+                try {
+
+
+                    int playerNumber = this.addPlayerToEngine();
+
+                    if (playerNumber < 0) {
+                        this.handleGameFull();
+                    }
+
+                    System.out.println(playerNumber);
+
+                    this.constructClientIdentifier(playerNumber);
+
+                    this.tcpSend(playerNumber + "");
+
+                    this.registerSelfToActiveClientList();
+                    this.startHeartbeatReceiver();
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    this.safelyShutdownClientConnection();
+                }
+
+        }
+
+
+        private int addPlayerToEngine() {
+            return GameServer.this.engine.addTank();
+        }
+
+        private void removePlayerFromEngine(int playerNumber) {
+        }
+
+        private void handleGameFull() throws IOException {
+            throw new IOException("Game Full");
+            //TODO
+        }
+
+        private void constructClientIdentifier(int playerNumber) {
+            this.identifier = playerNumber + " " + this.clientIPAddress.toString().concat(" " + Long.toString(System.currentTimeMillis()));
+            System.out.println(this.identifier);
+        }
+
+        private void startHeartbeatReceiver() {
+            if (this.heartbeatExecutor == null) {
+                this.heartbeatExecutor = Executors.newFixedThreadPool(1);
+            }
+
+            this.heartbeatExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    while (true) {
+                        try {
+                            String heartBeat = ClientStatusWorker.this.tcpReceive();
+                            ClientStatusWorker.this.tcpSend(ClientStatusWorker.this.getHeartbeatMessage());
+                        } catch (IOException e) {
+                            ClientStatusWorker.this.safelyShutdownClientConnection();
+                            break;
+                        }
+                    }
+                }
+            });
+
+        }
+
+
+        private String getHeartbeatMessage() {
+            return "msg";
+        }
+
+        private void stopHeartbeatReceiver() {
+            if (this.heartbeatExecutor == null) {
+                return;
+            }
+
+            this.heartbeatExecutor.shutdownNow();
+        }
+
+        private void tcpSend(String msg) throws IOException {
+            this.writer.write(msg + "\n");
+            this.writer.flush();
+        }
+
+        public String tcpReceive() throws IOException {
+            return this.reader.readLine();
+        }
+
+        private void safelyShutdownClientConnection() {
+            this.deRegisterSelfFromActiveClientList();
+            this.stopHeartbeatReceiver();
+            this.safelyShutdownTCP();
+            System.out.println("Client " + this.identifier + " has disconnected.");
+        }
+
+
+        public void safelyShutdownTCP() {
+            try {
+                this.socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+
+        private boolean registerSelfToActiveClientList() {
+            return GameServer.this.currentClients.put(this.identifier, this) != null;
+        }
+
+        private void deRegisterSelfFromActiveClientList() {
+            GameServer.this.currentClients.remove(this.identifier);
+        }
+
+
+        public InetAddress getClientIPAddress() {
+            return clientIPAddress;
+        }
+
+
+    }
 
     private class ClientReceiverWorker implements Runnable {
 
         @Override
         public void run() {
+
+            if (GameServer.this.incomingDatagramSocket.isClosed()) {
+                return;
+            }
 
             try {
 
@@ -158,6 +318,10 @@ public class GameServer {
         @Override
         public void run() {
 
+            if (GameServer.this.outgoingDatagramSocket.isClosed()) {
+                return;
+            }
+
             Iterator<String> iterator = GameServer.this.currentClients.keySet().iterator();
 
             while (iterator.hasNext()) {
@@ -189,105 +353,6 @@ public class GameServer {
     }
 
 
-    private class ClientStatusWorker implements Runnable {
-
-        private Socket socket;
-        private InetAddress clientIPAddress;
-
-        private BufferedReader reader;
-        private BufferedWriter writer;
-
-        private String identifier;
-
-        public ClientStatusWorker(Socket socket) throws UnknownHostException, IOException {
-            this.socket = socket;
-            this.clientIPAddress = InetAddress.getByName(socket.getInetAddress().toString().substring(1));
-            this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), STRING_ENCODING));
-            this.writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), STRING_ENCODING));
-        }
-
-        @Override
-        public void run() {
-
-
-
-            try {
-
-
-                int playerNumber = this.addPlayer();
-
-                if (playerNumber < 0) {
-                    this.handleGameFull();
-                }
-
-                System.out.println(playerNumber);
-
-                this.constructClientIdentifier(playerNumber);
-
-                this.send(playerNumber + "");
-
-                this.registerSelf();
-
-            } catch (IOException e) {
-                e.printStackTrace();
-                this.safelyShutdownClientConnection();
-            }
-
-
-        }
-
-        public void constructClientIdentifier(int playerNumber) {
-            this.identifier =  playerNumber + " " +  this.clientIPAddress.toString().concat(" " + Long.toString(System.currentTimeMillis()));
-            System.out.println(this.identifier);
-        }
-
-        public int addPlayer() {
-            return GameServer.this.engine.addTank();
-        }
-
-        public void handleGameFull() throws IOException{
-            throw new IOException("Game Full");
-            //TODO
-        }
-
-        public void send(String msg) throws IOException {
-            this.writer.write(msg + "\n");
-            this.writer.flush();
-        }
-
-        public void safelyShutdownClientConnection() {
-            this.deRegisterSelf();
-            this.safelyShutdownTCP();
-        }
-
-
-        public void safelyShutdownTCP() {
-            try {
-                this.socket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-
-        private boolean registerSelf() {
-            return GameServer.this.currentClients.put(this.identifier, this) != null;
-        }
-
-        private void deRegisterSelf() {
-            GameServer.this.currentClients.remove(this.identifier);
-        }
-
-        private String getKeepAliveMessage() {
-            return KEEPALIVE_MESSAGE;
-        }
-
-
-        public InetAddress getClientIPAddress() {
-            return clientIPAddress;
-        }
-
-    }
 
 
     private class InstructionTableCleaner implements Runnable {
