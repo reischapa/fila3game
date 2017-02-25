@@ -33,7 +33,7 @@ public class GameClient implements GUIEventReceiver {
         ln.setInputReceiver(gc);
         gc.setDisplay(ln);
         ln.init();
-        gc.connect("192.168.0.132");
+//        gc.connect("192.168.0.132");
 
     }
 
@@ -145,7 +145,7 @@ public class GameClient implements GUIEventReceiver {
         switch (event.getType()) {
 
             case CLIENT_CONNECT_SERVER:
-                this.connect("192.168.0.118");
+                this.connect("localhost");
                 this.state = State.CONNECTED;
                 break;
             case CLIENT_DISCONNECT_SERVER:

@@ -170,6 +170,7 @@ public class LanternaDisplayController implements Display, Controller {
         System.out.println("got key! " + key);
         switch (key.getKind()) {
             case ArrowDown:
+
                 return GUIEvent.Key.KEY_ARROWDOWN;
             case ArrowLeft:
                 return GUIEvent.Key.KEY_ARROWLEFT;
@@ -262,7 +263,7 @@ public class LanternaDisplayController implements Display, Controller {
         screen.getTerminal().getTerminalSize().setRows(30);
         screen.setCursorPosition(99, 29);
         screen.getTerminal().setCursorVisible(false);
-        //TODO BACKGROUND SOUND - GIULIANO
+
 
         createScreenElements(titlePosX, titlePosY, title, Terminal.Color.WHITE);
         createScreenElements(tankPosX, tankPosY, tank, Terminal.Color.GREEN);
@@ -270,6 +271,7 @@ public class LanternaDisplayController implements Display, Controller {
         mainMenuBlinkExecutorService.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
+                //TODO BACKGROUND SOUND - GIULIANO
                 AudioManager.start("sound");
 
                 createScreenElements(messagePosX, messagePosY, message, Terminal.Color.YELLOW);
