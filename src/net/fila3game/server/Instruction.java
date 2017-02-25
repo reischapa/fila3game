@@ -19,6 +19,7 @@ public class Instruction {
     private Instruction.Type type;
 
     public Instruction(String in) {
+        System.out.println(in);
 
         String[] results = in.split(" ");
 

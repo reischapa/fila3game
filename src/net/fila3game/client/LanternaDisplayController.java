@@ -16,6 +16,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class LanternaDisplayController implements Display, Controller {
 
+    public static final int INPUT_SCAN_DELAY = 5;
+
     private enum State {
         MAIN_SCREEN, IN_GAME,
     }
@@ -219,6 +221,13 @@ public class LanternaDisplayController implements Display, Controller {
             GUIEvent.Key k;
 
             while (true) {
+
+                try {
+                    Thread.sleep(INPUT_SCAN_DELAY);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
                 key = screen.readInput();
 
                 if (key == null) {
