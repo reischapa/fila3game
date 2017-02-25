@@ -167,7 +167,8 @@ public class GameEngine {
 
             battlefield.addField(EMPTYMASK,t.getX(),t.getY());
 
-            if (checkTankCollision(t)) {
+            if (checkBulletCollision(t)) {
+
                 System.out.println("colidiu");
                 battlefield.addField(EMPTYMASK,t.getX(), t.getY());
                 battlefield.addField(new Field(1,1),bullet.getX(),bullet.getY());
@@ -178,10 +179,25 @@ public class GameEngine {
                 numberOfTanks--;
                 return;
             }
+
             battlefield.addField(t.getRepresentation(),t.getX(),t.getY());
         }
 
+        for(Bullet otherbullet : bullets){
+            if(otherbullet.getPlayer() != bullet.getPlayer()){
+                if(checkBulletCollision(otherbullet)){
+                    System.out.println("bullet on bullet collision");
+                    bullet.die();
+                    otherbullet.die();
+                    bullets.remove(bullet);
+                    bullets.remove(otherbullet);
+                    return;
+                }
+            }
+        }
+
         if(checkWallColistion(bullet)){
+
             System.out.println("bitch");
             Field wallField = new Field(1,1);
             wallField.set(0,0,'W');
@@ -207,6 +223,7 @@ public class GameEngine {
         }
 
         if(checkBulletCollision(tank)){
+            System.out.println("wtfboy");
 
             battlefield.addField(EMPTYMASK,tank.getX(), tank.getY());
             tankList.remove(tank);
@@ -314,6 +331,9 @@ public class GameEngine {
         for(int i = object.getX(); i < object.getX()+object.getWidth(); i++) {
 
             for(int j = object.getY(); j < object.getY()+object.getHeight(); j++) {
+
+                System.out.println(i);
+                System.out.println(j);
 
                 if (battlefield.get(i,j) == Tiletypes.BULLET_D.getSymbol() || battlefield.get(i,j) == Tiletypes.BULLET_U.getSymbol() ||
                         battlefield.get(i,j) == Tiletypes.BULLET_L.getSymbol() || battlefield.get(i,j) == Tiletypes.BULLET_R.getSymbol()) {
