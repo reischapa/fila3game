@@ -7,9 +7,6 @@ import net.fila3game.server.gameengine.Field;
  */
 public class RepresentationFactory {
 
-    public static final int TANK_WIDTH = 3;
-    public static final int TANK_HEIGHT = 3;
-
     public enum Orientation {
 
         NORTH, SOUTH, EAST, WEST
@@ -17,7 +14,7 @@ public class RepresentationFactory {
 
     public enum GameObjectType {
 
-        TANK, BULLET
+        TANK, BULLET, HEART, MINE
     }
 
 
@@ -31,22 +28,22 @@ public class RepresentationFactory {
                 switch (orientation) {
                     case NORTH:
                         fieldRepresentation = new Field(Tank.TANK_WIDTH, Tank.TANK_HEIGHT);
-                        fieldRepresentation.constructFromString("0T0\nT"+playerID+"T\nTTT");
+                        fieldRepresentation.constructFromString("0T0\nT" + playerID + "T\nTTT");
                         break;
 
                     case SOUTH:
                         fieldRepresentation = new Field(Tank.TANK_WIDTH, Tank.TANK_HEIGHT);
-                        fieldRepresentation.constructFromString("TTT\nT"+playerID+"T\n0T0");
+                        fieldRepresentation.constructFromString("TTT\nT" + playerID + "T\n0T0");
                         break;
 
                     case EAST:
                         fieldRepresentation = new Field(Tank.TANK_WIDTH, Tank.TANK_HEIGHT);
-                        fieldRepresentation.constructFromString("TT0\nT"+playerID+"T\nTT0");
+                        fieldRepresentation.constructFromString("TT0\nT" + playerID + "T\nTT0");
                         break;
 
                     case WEST:
                         fieldRepresentation = new Field(Tank.TANK_WIDTH, Tank.TANK_HEIGHT);
-                        fieldRepresentation.constructFromString("0TT\nT"+playerID+"T\n0TT");
+                        fieldRepresentation.constructFromString("0TT\nT" + playerID + "T\n0TT");
                         break;
 
                     default:
@@ -81,7 +78,18 @@ public class RepresentationFactory {
                         System.out.println("Something went terribly wrong");
                 }
                 break;
+            case HEART:
+                fieldRepresentation = new Field(Heart.HEART_WIDTH, Heart.HEART_HEIGHT);
+                fieldRepresentation.constructFromString("♥♥♥♥");
+                break;
+            case MINE:
+                fieldRepresentation = new Field(Mine.MINE_WIDTH, Mine.MINE_HEIGHT);
+                fieldRepresentation.constructFromString("@@@@");
+                break;
+            default:
+                System.out.println("Something went terribly wrong");
         }
+
         return fieldRepresentation;
     }
 

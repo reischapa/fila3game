@@ -77,12 +77,9 @@ public class Tank implements GameObject {
 
     @Override
     public void die() {
-        if(alive){
+        if (alive) {
             alive = false;
         }
     }
 
-    public void setPlayer(int player) {
-        this.player = player;
-    }
 }

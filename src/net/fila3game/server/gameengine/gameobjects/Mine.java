@@ -3,25 +3,25 @@ package net.fila3game.server.gameengine.gameobjects;
 import net.fila3game.server.gameengine.Field;
 
 /**
- * Created by codecadet on 2/21/17.
+ * Created by codecadet on 2/25/17.
  */
-public class Bullet implements GameObject {
+public class Mine implements GameObject {
 
-    public static final int BULLET_HEIGHT = 1;
-    public static final int BULLET_WIDTH = 1;
+    public static final int MINE_WIDTH = 2;
+    public static final int MINE_HEIGHT = 2;
 
     private int player;
     private int x;
     private int y;
-    private RepresentationFactory.Orientation orientation;
+    private RepresentationFactory.Orientation defaultOrientation;
     private boolean alive;
 
-    public Bullet(int player, int x, int y, RepresentationFactory.Orientation orientation) {
-        this.player = player;
+    public Mine(int x, int y) {
         this.x = x;
         this.y = y;
-        this.orientation = orientation;
-        this.alive = true;
+        player = 0;
+        defaultOrientation = RepresentationFactory.Orientation.NORTH;
+        alive = true;
     }
 
     @Override
@@ -41,7 +41,7 @@ public class Bullet implements GameObject {
 
     @Override
     public Field getRepresentation() {
-        return RepresentationFactory.returnRepresentation(this.orientation, RepresentationFactory.GameObjectType.BULLET, String.valueOf(player));
+        return RepresentationFactory.returnRepresentation(defaultOrientation, RepresentationFactory.GameObjectType.MINE, String.valueOf(player));
     }
 
     @Override
@@ -52,22 +52,22 @@ public class Bullet implements GameObject {
 
     @Override
     public void setOrientation(RepresentationFactory.Orientation orientation) {
-        this.orientation = orientation;
+        defaultOrientation = orientation;
     }
 
     @Override
     public RepresentationFactory.Orientation getOrientation() {
-        return this.orientation;
+        return defaultOrientation;
     }
 
     @Override
     public int getHeight() {
-        return BULLET_HEIGHT;
+        return MINE_HEIGHT;
     }
 
     @Override
     public int getWidth() {
-        return BULLET_WIDTH;
+        return MINE_WIDTH;
     }
 
     @Override
