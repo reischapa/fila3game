@@ -4,6 +4,7 @@ import com.googlecode.lanterna.TerminalFacade;
 import com.googlecode.lanterna.input.Key;
 import com.googlecode.lanterna.terminal.Terminal;
 import com.googlecode.lanterna.screen.Screen;
+import net.fila3game.AudioManager;
 
 import java.util.Scanner;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -62,6 +63,7 @@ public class LanternaDisplayController implements Display, Controller {
     private State state = State.MAIN_SCREEN;
 
     public void init() {
+        AudioManager.load(new String[]{"sound", /* TODO MORE SOUNDS HERE - GIULIANO */});
         showFrontPage();
 
         Thread t = new Thread(new KeyListener());
@@ -187,8 +189,10 @@ public class LanternaDisplayController implements Display, Controller {
     private GUIEvent.Key getNormalKeyCharacter(Key key) {
         switch (key.getCharacter()) {
             case ' ':
+                AudioManager.start("sound");
                 return GUIEvent.Key.KEY_SPACE;
             case 'q':
+                //TODO MORE SOUNDS - GIULIANO
                 return GUIEvent.Key.KEY_Q;
             case 'r':
                 return GUIEvent.Key.KEY_R;
@@ -258,6 +262,7 @@ public class LanternaDisplayController implements Display, Controller {
         screen.getTerminal().getTerminalSize().setRows(30);
         screen.setCursorPosition(99, 29);
         screen.getTerminal().setCursorVisible(false);
+        //TODO BACKGROUND SOUND - GIULIANO
 
         createScreenElements(titlePosX, titlePosY, title, Terminal.Color.WHITE);
         createScreenElements(tankPosX, tankPosY, tank, Terminal.Color.GREEN);
@@ -265,6 +270,7 @@ public class LanternaDisplayController implements Display, Controller {
         mainMenuBlinkExecutorService.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
+                AudioManager.start("sound");
 
                 createScreenElements(messagePosX, messagePosY, message, Terminal.Color.YELLOW);
                 screen.refresh();

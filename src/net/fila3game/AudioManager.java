@@ -24,12 +24,12 @@ public class AudioManager {
                 soundClips.put(soundName, AudioSystem.getClip());
 
                 // load sound from jar
-                String pathStr = "/res/" + soundName.toString() + ".wav";
+                String pathStr = "/resources/" + soundName.toString() + ".wav";
                 URL soundURL = AudioManager.class.getResource(pathStr);
 
                 if (soundURL == null) {
                     // load sound from source code
-                    File file = new File("res/" + soundName.toString() + ".wav");
+                    File file = new File("resources/" + soundName.toString() + ".wav");
                     soundURL = file.toURI().toURL();
                 }
 
