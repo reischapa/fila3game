@@ -14,11 +14,14 @@ public class Bullet implements GameObject {
     private int x;
     private int y;
     private RepresentationFactory.Orientation orientation;
+    private boolean alive;
 
-    public Bullet(int player, int x, int y) {
+    public Bullet(int player, int x, int y, RepresentationFactory.Orientation orientation) {
         this.player = player;
         this.x = x;
         this.y = y;
+        this.orientation = orientation;
+        this.alive = true;
     }
 
     @Override
@@ -38,7 +41,7 @@ public class Bullet implements GameObject {
 
     @Override
     public Field getRepresentation() {
-        return RepresentationFactory.returnRepresentation(this.orientation, RepresentationFactory.GameObjectType.BULLET);
+        return RepresentationFactory.returnRepresentation(this.orientation, RepresentationFactory.GameObjectType.BULLET,String.valueOf(player));
     }
 
     @Override
@@ -53,6 +56,11 @@ public class Bullet implements GameObject {
     }
 
     @Override
+    public RepresentationFactory.Orientation getOrientation() {
+        return this.orientation;
+    }
+
+    @Override
     public int getHeight() {
         return BULLET_HEIGHT;
     }
@@ -60,5 +68,17 @@ public class Bullet implements GameObject {
     @Override
     public int getWidth() {
         return BULLET_WIDTH;
+    }
+
+    @Override
+    public boolean isAlive() {
+        return alive;
+    }
+
+    @Override
+    public void die() {
+        if(alive){
+            alive = false;
+        }
     }
 }

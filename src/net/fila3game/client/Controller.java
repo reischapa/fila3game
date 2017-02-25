@@ -5,6 +5,6 @@ package net.fila3game.client;
  */
 public interface Controller {
 
-    void setInputReceiver(InputReceiver receiver);
+    void setInputReceiver(GUIEventReceiver receiver);
 
 }

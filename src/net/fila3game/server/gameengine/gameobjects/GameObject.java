@@ -19,8 +19,14 @@ public interface GameObject {
 
     void setOrientation(RepresentationFactory.Orientation orientation);
 
+    RepresentationFactory.Orientation getOrientation();
+
     int getHeight();
 
     int getWidth();
+
+    boolean isAlive();
+
+    void die();
 
 }

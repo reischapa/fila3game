@@ -13,7 +13,12 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by chapa on 2/19/2017.
  */
-public class GameClient implements InputReceiver {
+public class GameClient implements GUIEventReceiver {
+
+    private enum State {
+        WAITING, CONNECTED,
+    }
+
 
     public static final int SERVER_TCP_CONNECTION_PORT = 8080;
     public static final int RECEIVING_UDP_CONNECTION_PORT = 55356;
@@ -29,6 +34,7 @@ public class GameClient implements InputReceiver {
         gc.setDisplay(ln);
         ln.init();
         gc.connect("192.168.0.132");
+
     }
 
     private Display display;
@@ -48,12 +54,16 @@ public class GameClient implements InputReceiver {
 
     private int playerNumber = 0;
 
-    private boolean isConnected = false;
+    private State state = State.WAITING;
 
     public GameClient() {
     }
 
     public void connect(String address) {
+
+        if (this.state == State.CONNECTED) {
+            return;
+        }
 
 
         try {
@@ -78,8 +88,6 @@ public class GameClient implements InputReceiver {
 
             this.scheduledExecutorService.scheduleAtFixedRate(new ServerReceiverWorker(),0, CLIENT_LISTEN_INTERVAL_MILLIS, TimeUnit.MILLISECONDS);
 
-            this.isConnected = true;
-
 
         } catch (UnknownHostException e) {
             //TODO no host
@@ -91,7 +99,28 @@ public class GameClient implements InputReceiver {
 
     }
 
-    private void handshake() {
+    private void disconnect() {
+
+        try {
+            this.reader.close();
+            this.writer.close();
+            this.socket.close();
+
+            this.normalExecutorService.shutdownNow();
+            this.scheduledExecutorService.shutdownNow();
+            this.incomingDatagramSocket.close();
+            this.outgoingDatagramSocket.close();
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("Disconnected");
+
+    }
+
+    private void receiveInitialConfiguration() throws IOException                                                                                                                                                                                       {
 
     }
 
@@ -105,29 +134,73 @@ public class GameClient implements InputReceiver {
     }
 
     @Override
-    public void receiveInput(InputReceiver.Key key) {
-        if (!this.isConnected) {
-            return;
+    public void receiveGUIEvent(GUIEvent event) {
+
+//        if (event == null) {
+//            return;
+//        }
+
+        System.out.println(event.getType());
+
+        switch (event.getType()) {
+
+            case CLIENT_CONNECT_SERVER:
+                this.connect("localhost");
+                this.state = State.CONNECTED;
+                break;
+            case CLIENT_DISCONNECT_SERVER:
+                this.disconnect();
+                this.state = State.WAITING;
+                break;
+            case CLIENT_KEYBOARD_INPUT:
+                ServerSenderWorker s = new ServerSenderWorker(this.multiplyCommands(this.constructInstructionString(event.getKey())));
+                this.normalExecutorService.execute(s);
+                break;
         }
 
-        String instruction = this.appendMovementInstruction(this.playerNumber + "", key);
 
-        this.normalExecutorService.execute(new ServerSenderWorker(this.multiplyCommands(instruction)));
 
     }
 
-    public String appendMovementInstruction(String base, InputReceiver.Key key) {
+
+    private String constructInstructionString(GUIEvent.Key key) {
+        String result = this.playerNumber + "";
+
+        result = this.appendMovementInstruction(result, key);
+        result = this.appendShootInstruction(result, key);
+        return result;
+    }
+
+
+    public String appendMovementInstruction(String base, GUIEvent.Key key) {
+
+
         switch (key) {
             case KEY_ARROWDOWN:
-                return base + " " + Instruction.Type.D.toString();
+                base = base + " " + Instruction.Type.D.toString();
+                break;
             case KEY_ARROWRIGHT:
-                return base + " " + Instruction.Type.R.toString();
+                base = base + " " + Instruction.Type.R.toString();
+                break;
             case KEY_ARROWUP:
-                return base + " " + Instruction.Type.U.toString();
+                base = base + " " + Instruction.Type.U.toString();
+                break;
             case KEY_ARROWLEFT:
-                return base + " " + Instruction.Type.L.toString();
+                base = base + " " + Instruction.Type.L.toString();
+                break;
             default:
-                throw new UnsupportedOperationException();
+        }
+
+        return base;
+    }
+
+    public String appendShootInstruction(String base, GUIEvent.Key key) {
+        switch (key) {
+            case KEY_SPACE:
+                return base + " " + Instruction.Type.S;
+            default:
+                return base;
+
         }
     }
 

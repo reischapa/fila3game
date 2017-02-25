@@ -21,7 +21,7 @@ public class RepresentationFactory {
     }
 
 
-    public static Field returnRepresentation(Orientation orientation, GameObjectType objectType) {
+    public static Field returnRepresentation(Orientation orientation, GameObjectType objectType, String playerID) {
 
         Field fieldRepresentation = null;
 
@@ -31,22 +31,22 @@ public class RepresentationFactory {
                 switch (orientation) {
                     case NORTH:
                         fieldRepresentation = new Field(Tank.TANK_WIDTH, Tank.TANK_HEIGHT);
-                        fieldRepresentation.constructFromString("0T0\nTTT\nTTT");
+                        fieldRepresentation.constructFromString("0T0\nT"+playerID+"T\nTTT");
                         break;
 
                     case SOUTH:
                         fieldRepresentation = new Field(Tank.TANK_WIDTH, Tank.TANK_HEIGHT);
-                        fieldRepresentation.constructFromString("TTT\nTTT\n0T0");
+                        fieldRepresentation.constructFromString("TTT\nT"+playerID+"T\n0T0");
                         break;
 
                     case EAST:
                         fieldRepresentation = new Field(Tank.TANK_WIDTH, Tank.TANK_HEIGHT);
-                        fieldRepresentation.constructFromString("TT0\nTTT\nTT0");
+                        fieldRepresentation.constructFromString("TT0\nT"+playerID+"T\nTT0");
                         break;
 
                     case WEST:
                         fieldRepresentation = new Field(Tank.TANK_WIDTH, Tank.TANK_HEIGHT);
-                        fieldRepresentation.constructFromString("0TT\nTTT\n0TT");
+                        fieldRepresentation.constructFromString("0TT\nT"+playerID+"T\n0TT");
                         break;
 
                     default:

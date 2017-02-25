@@ -2,9 +2,7 @@ package net.fila3game.client;
 
 import com.googlecode.lanterna.TerminalFacade;
 import com.googlecode.lanterna.input.Key;
-import com.googlecode.lanterna.screen.ScreenWriter;
 import com.googlecode.lanterna.terminal.Terminal;
-import net.fila3game.server.gameengine.Field;
 import com.googlecode.lanterna.screen.Screen;
 
 import java.util.Scanner;
@@ -17,11 +15,12 @@ import java.util.concurrent.TimeUnit;
  */
 public class LanternaDisplayController implements Display, Controller {
 
-    public static void main(String[] args) {
-        LanternaDisplayController d = new LanternaDisplayController();
-        Field f = new Field(10, 10);
-//        d.receiveData(new GameState(f.returnAsString()));
-        d.init();
+    private enum State {
+        MAIN_SCREEN, IN_GAME,
+    }
+
+    public LanternaDisplayController() {
+        this.mainMenuBlinkExecutorService = new ScheduledThreadPoolExecutor(2);
     }
 
     private static final String title =
@@ -49,6 +48,7 @@ public class LanternaDisplayController implements Display, Controller {
                     "╔═╗╦═╗╔═╗╔═╗╔═╗  ╔═╗╔╗╔╦ ╦  ╦╔═╔═╗╦ ╦  ╔╦╗╔═╗  ╔═╗╔╦╗╔═╗╦═╗╔╦╗\n" +
                     "╠═╝╠╦╝║╣ ╚═╗╚═╗  ╠═╣║║║╚╦╝  ╠╩╗║╣ ╚╦╝   ║ ║ ║  ╚═╗ ║ ╠═╣╠╦╝ ║ \n" +
                     "╩  ╩╚═╚═╝╚═╝╚═╝  ╩ ╩╝╚╝ ╩   ╩ ╩╚═╝ ╩    ╩ ╚═╝  ╚═╝ ╩ ╩ ╩╩╚═ ╩ ";
+
     private static final int titlePosX = 5;
     private static final int titlePosY = 5;
     private static final int tankPosX = 70;
@@ -56,24 +56,17 @@ public class LanternaDisplayController implements Display, Controller {
     private static final int messagePosX = 5;
     private static final int messagePosY = 20;
 
-
-    private InputReceiver receiver;
+    private ScheduledThreadPoolExecutor mainMenuBlinkExecutorService;
+    private GUIEventReceiver receiver;
     private Screen screen;
+    private State state = State.MAIN_SCREEN;
 
     public void init() {
-        screen = TerminalFacade.createScreen();
-        screen.getTerminal().getTerminalSize().setColumns(60);
-        screen.getTerminal().getTerminalSize().setRows(30);
-
-        screen.getTerminal().setCursorVisible(false);
-        ScreenWriter screenWriter = new ScreenWriter(screen);
-        screenWriter.setBackgroundColor(Terminal.Color.BLUE);
-        screenWriter.setForegroundColor(Terminal.Color.WHITE);
-
-        screen.startScreen();
+        showFrontPage();
 
         Thread t = new Thread(new KeyListener());
         t.start();
+
     }
 
     @Override
@@ -103,56 +96,97 @@ public class LanternaDisplayController implements Display, Controller {
             case 'T':
                 back = Terminal.Color.BLACK;
                 front = Terminal.Color.GREEN;
-                actualChar = 'T';
+                actualChar = ' ';
                 break;
-            case 'B':
+            case 'A':
                 back = Terminal.Color.BLACK;
                 front = Terminal.Color.MAGENTA;
-                actualChar = 'B';
+                actualChar = 'A';
+                break;
+            case 'V':
+                back = Terminal.Color.BLACK;
+                front = Terminal.Color.MAGENTA;
+                actualChar = 'V';
+                break;
+            case '<':
+                back = Terminal.Color.BLACK;
+                front = Terminal.Color.MAGENTA;
+                actualChar = '<';
+                break;
+            case '>':
+                back = Terminal.Color.BLACK;
+                front = Terminal.Color.MAGENTA;
+                actualChar = '>';
                 break;
             case 'W':
                 back = Terminal.Color.BLACK;
                 front = Terminal.Color.BLUE;
-                actualChar = 'W';
+                actualChar = '|';
                 break;
             case '0':
                 back = Terminal.Color.BLACK;
                 front = Terminal.Color.BLACK;
                 actualChar = ' ';
                 break;
+            case '1':
+                back = Terminal.Color.BLACK;
+                front = Terminal.Color.GREEN;
+                actualChar = '1';
+                break;
+            case '2':
+                back = Terminal.Color.BLACK;
+                front = Terminal.Color.GREEN;
+                actualChar = '2';
+                break;
+            case '3':
+                back = Terminal.Color.BLACK;
+                front = Terminal.Color.GREEN;
+                actualChar = '3';
+                break;
+            case '4':
+                back = Terminal.Color.BLACK;
+                front = Terminal.Color.GREEN;
+                actualChar = '4';
+                break;
+
         }
         this.screen.putString(x, y, "" + actualChar + actualChar, back, front);
     }
 
-    private InputReceiver.Key translateKey(Key key) {
+    private GUIEvent.Key translateKey(Key key) {
         System.out.println("got key! " + key);
         switch (key.getKind()) {
             case ArrowDown:
-                return InputReceiver.Key.KEY_ARROWDOWN;
+                return GUIEvent.Key.KEY_ARROWDOWN;
             case ArrowLeft:
-                return InputReceiver.Key.KEY_ARROWLEFT;
+                return GUIEvent.Key.KEY_ARROWLEFT;
             case ArrowUp:
-                return InputReceiver.Key.KEY_ARROWUP;
+                return GUIEvent.Key.KEY_ARROWUP;
             case ArrowRight:
-                return InputReceiver.Key.KEY_ARROWRIGHT;
+                return GUIEvent.Key.KEY_ARROWRIGHT;
             case NormalKey:
                 return getNormalKeyCharacter(key);
+        }
+
+        return null;
+    }
+
+    private GUIEvent.Key getNormalKeyCharacter(Key key) {
+        switch (key.getCharacter()) {
+            case ' ':
+                return GUIEvent.Key.KEY_SPACE;
+            case 'q':
+                return GUIEvent.Key.KEY_Q;
+            case 'r':
+                return GUIEvent.Key.KEY_R;
         }
 
         System.err.println("Keystroke is not mapped, returning null...");
         return null;
     }
 
-    private InputReceiver.Key getNormalKeyCharacter(Key key) {
-        switch (key.getCharacter()) {
-            case ' ':
-                return InputReceiver.Key.KEY_SPACE;
-        }
-        return null;
-    }
-
     @Override
-    public void setInputReceiver(InputReceiver receiver) {
+    public void setInputReceiver(GUIEventReceiver receiver) {
         this.receiver = receiver;
     }
 
@@ -161,7 +195,7 @@ public class LanternaDisplayController implements Display, Controller {
         @Override
         public void run() {
             Key key;
-            InputReceiver.Key k;
+            GUIEvent.Key k;
 
             while (true) {
                 key = screen.readInput();
@@ -170,27 +204,50 @@ public class LanternaDisplayController implements Display, Controller {
                     continue;
                 }
 
+                if (LanternaDisplayController.this.state == State.MAIN_SCREEN) {
+                    LanternaDisplayController.this.setGameLayout();
+                    LanternaDisplayController.this.mainMenuBlinkExecutorService.shutdownNow();
+                    LanternaDisplayController.this.state = State.IN_GAME;
+                    receiver.receiveGUIEvent(GUIEvent.connect());
+                    continue;
+                }
+
                 k = translateKey(key);
 
+                if (k == GUIEvent.Key.KEY_Q) {
+                    receiver.receiveGUIEvent(GUIEvent.disconnect());
+                    LanternaDisplayController.this.shutdown();
+                    return;
+                }
+
                 System.out.println("key " + k + " pressed!");
-                receiver.receiveInput(k);
+                receiver.receiveGUIEvent(GUIEvent.keyboardInput(k));
 
             }
         }
     }
 
-    private void showFrontPage() {
+    private void setGameLayout() {
+        //IF LAYOUT NEEDS CHANGES
+    }
 
+    private void shutdown() {
+        this.mainMenuBlinkExecutorService.shutdownNow();
+        this.screen.stopScreen();
+    }
+
+    private void showFrontPage() {
         screen = TerminalFacade.createScreen();
         screen.startScreen();
+        screen.getTerminal().getTerminalSize().setColumns(100);
+        screen.getTerminal().getTerminalSize().setRows(30);
         screen.setCursorPosition(99, 29);
+        screen.getTerminal().setCursorVisible(false);
 
         createScreenElements(titlePosX, titlePosY, title, Terminal.Color.WHITE);
         createScreenElements(tankPosX, tankPosY, tank, Terminal.Color.GREEN);
 
-        ScheduledThreadPoolExecutor executorService = new ScheduledThreadPoolExecutor(1);
-
-        executorService.scheduleAtFixedRate(new Runnable() {
+        mainMenuBlinkExecutorService.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
 
@@ -208,13 +265,6 @@ public class LanternaDisplayController implements Display, Controller {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                }
-
-                Key key = screen.readInput();
-
-                if (key != null) {
-                    executorService.shutdownNow();
-                    screen.clear();
                 }
             }
         }, 0, 500, TimeUnit.MILLISECONDS);
