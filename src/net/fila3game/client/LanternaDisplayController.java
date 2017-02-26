@@ -73,6 +73,57 @@ public class LanternaDisplayController implements Display, Controller {
                     "      ░       ░  ░       ░      ░  ░       ░ ░        ░     ░  ░   ░     \n" +
                     "                                                     ░                   \n";
 
+    private static final String credits =
+            " ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄   ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄ \n" +
+                    "▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░▌ ▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌\n" +
+                    "▐░█▀▀▀▀▀▀▀▀▀ ▐░█▀▀▀▀▀▀▀█░▌▐░█▀▀▀▀▀▀▀▀▀ ▐░█▀▀▀▀▀▀▀█░▌ ▀▀▀▀█░█▀▀▀▀  ▀▀▀▀█░█▀▀▀▀ ▐░█▀▀▀▀▀▀▀▀▀ \n" +
+                    "▐░▌          ▐░▌       ▐░▌▐░▌          ▐░▌       ▐░▌     ▐░▌          ▐░▌     ▐░▌          \n" +
+                    "▐░▌          ▐░█▄▄▄▄▄▄▄█░▌▐░█▄▄▄▄▄▄▄▄▄ ▐░▌       ▐░▌     ▐░▌          ▐░▌     ▐░█▄▄▄▄▄▄▄▄▄ \n" +
+                    "▐░▌          ▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░▌       ▐░▌     ▐░▌          ▐░▌     ▐░░░░░░░░░░░▌\n" +
+                    "▐░▌          ▐░█▀▀▀▀█░█▀▀ ▐░█▀▀▀▀▀▀▀▀▀ ▐░▌       ▐░▌     ▐░▌          ▐░▌      ▀▀▀▀▀▀▀▀▀█░▌\n" +
+                    "▐░▌          ▐░▌     ▐░▌  ▐░▌          ▐░▌       ▐░▌     ▐░▌          ▐░▌               ▐░▌\n" +
+                    "▐░█▄▄▄▄▄▄▄▄▄ ▐░▌      ▐░▌ ▐░█▄▄▄▄▄▄▄▄▄ ▐░█▄▄▄▄▄▄▄█░▌ ▄▄▄▄█░█▄▄▄▄      ▐░▌      ▄▄▄▄▄▄▄▄▄█░▌\n" +
+                    "▐░░░░░░░░░░░▌▐░▌       ▐░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░▌ ▐░░░░░░░░░░░▌     ▐░▌     ▐░░░░░░░░░░░▌\n" +
+                    " ▀▀▀▀▀▀▀▀▀▀▀  ▀         ▀  ▀▀▀▀▀▀▀▀▀▀▀  ▀▀▀▀▀▀▀▀▀▀   ▀▀▀▀▀▀▀▀▀▀▀       ▀       ▀▀▀▀▀▀▀▀▀▀▀ ";
+
+    private static final String creditsMessage =
+            "╔═╗╦═╗╔═╗╔═╗╦═╗╔═╗╔╦╗╔╦╗╔═╗╦═╗╔═╗\n" +
+                    "╠═╝╠╦╝║ ║║ ╦╠╦╝╠═╣║║║║║║║╣ ╠╦╝╚═╗\n" +
+                    "╩  ╩╚═╚═╝╚═╝╩╚═╩ ╩╩ ╩╩ ╩╚═╝╩╚═╚═╝";
+
+    private static final String chapa =
+            "╔═╗┬ ┬┌─┐┌─┐┌─┐\n" +
+                    "║  ├─┤├─┤├─┘├─┤\n" +
+                    "╚═╝┴ ┴┴ ┴┴  ┴ ┴";
+
+    private static final String luizord =
+            "╦  ┬ ┬┬┌─┐┌─┐┬─┐┌┬┐\n" +
+                    "║  │ ││┌─┘│ │├┬┘ ││\n" +
+                    "╩═╝└─┘┴└─┘└─┘┴└──┴┘";
+
+    private static final String ruben =
+            "╦═╗┬ ┬┌┐ ┌─┐┌┐┌\n" +
+                    "╠╦╝│ │├┴┐├┤ │││\n" +
+                    "╩╚═└─┘└─┘└─┘┘└┘";
+
+    private static final String giuli =
+            "╔═╗┬┬ ┬┬  ┬┌─┐┌┐┌┌─┐\n" +
+                    "║ ╦││ ││  │├─┤││││ │\n" +
+                    "╚═╝┴└─┘┴─┘┴┴ ┴┘└┘└─┘\n";
+
+    private static final int creditsX = 5;
+    private static final int creditsY = 2;
+    private static final int programmersX = 5;
+    private static final int programmersY = 12;
+    private static final int chapaX = 5;
+    private static final int chapaY = 17;
+    private static final int luisX = 5;
+    private static final int luisY = 23;
+    private static final int rubenX = 55;
+    private static final int rubenY = 17;
+    private static final int giuliX = 55;
+    private static final int giuliY = 23;
+
     private static final int titlePosX = 5;
     private static final int titlePosY = 5;
     private static final int tankPosX = 70;
@@ -325,7 +376,10 @@ public class LanternaDisplayController implements Display, Controller {
                         receiver.receiveGUIEvent(GUIEvent.connect());
                         continue;
                     case GAME_OVER:
+                        LanternaDisplayController.this.showCreditsScreen();
+                        continue;
                     case IN_GAME:
+                    case CREDITS:
 
                 }
 
@@ -400,7 +454,6 @@ public class LanternaDisplayController implements Display, Controller {
         }
 
         this.screen.clear();
-        System.out.println("Game Over");
 
         createScreenElements(titlePosX, titlePosY, gameOver, Terminal.Color.RED);
         createScreenElements(messagePosX, messagePosY, messageToRestart, Terminal.Color.YELLOW);
@@ -420,6 +473,25 @@ public class LanternaDisplayController implements Display, Controller {
         }
     }
 
+    private void showCreditsScreen() {
+
+        if (this.screen == null) {
+            this.initializeScreen();
+        }
+
+        this.screen.clear();
+
+        createScreenElements(creditsX, creditsY, credits, Terminal.Color.WHITE);
+        createScreenElements(programmersX, programmersY, creditsMessage, Terminal.Color.YELLOW);
+        createScreenElements(chapaX, chapaY, chapa, Terminal.Color.CYAN);
+        createScreenElements(luisX, luisY, luizord, Terminal.Color.CYAN);
+        createScreenElements(rubenX, rubenY, ruben, Terminal.Color.CYAN);
+        createScreenElements(giuliX, giuliY, giuli, Terminal.Color.CYAN);
+
+        this.screen.refresh();
+        this.state = State.CREDITS;
+    }
+
     private void showServerBusy() {
         createScreenElements(messagePosX, serverBusyY, serverBusy, Terminal.Color.RED);
     }
@@ -432,9 +504,6 @@ public class LanternaDisplayController implements Display, Controller {
         screen.setCursorPosition(99, 29);
         screen.getTerminal().setCursorVisible(false);
     }
-
-
-
 
 
 }
