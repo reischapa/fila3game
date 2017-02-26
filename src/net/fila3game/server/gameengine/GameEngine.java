@@ -11,7 +11,7 @@ import java.util.LinkedList;
 import static net.fila3game.server.gameengine.gameobjects.RepresentationFactory.Orientation.NORTH;
 
 /**
- * Created by codecadet on 2/21/17.
+ * Created by Luizord on 2/21/17.
  */
 public class GameEngine {
 
@@ -34,7 +34,7 @@ public class GameEngine {
             this.symbol = b;
         }
 
-        public char getSymbol(){
+        public char getSymbol() {
             return symbol;
         }
     }
@@ -43,39 +43,42 @@ public class GameEngine {
     private int numberOfTanks;
     private LinkedList<Tank> tankList;
     private LinkedList<Bullet> bullets;
-    private final Field EMPTYMASK = new Field(RepresentationFactory.TANK_WIDTH,RepresentationFactory.TANK_HEIGHT);
-    private final Field EMPTYBULLET = new Field(1,1);
+    private final Field EMPTYMASK = new Field(RepresentationFactory.TANK_WIDTH, RepresentationFactory.TANK_HEIGHT);
+    private final Field EMPTYBULLET = new Field(1, 1);
 
 
-    public GameEngine(Field battlefield){
+    public GameEngine(Field battlefield) {
 
         this.battlefield = battlefield;
-        numberOfTanks = 0;
-        tankList = new LinkedList<>();
-        bullets = new LinkedList<>();
+        this.numberOfTanks = 0;
+        this.tankList = new LinkedList<>();
+        this.bullets = new LinkedList<>();
 
     }
 
-    public GameEngine (){
+    public GameEngine() {
 
         this.battlefield = createDefaultField();
-        numberOfTanks = 0;
-        tankList = new LinkedList<>();
-        bullets = new LinkedList<>();
+        this.numberOfTanks = 0;
+        this.tankList = new LinkedList<>();
+        this.bullets = new LinkedList<>();
 
     }
 
     public synchronized void receiveInstruction(Instruction i) {
 
-        if (tankList.isEmpty()) {
+        if (this.tankList.isEmpty()) {
             return;
         }
 
         Tank tank = null;
 
-        for (int x =0; x < tankList.size(); x++) {
-            if (i.getPlayerNumber() == tankList.get(x).getPlayer()) {
-                tank = tankList.get(x);
+        for (int x = 0; x < this.tankList.size(); x++) {
+
+            if (i.getPlayerNumber() == this.tankList.get(x).getPlayer()) {
+
+                tank = this.tankList.get(x);
+
             }
         }
 
@@ -83,30 +86,38 @@ public class GameEngine {
             return;
         }
 
-        if(tank.isAlive()) {
+        if (tank.isAlive()) {
 
             if (i.getType().equals(Instruction.Type.R)) {
+
                 tank.setOrientation(RepresentationFactory.Orientation.EAST);
                 moveTank(tank, 1, 0);
 
             } else if (i.getType().equals(Instruction.Type.L)) {
+
                 tank.setOrientation(RepresentationFactory.Orientation.WEST);
                 moveTank(tank, -1, 0);
 
             } else if (i.getType().equals(Instruction.Type.U)) {
+
                 tank.setOrientation(NORTH);
                 moveTank(tank, 0, -1);
 
             } else if (i.getType().equals(Instruction.Type.D)) {
+
                 tank.setOrientation(RepresentationFactory.Orientation.SOUTH);
                 moveTank(tank, 0, 1);
 
             } else if (i.getType().equals(Instruction.Type.S)) {
 
-                if(!bulletExists(tank.getPlayer())) {
+                if (!bulletExists(tank.getPlayer())) {
+
                     Bullet bullet = createBullet(tank);
-                    if(bullet.isAlive()) {
-                        bullets.add(bullet);
+
+                    if (bullet.isAlive()) {
+
+                        this.bullets.add(bullet);
+
                     }
                 }
 
@@ -116,56 +127,64 @@ public class GameEngine {
     }
 
     private boolean bulletExists(int tankID) {
-        if(!bullets.isEmpty()) {
-            for (Bullet bullet : bullets) {
+
+        if (!this.bullets.isEmpty()) {
+
+            for (Bullet bullet : this.bullets) {
+
                 if (bullet.getPlayer() == tankID) {
+
                     return true;
+
                 }
             }
         }
+
         return false;
     }
 
-    private Bullet createBullet(Tank tank){
+    private Bullet createBullet(Tank tank) {
 
         Bullet bullet = null;
 
-        if(tank.getOrientation().equals(RepresentationFactory.Orientation.WEST)){
+        if (tank.getOrientation().equals(RepresentationFactory.Orientation.WEST)) {
 
-            bullet = new Bullet(tank.getPlayer(),tank.getX()-1,tank.getY()+1, RepresentationFactory.Orientation.WEST);
+            bullet = new Bullet(tank.getPlayer(), tank.getX() - 1, tank.getY() + 1, RepresentationFactory.Orientation.WEST);
 
-        }else if(tank.getOrientation().equals(RepresentationFactory.Orientation.EAST)){
+        } else if (tank.getOrientation().equals(RepresentationFactory.Orientation.EAST)) {
 
-            bullet = new Bullet(tank.getPlayer(),tank.getX()+3,tank.getY()+1, RepresentationFactory.Orientation.EAST);
+            bullet = new Bullet(tank.getPlayer(), tank.getX() + 3, tank.getY() + 1, RepresentationFactory.Orientation.EAST);
 
-        }else if(tank.getOrientation().equals(RepresentationFactory.Orientation.SOUTH)){
+        } else if (tank.getOrientation().equals(RepresentationFactory.Orientation.SOUTH)) {
 
-            bullet = new Bullet(tank.getPlayer(),tank.getX()+1,tank.getY()+3, RepresentationFactory.Orientation.SOUTH);
+            bullet = new Bullet(tank.getPlayer(), tank.getX() + 1, tank.getY() + 3, RepresentationFactory.Orientation.SOUTH);
 
-        }else {
+        } else {
 
-            bullet = new Bullet(tank.getPlayer(),tank.getX()+1,tank.getY()-1, NORTH);
+            bullet = new Bullet(tank.getPlayer(), tank.getX() + 1, tank.getY() - 1, NORTH);
 
         }
 
-        if(!checkWallCollision(bullet) && !checkBulletCollision(bullet)){
+        if (!checkWallCollision(bullet) && !checkBulletCollision(bullet)) {
 
-            battlefield.addField(bullet.getRepresentation(),bullet.getX(),bullet.getY());
+            this.battlefield.addField(bullet.getRepresentation(), bullet.getX(), bullet.getY());
 
-        }else{
+        } else {
+
             bullet.die();
+
         }
 
         return bullet;
     }
 
-    private synchronized void moveBullet(Bullet bullet){
+    private synchronized void moveBullet(Bullet bullet) {
 
-        battlefield.addField(new Field(1,1), bullet.getX(), bullet.getY());
+        this.battlefield.addField(new Field(1, 1), bullet.getX(), bullet.getY());
         int x = 0;
         int y = 0;
 
-        switch (bullet.getOrientation()){
+        switch (bullet.getOrientation()) {
             case NORTH:
                 y = -1;
                 break;
@@ -184,136 +203,96 @@ public class GameEngine {
                 break;
         }
 
-        if(bullet.getX()+x >= 0 && bullet.getY()+x < battlefield.getWidth()) {
+        if (bullet.getX() + x >= 0 && bullet.getY() + x < this.battlefield.getWidth()) {
+
             bullet.move(bullet.getX() + x, bullet.getY() + y);
-        }else{
-            Field wallField = new Field(1,1);
-            wallField.set(0,0,'W');
-            battlefield.addField(wallField,bullet.getX(), bullet.getY());
+
+        } else {
+
+            Field wallField = new Field(1, 1);
+            wallField.set(0, 0, 'W');
+            this.battlefield.addField(wallField, bullet.getX(), bullet.getY());
             bullet.die();
-            bullets.remove(bullet);
+            this.bullets.remove(bullet);
             return;
+
         }
-
-
-        //Does not work
 
         if (checkBulletTankCollision(bullet)) {
 
-            System.out.println("colidiu");
-            battlefield.addField(bullet.getRepresentation(),bullet.getX(),bullet.getY());
+            this.battlefield.addField(bullet.getRepresentation(), bullet.getX(), bullet.getY());
 
-            for(Tank t : tankList){
+            for (Tank t : this.tankList) {
 
-                if(checkBulletCollision(t)){
+                if (checkBulletCollision(t)) {
 
-                    if(bullet.getPlayer() != t.getPlayer()) {
+                    if (bullet.getPlayer() != t.getPlayer()) {
 
-                        System.out.println("gotcha bitch");
-                        battlefield.addField(EMPTYMASK, t.getX(), t.getY());
+                        this.battlefield.addField(this.EMPTYMASK, t.getX(), t.getY());
                         t.die();
-                        tankList.remove(t);
-                        numberOfTanks--;
+                        this.tankList.remove(t);
+                        this.numberOfTanks--;
+
                     }
                 }
             }
 
-            battlefield.addField(EMPTYBULLET,bullet.getX(),bullet.getY());
+            this.battlefield.addField(this.EMPTYBULLET, bullet.getX(), bullet.getY());
             bullet.die();
-            bullets.remove(bullet);
+            this.bullets.remove(bullet);
             return;
 
         }
 
-        for(Bullet otherbullet : bullets){
+        for (Bullet otherbullet : this.bullets) {
 
-            if(otherbullet.getPlayer() != bullet.getPlayer()){
+            if (otherbullet.getPlayer() != bullet.getPlayer()) {
 
-                if(checkBulletCollision(bullet)){
+                if (checkBulletCollision(bullet)) {
 
-                    battlefield.addField(bullet.getRepresentation(),bullet.getX(),bullet.getY());
-                    battlefield.addField(EMPTYBULLET,bullet.getX(), bullet.getY());
-                    battlefield.addField(EMPTYBULLET,otherbullet.getX(), otherbullet.getY());
+                    this.battlefield.addField(bullet.getRepresentation(), bullet.getX(), bullet.getY());
+                    this.battlefield.addField(this.EMPTYBULLET, bullet.getX(), bullet.getY());
+                    this.battlefield.addField(this.EMPTYBULLET, otherbullet.getX(), otherbullet.getY());
                     bullet.die();
                     otherbullet.die();
-                    bullets.remove(bullet);
-                    bullets.remove(otherbullet);
+                    this.bullets.remove(bullet);
+                    this.bullets.remove(otherbullet);
                     return;
+
                 }
             }
         }
 
-        if(checkWallCollision(bullet)){
+        if (checkWallCollision(bullet)) {
 
-            System.out.println("bitch");
-            Field wallField = new Field(1,1);
-            wallField.set(0,0,'W');
-            battlefield.addField(wallField,bullet.getX(), bullet.getY());
+            Field wallField = new Field(1, 1);
+            wallField.set(0, 0, 'W');
+            this.battlefield.addField(wallField, bullet.getX(), bullet.getY());
             bullet.die();
-            bullets.remove(bullet);
+            this.bullets.remove(bullet);
             return;
+
         }
 
-        battlefield.addField(bullet.getRepresentation(), bullet.getX(), bullet.getY());
+        this.battlefield.addField(bullet.getRepresentation(), bullet.getX(), bullet.getY());
 
     }
 
-    private void moveTank(Tank tank, int x, int y){
+    private void moveTank(Tank tank, int x, int y) {
 
-        battlefield.addField(EMPTYMASK, tank.getX(), tank.getY());
-        tank.move(tank.getX()+x, tank.getY()+y);
+        this.battlefield.addField(this.EMPTYMASK, tank.getX(), tank.getY());
+        tank.move(tank.getX() + x, tank.getY() + y);
 
-        if(checkTankCollision(tank)){
+        if (checkTankCollision(tank)) {
 
-            tank.move(tank.getX()-x,tank.getY()-y);
+            tank.move(tank.getX() - x, tank.getY() - y);
 
         }
 
-        if(checkBulletCollision(tank)){
-            System.out.println("wtfboy");
-
-            battlefield.addField(EMPTYMASK,tank.getX(), tank.getY());
-            tankList.remove(tank);
-            numberOfTanks--;
-            return;
-        }
-
-        battlefield.addField(tank.getRepresentation(), tank.getX(), tank.getY());
+        this.battlefield.addField(tank.getRepresentation(), tank.getX(), tank.getY());
     }
 
-    //TODO Tanques teem que morrer e o server teem que saber;
     //TODO matar o chapa sem que ninguem saiba...
-
-
-//    public synchronized int addTank(){
-//
-//        if( numberOfTanks < MAX_NUMBER_TANKS) {
-//
-//            if (tankList.size() == 0) {
-//
-//                Tank tank = new Tank(1, 3, battlefield.getHeight()/2, RepresentationFactory.Orientation.EAST);
-//                return createTank(tank);
-//
-//            } else if (tankList.size() == 1) {
-//
-//                Tank tank = new Tank(2, battlefield.getWidth() - 2 - RepresentationFactory.TANK_WIDTH, battlefield.getHeight() / 2, RepresentationFactory.Orientation.WEST);
-//                return createTank(tank);
-//            } else if(tankList.size() == 2){
-//
-//                Tank tank = new Tank(3, battlefield.getWidth()/2 , 2 , RepresentationFactory.Orientation.SOUTH);
-//                return createTank(tank);
-//
-//            }else if(tankList.size() == 3){
-//
-//                Tank tank = new Tank(4, battlefield.getWidth()/2, battlefield.getHeight() - 2 , RepresentationFactory.Orientation.NORTH);
-//                return createTank(tank);
-//
-//            }
-//        }
-//
-//        return -1;
-//
-//    }
 
     public synchronized int addTank() {
 
@@ -323,26 +302,51 @@ public class GameEngine {
         int newTankY;
         int newPlayerNumber = 1;
 
+        for (int j = 0; j < this.tankList.size(); j++) {
 
-            for (int j =0; j<this.tankList.size(); j++) {
+            while (this.tankList.get(j).getPlayer() == newPlayerNumber) {
 
-                while (this.tankList.get(j).getPlayer() == newPlayerNumber) {
-                    newPlayerNumber++;
-                }
+                newPlayerNumber++;
 
             }
-        System.out.println("player: "+newPlayerNumber);
-        do{
-            //newTankX = RandomGen.getBoundedRandomInt(1, battlefield.getWidth() - 2 - RepresentationFactory.TANK_WIDTH);
-            //newTankY = RandomGen.getBoundedRandomInt(1, battlefield.getHeight() - 2 - RepresentationFactory.TANK_HEIGHT);
-            newTankX = (int) Math.round(Math.random() * battlefield.getWidth() - RepresentationFactory.TANK_WIDTH ) + 2;
-            newTankY = (int)  Math.round(Math.random() * battlefield.getHeight() - RepresentationFactory.TANK_HEIGHT ) + 2 ;
-            t = new Tank(newPlayerNumber, newTankX, newTankY, RepresentationFactory.Orientation.NORTH);
+        }
+
+        System.out.println("player: " + newPlayerNumber);
+
+        do {
+
+            //newTankX = RandomGen.getBoundedRandomInt(1, this.battlefield.getWidth() - 2 - RepresentationFactory.TANK_WIDTH);
+            //newTankY = RandomGen.getBoundedRandomInt(1, this.battlefield.getHeight() - 2 - RepresentationFactory.TANK_HEIGHT);
+            newTankX = (int) Math.round(Math.random() * this.battlefield.getWidth() - RepresentationFactory.TANK_WIDTH) + 2;
+            newTankY = (int) Math.round(Math.random() * this.battlefield.getHeight() - RepresentationFactory.TANK_HEIGHT) + 2;
+
+            if (newTankX > this.battlefield.getWidth() / 4 && newTankX < (this.battlefield.getWidth() * 3) / 4) {
+
+                if (newTankY > this.battlefield.getHeight() / 2) {
+
+                    t = new Tank(newPlayerNumber, newTankX, newTankY, RepresentationFactory.Orientation.NORTH);
+
+                } else {
+
+                    t = new Tank(newPlayerNumber, newTankX, newTankY, RepresentationFactory.Orientation.SOUTH);
+
+                }
+            } else if (newTankX > (this.battlefield.getWidth() * 3) / 4) {
+
+                t = new Tank(newPlayerNumber, newTankX, newTankY, RepresentationFactory.Orientation.WEST);
+
+            } else {
+
+                t = new Tank(newPlayerNumber, newTankX, newTankY, RepresentationFactory.Orientation.EAST);
+
+            }
+
         } while (this.createTank(t) < 0);
 
         if (t == null) {
             return -1;
         }
+
         return t.getPlayer();
     }
 
@@ -357,15 +361,16 @@ public class GameEngine {
             return;
         }
 
-
-
         for (int i = 0; i < this.tankList.size(); i++) {
+
             Tank t = this.tankList.get(i);
 
             if (t.getPlayer() == playerNumber) {
+
                 this.tankList.remove(t);
-                this.battlefield.addField(this.EMPTYMASK,t.getX(),t.getY());
+                this.battlefield.addField(this.EMPTYMASK, t.getX(), t.getY());
                 this.numberOfTanks--;
+
             }
         }
 
@@ -375,21 +380,24 @@ public class GameEngine {
     public synchronized boolean isPlayerDead(int playerNumber) {
 
         for (Tank t : this.tankList) {
+
             if (t.getPlayer() == playerNumber) {
+
                 return false;
+
             }
         }
 
         return true;
     }
 
-    private int createTank(Tank tank){
+    private int createTank(Tank tank) {
 
-        if(!checkTankCollision(tank)){
+        if (!checkTankCollision(tank)) {
 
-            battlefield.addField(tank.getRepresentation(), tank.getX(), tank.getY());
-            tankList.add(tank);
-            numberOfTanks++;
+            this.battlefield.addField(tank.getRepresentation(), tank.getX(), tank.getY());
+            this.tankList.add(tank);
+            this.numberOfTanks++;
             return tank.getPlayer();
 
         }
@@ -397,75 +405,91 @@ public class GameEngine {
         return -1;
     }
 
-    //calculate and return the state
+    //calculate and return the gameState
     public synchronized String calculateState() {
 
-        if(!bullets.isEmpty()) {
-            for (Bullet bullet : bullets) {
-                if(bullet.isAlive()){
+        if (!this.bullets.isEmpty()) {
+
+            for (Bullet bullet : this.bullets) {
+
+                if (bullet.isAlive()) {
+
                     moveBullet(bullet);
-                }
-            }
-        }
-        return battlefield.returnAsString();
-    }
 
-    private synchronized boolean checkTankCollision(GameObject object){
-
-        for(int i = object.getX(); i < object.getX()+object.getWidth(); i++) {
-
-            for(int j = object.getY(); j < object.getY()+object.getHeight(); j++) {
-
-                if (battlefield.get(i,j) == Tiletypes.WALL.getSymbol() || battlefield.get(i,j) == Tiletypes.TANK.getSymbol()) {
-                    System.out.println("Collision");
-                    return true;
                 }
             }
         }
 
-        return false;
+        return this.battlefield.returnAsString();
     }
 
-    private synchronized boolean checkWallCollision(Bullet bullet){
+    private synchronized boolean checkTankCollision(GameObject object) {
 
-        for(int i = bullet.getX(); i < bullet.getX()+bullet.getWidth(); i++) {
-
-            for (int j = bullet.getY(); j < bullet.getY() + bullet.getHeight(); j++) {
-
-                if (battlefield.get(i, j) == Tiletypes.WALL.getSymbol()) {
-                    System.out.println("Wall Collision");
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private synchronized boolean checkBulletTankCollision(GameObject object){
-        for(int i = object.getX(); i < object.getX()+object.getWidth(); i++) {
+        for (int i = object.getX(); i < object.getX() + object.getWidth(); i++) {
 
             for (int j = object.getY(); j < object.getY() + object.getHeight(); j++) {
 
-                if (battlefield.get(i, j) == Tiletypes.TANK.getSymbol()) {
+                if (this.battlefield.get(i, j) == Tiletypes.WALL.getSymbol() || this.battlefield.get(i, j) == Tiletypes.TANK.getSymbol()) {
+
                     System.out.println("Tank Collision");
                     return true;
+
                 }
             }
         }
+
+        return false;
+    }
+
+    private synchronized boolean checkWallCollision(Bullet bullet) {
+
+        for (int i = bullet.getX(); i < bullet.getX() + bullet.getWidth(); i++) {
+
+            for (int j = bullet.getY(); j < bullet.getY() + bullet.getHeight(); j++) {
+
+                if (this.battlefield.get(i, j) == Tiletypes.WALL.getSymbol()) {
+
+                    System.out.println("Bullet-Wall Collision");
+                    return true;
+
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private synchronized boolean checkBulletTankCollision(GameObject object) {
+
+        for (int i = object.getX(); i < object.getX() + object.getWidth(); i++) {
+
+            for (int j = object.getY(); j < object.getY() + object.getHeight(); j++) {
+
+                if (this.battlefield.get(i, j) == Tiletypes.TANK.getSymbol()) {
+
+                    System.out.println("Tank-Bullet Collision");
+                    return true;
+
+                }
+            }
+        }
+
         return false;
     }
 
 
-    private synchronized boolean checkBulletCollision(GameObject object){
+    private synchronized boolean checkBulletCollision(GameObject object) {
 
-        for(int i = object.getX(); i < object.getX()+object.getWidth(); i++) {
+        for (int i = object.getX(); i < object.getX() + object.getWidth(); i++) {
 
-            for(int j = object.getY(); j < object.getY()+object.getHeight(); j++) {
+            for (int j = object.getY(); j < object.getY() + object.getHeight(); j++) {
 
-                if (battlefield.get(i,j) == Tiletypes.BULLET_D.getSymbol() || battlefield.get(i,j) == Tiletypes.BULLET_U.getSymbol() ||
-                        battlefield.get(i,j) == Tiletypes.BULLET_L.getSymbol() || battlefield.get(i,j) == Tiletypes.BULLET_R.getSymbol()) {
+                if (this.battlefield.get(i, j) == Tiletypes.BULLET_D.getSymbol() || this.battlefield.get(i, j) == Tiletypes.BULLET_U.getSymbol() ||
+                        this.battlefield.get(i, j) == Tiletypes.BULLET_L.getSymbol() || this.battlefield.get(i, j) == Tiletypes.BULLET_R.getSymbol()) {
+
                     System.out.println("Bullet Collision");
                     return true;
+
                 }
             }
         }
@@ -473,15 +497,15 @@ public class GameEngine {
         return false;
     }
 
-    private Field createDefaultField(){
+    private Field createDefaultField() {
 
-        Field mainField = new Field(DEFAULT_BATTLEFIELD_COLUMNS,DEFAULT_BATTLEFIELD_ROWS);
+        Field mainField = new Field(DEFAULT_BATTLEFIELD_COLUMNS, DEFAULT_BATTLEFIELD_ROWS);
 
-        for(int x = 0; x < mainField.getWidth(); x++){
+        for (int x = 0; x < mainField.getWidth(); x++) {
 
-            for(int y = 0; y < mainField.getHeight(); y++ ){
+            for (int y = 0; y < mainField.getHeight(); y++) {
 
-                if(x == 0 || y == 0 || x == mainField.getWidth()-1 || y == mainField.getHeight()-1) {
+                if (x == 0 || y == 0 || x == mainField.getWidth() - 1 || y == mainField.getHeight() - 1) {
 
                     mainField.set(x, y, Tiletypes.WALL.getSymbol());
                 }
@@ -489,22 +513,6 @@ public class GameEngine {
         }
 
         return mainField;
-
-    }
-
-    public static void main(String[] args) {
-
-
-        GameEngine gameEngine = new GameEngine();
-        gameEngine.addTank();
-        gameEngine.addTank();
-        gameEngine.battlefield.addField(new Bullet(1,5,5, RepresentationFactory.Orientation.EAST).getRepresentation(),5,5);
-        gameEngine.battlefield.addField(new Bullet(1,10,10, RepresentationFactory.Orientation.WEST).getRepresentation(),10,10);
-        System.out.println(gameEngine.calculateState());
-        gameEngine.receiveInstruction(new Instruction("0 S"));
-
-        System.out.println(gameEngine.calculateState());
-
 
     }
 
