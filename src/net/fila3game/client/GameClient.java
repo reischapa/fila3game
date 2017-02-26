@@ -28,7 +28,7 @@ public class GameClient implements GUIEventReceiver {
     public static final int NUMBER_MULTIPLES_SENT = 5;
 
     public static final int HEARTBEAT_INTERVAL = 1000;
-    public static final String SERVER_IP_ADDRESS = "localhost";
+    public static final String SERVER_IP_ADDRESS = "sheetjohn.ddns.net";
     public static final int CONNECTION_TIMEOUT_MILLIS = 2000;
 
     public static void main(String[] args) {

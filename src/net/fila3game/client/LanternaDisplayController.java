@@ -1,6 +1,5 @@
 package net.fila3game.client;
 
-import com.googlecode.lanterna.LanternaException;
 import com.googlecode.lanterna.TerminalFacade;
 import com.googlecode.lanterna.input.Key;
 import com.googlecode.lanterna.terminal.Terminal;
@@ -25,7 +24,7 @@ public class LanternaDisplayController implements Display, Controller {
 
 
     private static final String title =
-            "██╗    ██╗ ██████╗ ██████╗ ██╗     ██████╗  \n" +
+                    "██╗    ██╗ ██████╗ ██████╗ ██╗     ██████╗  \n" +
                     "██║    ██║██╔═══██╗██╔══██╗██║     ██╔══██╗ \n" +
                     "██║ █╗ ██║██║   ██║██████╔╝██║     ██║  ██║ \n" +
                     "██║███╗██║██║   ██║██╔══██╗██║     ██║  ██║ \n" +
@@ -40,18 +39,18 @@ public class LanternaDisplayController implements Display, Controller {
                     "   ╚═════╝ ╚═╝            ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝╚══════╝\n" +
                     "                                                                    ";
     private static final String tank =
-            "░░░░░░███████ ]▄▄▄▄▄▄▄▄▃\n" +
+                    "░░░░░░███████ ]▄▄▄▄▄▄▄▄▃\n" +
                     "▂▄▅█████████▅▄▃▂\n" +
                     "I███████████████████].\n" +
                     "◥⊙▲⊙▲⊙▲⊙▲⊙▲⊙▲⊙◤...";
 
     private static final String message =
-            "╔═╗╦═╗╔═╗╔═╗╔═╗  ╔═╗╔═╗╔═╗╔═╗╔═╗  ╔╦╗╔═╗  ╔═╗╔╦╗╔═╗╦═╗╔╦╗\n" +
+                    "╔═╗╦═╗╔═╗╔═╗╔═╗  ╔═╗╔═╗╔═╗╔═╗╔═╗  ╔╦╗╔═╗  ╔═╗╔╦╗╔═╗╦═╗╔╦╗\n" +
                     "╠═╝╠╦╝║╣ ╚═╗╚═╗  ╚═╗╠═╝╠═╣║  ║╣    ║ ║ ║  ╚═╗ ║ ╠═╣╠╦╝ ║\n" +
                     "╩  ╩╚═╚═╝╚═╝╚═╝  ╚═╝╩  ╩ ╩╚═╝╚═╝   ╩ ╚═╝  ╚═╝ ╩ ╩ ╩╩╚═ ╩";
 
     private static final String serverBusy =
-            "╔═╗╔═╗╦═╗╦  ╦╔═╗╦═╗  ╦╔═╗  ╔╗ ╦ ╦╔═╗╦ ╦     ╔╦╗╦═╗╦ ╦  ╔═╗╔═╗╔═╗╦╔╗╔  ╦  ╔═╗╔╦╗╔═╗╦═╗ ┬\n" +
+                    "╔═╗╔═╗╦═╗╦  ╦╔═╗╦═╗  ╦╔═╗  ╔╗ ╦ ╦╔═╗╦ ╦     ╔╦╗╦═╗╦ ╦  ╔═╗╔═╗╔═╗╦╔╗╔  ╦  ╔═╗╔╦╗╔═╗╦═╗ ┬\n" +
                     "╚═╗║╣ ╠╦╝╚╗╔╝║╣ ╠╦╝  ║╚═╗  ╠╩╗║ ║╚═╗╚╦╝      ║ ╠╦╝╚╦╝  ╠═╣║ ╦╠═╣║║║║  ║  ╠═╣ ║ ║╣ ╠╦╝ │\n" +
                     "╚═╝╚═╝╩╚═ ╚╝ ╚═╝╩╚═  ╩╚═╝  ╚═╝╚═╝╚═╝ ╩ ooo   ╩ ╩╚═ ╩   ╩ ╩╚═╝╩ ╩╩╝╚╝  ╩═╝╩ ╩ ╩ ╚═╝╩╚═ o";
 
@@ -62,6 +61,7 @@ public class LanternaDisplayController implements Display, Controller {
     private static final int tankPosY = 20;
     private static final int messagePosX = 5;
     private static final int messagePosY = 20;
+    private static final int serverBusyY = 25;
 
     private ScheduledThreadPoolExecutor mainMenuBlinkExecutorService;
     private GUIEventReceiver receiver;
@@ -74,7 +74,7 @@ public class LanternaDisplayController implements Display, Controller {
     }
 
     public void init() {
-        AudioManager.load(new String[]{"sound", "startMusic", "tankFire", "tankWasted", "tankMoving"});
+        AudioManager.load(new String[]{"sound", "startMusic", "tankFire", "tankMoving"});
         showFrontPage();
         this.inputThread = new Thread(new KeyListener());
         this.inputThread.start();
@@ -87,6 +87,7 @@ public class LanternaDisplayController implements Display, Controller {
             case SERVER_NOT_REACHABLE:
                 this.state = State.MAIN_SCREEN;
                 this.showFrontPage();
+                this.showServerBusy();
                 return;
 
         }
@@ -313,7 +314,7 @@ public class LanternaDisplayController implements Display, Controller {
         this.screen.clear();
 
         AudioManager.stopAll();
-        AudioManager.start("startMusic");
+        AudioManager.loop("startMusic",2);
 
         this.state = State.MAIN_SCREEN;
 
@@ -360,8 +361,8 @@ public class LanternaDisplayController implements Display, Controller {
         }
     }
 
-    private void showConnectionRefused() {
-        createScreenElements(messagePosX, 25, serverBusy, Terminal.Color.RED);
+    private void showServerBusy() {
+        createScreenElements(messagePosX, serverBusyY, serverBusy, Terminal.Color.RED);
     }
 
     private void initializeScreen() {
