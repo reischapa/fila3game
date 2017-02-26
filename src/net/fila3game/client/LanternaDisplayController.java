@@ -25,7 +25,7 @@ public class LanternaDisplayController implements Display, Controller {
 
 
     private static final String title =
-                    "██╗    ██╗ ██████╗ ██████╗ ██╗     ██████╗  \n" +
+            "██╗    ██╗ ██████╗ ██████╗ ██╗     ██████╗  \n" +
                     "██║    ██║██╔═══██╗██╔══██╗██║     ██╔══██╗ \n" +
                     "██║ █╗ ██║██║   ██║██████╔╝██║     ██║  ██║ \n" +
                     "██║███╗██║██║   ██║██╔══██╗██║     ██║  ██║ \n" +
@@ -40,20 +40,21 @@ public class LanternaDisplayController implements Display, Controller {
                     "   ╚═════╝ ╚═╝            ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝╚══════╝\n" +
                     "                                                                    ";
     private static final String tank =
-                    "░░░░░░███████ ]▄▄▄▄▄▄▄▄▃\n" +
+            "░░░░░░███████ ]▄▄▄▄▄▄▄▄▃\n" +
                     "▂▄▅█████████▅▄▃▂\n" +
                     "I███████████████████].\n" +
                     "◥⊙▲⊙▲⊙▲⊙▲⊙▲⊙▲⊙◤...";
 
     private static final String message =
-                    "╔═╗╦═╗╔═╗╔═╗╔═╗  ╔═╗╔╗╔╦ ╦  ╦╔═╔═╗╦ ╦  ╔╦╗╔═╗  ╔═╗╔╦╗╔═╗╦═╗╔╦╗\n" +
-                    "╠═╝╠╦╝║╣ ╚═╗╚═╗  ╠═╣║║║╚╦╝  ╠╩╗║╣ ╚╦╝   ║ ║ ║  ╚═╗ ║ ╠═╣╠╦╝ ║ \n" +
-                    "╩  ╩╚═╚═╝╚═╝╚═╝  ╩ ╩╝╚╝ ╩   ╩ ╩╚═╝ ╩    ╩ ╚═╝  ╚═╝ ╩ ╩ ╩╩╚═ ╩ ";
+            "╔═╗╦═╗╔═╗╔═╗╔═╗  ╔═╗╔═╗╔═╗╔═╗╔═╗  ╔╦╗╔═╗  ╔═╗╔╦╗╔═╗╦═╗╔╦╗\n" +
+                    "╠═╝╠╦╝║╣ ╚═╗╚═╗  ╚═╗╠═╝╠═╣║  ║╣    ║ ║ ║  ╚═╗ ║ ╠═╣╠╦╝ ║\n" +
+                    "╩  ╩╚═╚═╝╚═╝╚═╝  ╚═╝╩  ╩ ╩╚═╝╚═╝   ╩ ╚═╝  ╚═╝ ╩ ╩ ╩╩╚═ ╩";
 
-    private static final String message2 =
-                    "╔═╗╦  ╔═╗╦ ╦  ╔═╗╔═╗╦═╗  ╔═╗╦═╗╔═╗╔═╗┬┬┬\n" +
-                    "╠═╝║  ╠═╣╚╦╝  ╠╣ ║ ║╠╦╝  ╠╣ ╠╦╝║╣ ║╣ │││\n" +
-                    "╩  ╩═╝╩ ╩ ╩   ╚  ╚═╝╩╚═  ╚  ╩╚═╚═╝╚═╝ooo";
+    private static final String serverBusy =
+            "╔═╗╔═╗╦═╗╦  ╦╔═╗╦═╗  ╦╔═╗  ╔╗ ╦ ╦╔═╗╦ ╦     ╔╦╗╦═╗╦ ╦  ╔═╗╔═╗╔═╗╦╔╗╔  ╦  ╔═╗╔╦╗╔═╗╦═╗ ┬\n" +
+                    "╚═╗║╣ ╠╦╝╚╗╔╝║╣ ╠╦╝  ║╚═╗  ╠╩╗║ ║╚═╗╚╦╝      ║ ╠╦╝╚╦╝  ╠═╣║ ╦╠═╣║║║║  ║  ╠═╣ ║ ║╣ ╠╦╝ │\n" +
+                    "╚═╝╚═╝╩╚═ ╚╝ ╚═╝╩╚═  ╩╚═╝  ╚═╝╚═╝╚═╝ ╩ ooo   ╩ ╩╚═ ╩   ╩ ╩╚═╝╩ ╩╩╝╚╝  ╩═╝╩ ╩ ╩ ╚═╝╩╚═ o";
+
 
     private static final int titlePosX = 5;
     private static final int titlePosY = 5;
@@ -200,7 +201,6 @@ public class LanternaDisplayController implements Display, Controller {
         switch (key.getCharacter()) {
             case ' ':
                 AudioManager.stopAll();
-
                 return GUIEvent.Key.KEY_SPACE;
             case 'q':
                 return GUIEvent.Key.KEY_Q;
@@ -242,28 +242,37 @@ public class LanternaDisplayController implements Display, Controller {
                     continue;
                 }
 
-                if (LanternaDisplayController.this.state == State.MAIN_SCREEN) {
+                k = translateKey(key);
 
-                    AudioManager.stopAll();
-                    AudioManager.start("sound");
-                    LanternaDisplayController.this.mainMenuBlinkExecutorService.shutdownNow();
-
-                    try {
-                        Thread.sleep(1500);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
-                    AudioManager.stopAll();
-
-                    LanternaDisplayController.this.state = State.IN_GAME;
-                    receiver.receiveGUIEvent(GUIEvent.connect());
+                if (k == null) {
                     continue;
                 }
 
-                k = translateKey(key);
-
                 switch (k) {
+                    case KEY_SPACE:
+                            AudioManager.stopAll();
+                            AudioManager.start("sound");
+                            LanternaDisplayController.this.mainMenuBlinkExecutorService.shutdownNow();
+
+                            try {
+                                Thread.sleep(1500);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+
+                            AudioManager.stopAll();
+
+                            LanternaDisplayController.this.state = State.IN_GAME;
+                            receiver.receiveGUIEvent(GUIEvent.connect());
+                            continue;
+                    case KEY_ARROWUP:
+                        break;
+                    case KEY_ARROWDOWN:
+                        break;
+                    case KEY_ARROWLEFT:
+                        break;
+                    case KEY_ARROWRIGHT:
+                        break;
                     case KEY_Q:
                         receiver.receiveGUIEvent(GUIEvent.disconnect());
                         LanternaDisplayController.this.shutdown();
@@ -272,11 +281,12 @@ public class LanternaDisplayController implements Display, Controller {
                         LanternaDisplayController.this.receiver.receiveGUIEvent(GUIEvent.disconnect());
                         LanternaDisplayController.this.showFrontPage();
                         continue;
+                    case KEY_M:
+                        break;
                 }
 
                 System.out.println("key " + k + " pressed!");
                 receiver.receiveGUIEvent(GUIEvent.keyboardInput(k));
-
             }
         }
     }
@@ -298,7 +308,6 @@ public class LanternaDisplayController implements Display, Controller {
         AudioManager.start("startMusic");
 
         this.state = State.MAIN_SCREEN;
-
 
         createScreenElements(titlePosX, titlePosY, title, Terminal.Color.WHITE);
         createScreenElements(tankPosX, tankPosY, tank, Terminal.Color.GREEN);
@@ -343,6 +352,9 @@ public class LanternaDisplayController implements Display, Controller {
         }
     }
 
+    private void showConnectionRefused() {
+        createScreenElements(messagePosX, 25, serverBusy, Terminal.Color.RED);
+    }
 
     private void initializeScreen() {
         screen = TerminalFacade.createScreen();
