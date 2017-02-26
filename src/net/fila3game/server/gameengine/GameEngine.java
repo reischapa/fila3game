@@ -105,7 +105,9 @@ public class GameEngine {
 
                 if(!bulletExists(tank.getPlayer())) {
                     Bullet bullet = createBullet(tank);
-                    bullets.add(bullet);
+                    if(bullet.isAlive()) {
+                        bullets.add(bullet);
+                    }
                 }
 
             }
@@ -149,6 +151,9 @@ public class GameEngine {
         if(!checkWallCollision(bullet) && !checkBulletCollision(bullet)){
 
             battlefield.addField(bullet.getRepresentation(),bullet.getX(),bullet.getY());
+
+        }else{
+            bullet.die();
         }
 
         return bullet;
@@ -179,7 +184,16 @@ public class GameEngine {
                 break;
         }
 
-        bullet.move(bullet.getX()+x,bullet.getY()+y);
+        if(bullet.getX()+x >= 0 && bullet.getY()+x < battlefield.getWidth()) {
+            bullet.move(bullet.getX() + x, bullet.getY() + y);
+        }else{
+            Field wallField = new Field(1,1);
+            wallField.set(0,0,'W');
+            battlefield.addField(wallField,bullet.getX(), bullet.getY());
+            bullet.die();
+            bullets.remove(bullet);
+            return;
+        }
 
 
         //Does not work
@@ -193,12 +207,14 @@ public class GameEngine {
 
                 if(checkBulletCollision(t)){
 
-                    System.out.println("gotcha bitch");
-                    battlefield.addField(EMPTYMASK,t.getX(),t.getY());
-                    t.die();
-                    tankList.remove(t);
-                    numberOfTanks--;
+                    if(bullet.getPlayer() != t.getPlayer()) {
 
+                        System.out.println("gotcha bitch");
+                        battlefield.addField(EMPTYMASK, t.getX(), t.getY());
+                        t.die();
+                        tankList.remove(t);
+                        numberOfTanks--;
+                    }
                 }
             }
 
