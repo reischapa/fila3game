@@ -111,18 +111,22 @@ public class GameClient implements GUIEventReceiver {
     }
 
     private void scheduleWorkers() {
-        if (this.workerExecutorService == null) {
-            this.workerExecutorService = Executors.newFixedThreadPool(4);
+        if (this.workerExecutorService != null) {
+            this.workerExecutorService.shutdownNow();
         }
+
+        this.workerExecutorService = Executors.newFixedThreadPool(4);
 
         this.workerExecutorService.execute(new ServerReceiverWorker());
     }
 
 
     private void startHeartbeatSender() {
-        if (this.heartbeatExecutor == null) {
-            this.heartbeatExecutor = new ScheduledThreadPoolExecutor(4);
+        if (this.heartbeatExecutor != null) {
+            this.heartbeatExecutor.shutdownNow();
         }
+
+        this.heartbeatExecutor = new ScheduledThreadPoolExecutor(4);
 
         this.heartbeatExecutor.scheduleAtFixedRate(new Runnable() {
             @Override

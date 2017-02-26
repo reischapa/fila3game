@@ -87,7 +87,7 @@ public class RepresentationFactory {
                 break;
             case MINE:
                 fieldRepresentation = new Field(Mine.MINE_WIDTH, Mine.MINE_HEIGHT);
-                fieldRepresentation.constructFromString("@@@@");
+                fieldRepresentation.constructFromString("@\n@");
                 break;
             default:
                 System.out.println("Something went terribly wrong");

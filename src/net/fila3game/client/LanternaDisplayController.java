@@ -1,5 +1,6 @@
 package net.fila3game.client;
 
+import com.googlecode.lanterna.LanternaException;
 import com.googlecode.lanterna.TerminalFacade;
 import com.googlecode.lanterna.input.Key;
 import com.googlecode.lanterna.terminal.Terminal;
@@ -22,9 +23,6 @@ public class LanternaDisplayController implements Display, Controller {
         MAIN_SCREEN, IN_GAME,
     }
 
-    public LanternaDisplayController() {
-        this.mainMenuBlinkExecutorService = new ScheduledThreadPoolExecutor(2);
-    }
 
     private static final String title =
                     "██╗    ██╗ ██████╗ ██████╗ ██╗     ██████╗  \n" +
@@ -68,13 +66,17 @@ public class LanternaDisplayController implements Display, Controller {
     private GUIEventReceiver receiver;
     private Screen screen;
     private State state = State.MAIN_SCREEN;
+    private Thread inputThread;
+
+    public LanternaDisplayController() {
+        this.mainMenuBlinkExecutorService = new ScheduledThreadPoolExecutor(100);
+    }
 
     public void init() {
         AudioManager.load(new String[]{"sound", "startMusic", "tankFire", "tankWasted", "tankMoving"});
         showFrontPage();
-        AudioManager.start("startMusic");
-        Thread t = new Thread(new KeyListener());
-        t.start();
+        this.inputThread = new Thread(new KeyListener());
+        this.inputThread.start();
     }
 
     @Override
@@ -204,6 +206,8 @@ public class LanternaDisplayController implements Display, Controller {
                 return GUIEvent.Key.KEY_Q;
             case 'r':
                 return GUIEvent.Key.KEY_R;
+            case 'm':
+                return GUIEvent.Key.KEY_M;
             default:
                 System.out.println("Something went terribly wrong");
         }
@@ -259,10 +263,15 @@ public class LanternaDisplayController implements Display, Controller {
 
                 k = translateKey(key);
 
-                if (k == GUIEvent.Key.KEY_Q) {
-                    receiver.receiveGUIEvent(GUIEvent.disconnect());
-                    LanternaDisplayController.this.shutdown();
-                    return;
+                switch (k) {
+                    case KEY_Q:
+                        receiver.receiveGUIEvent(GUIEvent.disconnect());
+                        LanternaDisplayController.this.shutdown();
+                        return;
+                    case KEY_R:
+                        LanternaDisplayController.this.receiver.receiveGUIEvent(GUIEvent.disconnect());
+                        LanternaDisplayController.this.showFrontPage();
+                        continue;
                 }
 
                 System.out.println("key " + k + " pressed!");
@@ -273,21 +282,32 @@ public class LanternaDisplayController implements Display, Controller {
     }
 
     private void shutdown() {
+        AudioManager.stopAll();
         this.mainMenuBlinkExecutorService.shutdownNow();
         this.screen.stopScreen();
     }
 
     private void showFrontPage() {
-        screen = TerminalFacade.createScreen();
-        screen.startScreen();
-        screen.getTerminal().getTerminalSize().setColumns(100);
-        screen.getTerminal().getTerminalSize().setRows(30);
-        screen.setCursorPosition(99, 29);
-        screen.getTerminal().setCursorVisible(false);
+        if (this.screen == null) {
+            this.initializeScreen();
+        }
+
+        this.screen.clear();
+
+        AudioManager.stopAll();
+        AudioManager.start("startMusic");
+
+        this.state = State.MAIN_SCREEN;
 
 
         createScreenElements(titlePosX, titlePosY, title, Terminal.Color.WHITE);
         createScreenElements(tankPosX, tankPosY, tank, Terminal.Color.GREEN);
+
+        if (this.mainMenuBlinkExecutorService != null) {
+            this.mainMenuBlinkExecutorService.shutdownNow();
+        }
+
+        this.mainMenuBlinkExecutorService = new ScheduledThreadPoolExecutor(2);
 
         mainMenuBlinkExecutorService.scheduleAtFixedRate(new Runnable() {
             @Override
@@ -322,4 +342,15 @@ public class LanternaDisplayController implements Display, Controller {
             y++;
         }
     }
+
+
+    private void initializeScreen() {
+        screen = TerminalFacade.createScreen();
+        screen.startScreen();
+        screen.getTerminal().getTerminalSize().setColumns(100);
+        screen.getTerminal().getTerminalSize().setRows(30);
+        screen.setCursorPosition(99, 29);
+        screen.getTerminal().setCursorVisible(false);
+    }
+
 }
