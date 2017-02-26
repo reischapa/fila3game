@@ -5,17 +5,33 @@ package net.fila3game.client;
  */
 public class GameState {
 
+    public static GameState serverNotAvailable() {
+        return new GameState(ConnectionStatus.SERVER_NOT_REACHABLE);
+    }
+
     public static void main(String[] args) {
         GameState state = new GameState("1 0\r\nTTT\nTTT\n0T0\n");
     }
 
+    public enum ConnectionStatus {
+        OK, SERVER_NOT_REACHABLE, SERVER_INVALID_ADDRESS,
+    }
+
+
     private String fieldString;
 
 
+    private ConnectionStatus status;
+
+
     public GameState(String dataString) {
-//        System.out.println(dataString);
-//        this.parseString(dataString);
         this.fieldString = dataString;
+        this.status = ConnectionStatus.OK;
+    }
+
+    public GameState( ConnectionStatus status ) {
+        this.fieldString = null;
+        this.status = status;
     }
 
     public void parseString(String dataString) {
@@ -28,5 +44,9 @@ public class GameState {
 
     public String getFieldString() {
         return fieldString;
+    }
+
+    public ConnectionStatus getStatus() {
+        return status;
     }
 }
