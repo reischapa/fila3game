@@ -70,7 +70,7 @@ public class LanternaDisplayController implements Display, Controller {
     private State state = State.MAIN_SCREEN;
 
     public void init() {
-        AudioManager.load(new String[]{"sound", "startMusic", "tankFire", "tankWasted"});
+        AudioManager.load(new String[]{"sound", "startMusic", "tankFire", "tankWasted", "tankMoving"});
         showFrontPage();
         AudioManager.start("startMusic");
         Thread t = new Thread(new KeyListener());
@@ -104,8 +104,6 @@ public class LanternaDisplayController implements Display, Controller {
                 actualChar = ' ';
                 break;
             case 'A':
-
-                AudioManager.stop("tankFire");
                 AudioManager.start("tankFire");
 
                 back = Terminal.Color.BLACK;
@@ -113,8 +111,6 @@ public class LanternaDisplayController implements Display, Controller {
                 actualChar = 'A';
                 break;
             case 'V':
-
-                AudioManager.stop("tankFire");
                 AudioManager.start("tankFire");
 
                 back = Terminal.Color.BLACK;
@@ -122,8 +118,6 @@ public class LanternaDisplayController implements Display, Controller {
                 actualChar = 'V';
                 break;
             case '<':
-
-                AudioManager.stop("tankFire");
                 AudioManager.start("tankFire");
 
                 back = Terminal.Color.BLACK;
@@ -131,8 +125,6 @@ public class LanternaDisplayController implements Display, Controller {
                 actualChar = '<';
                 break;
             case '>':
-
-                AudioManager.stop("tankFire");
                 AudioManager.start("tankFire");
 
                 back = Terminal.Color.BLACK;
@@ -182,13 +174,16 @@ public class LanternaDisplayController implements Display, Controller {
         System.out.println("got key! " + key);
         switch (key.getKind()) {
             case ArrowDown:
-
+                AudioManager.start("tankMoving");
                 return GUIEvent.Key.KEY_ARROWDOWN;
             case ArrowLeft:
+                AudioManager.start("tankMoving");
                 return GUIEvent.Key.KEY_ARROWLEFT;
             case ArrowUp:
+                AudioManager.start("tankMoving");
                 return GUIEvent.Key.KEY_ARROWUP;
             case ArrowRight:
+                AudioManager.start("tankMoving");
                 return GUIEvent.Key.KEY_ARROWRIGHT;
             case NormalKey:
                 return getNormalKeyCharacter(key);
@@ -202,6 +197,8 @@ public class LanternaDisplayController implements Display, Controller {
     private GUIEvent.Key getNormalKeyCharacter(Key key) {
         switch (key.getCharacter()) {
             case ' ':
+                AudioManager.stopAll();
+
                 return GUIEvent.Key.KEY_SPACE;
             case 'q':
                 return GUIEvent.Key.KEY_Q;
@@ -243,6 +240,7 @@ public class LanternaDisplayController implements Display, Controller {
 
                 if (LanternaDisplayController.this.state == State.MAIN_SCREEN) {
 
+                    AudioManager.stopAll();
                     AudioManager.start("sound");
                     LanternaDisplayController.this.mainMenuBlinkExecutorService.shutdownNow();
 
@@ -254,7 +252,6 @@ public class LanternaDisplayController implements Display, Controller {
 
                     AudioManager.stopAll();
 
-                    LanternaDisplayController.this.setGameLayout();
                     LanternaDisplayController.this.state = State.IN_GAME;
                     receiver.receiveGUIEvent(GUIEvent.connect());
                     continue;
@@ -273,10 +270,6 @@ public class LanternaDisplayController implements Display, Controller {
 
             }
         }
-    }
-
-    private void setGameLayout() {
-        //IF LAYOUT NEEDS CHANGES
     }
 
     private void shutdown() {
