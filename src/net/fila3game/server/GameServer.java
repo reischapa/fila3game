@@ -13,7 +13,7 @@ import java.util.concurrent.*;
  */
 public class GameServer {
     public static final int SEND_INTERVAL = 25;
-    public static final int GAME_ENGINE_SENDING_INTERVAL = 30;
+    public static final int GAME_ENGINE_SENDING_INTERVAL = 50;
     public static final int KEEPALIVE_INTERVAL = 100;
     public static final String KEEPALIVE_MESSAGE = "a";
     public static final int TCP_CONNECTION_PORT = 8080;
@@ -205,7 +205,7 @@ public class GameServer {
 
 
         private String getHeartbeatMessage() {
-            return "msg";
+            return KEEPALIVE_MESSAGE;
         }
 
         private void stopHeartbeatReceiver() {
