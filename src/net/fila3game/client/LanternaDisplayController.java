@@ -1,6 +1,5 @@
 package net.fila3game.client;
 
-import com.googlecode.lanterna.LanternaException;
 import com.googlecode.lanterna.TerminalFacade;
 import com.googlecode.lanterna.input.Key;
 import com.googlecode.lanterna.terminal.Terminal;
@@ -46,14 +45,15 @@ public class LanternaDisplayController implements Display, Controller {
                     "◥⊙▲⊙▲⊙▲⊙▲⊙▲⊙▲⊙◤...";
 
     private static final String message =
-                    "╔═╗╦═╗╔═╗╔═╗╔═╗  ╔═╗╔╗╔╦ ╦  ╦╔═╔═╗╦ ╦  ╔╦╗╔═╗  ╔═╗╔╦╗╔═╗╦═╗╔╦╗\n" +
-                    "╠═╝╠╦╝║╣ ╚═╗╚═╗  ╠═╣║║║╚╦╝  ╠╩╗║╣ ╚╦╝   ║ ║ ║  ╚═╗ ║ ╠═╣╠╦╝ ║ \n" +
-                    "╩  ╩╚═╚═╝╚═╝╚═╝  ╩ ╩╝╚╝ ╩   ╩ ╩╚═╝ ╩    ╩ ╚═╝  ╚═╝ ╩ ╩ ╩╩╚═ ╩ ";
+                    "╔═╗╦═╗╔═╗╔═╗╔═╗  ╔═╗╔═╗╔═╗╔═╗╔═╗  ╔╦╗╔═╗  ╔═╗╔╦╗╔═╗╦═╗╔╦╗\n" +
+                    "╠═╝╠╦╝║╣ ╚═╗╚═╗  ╚═╗╠═╝╠═╣║  ║╣    ║ ║ ║  ╚═╗ ║ ╠═╣╠╦╝ ║\n" +
+                    "╩  ╩╚═╚═╝╚═╝╚═╝  ╚═╝╩  ╩ ╩╚═╝╚═╝   ╩ ╚═╝  ╚═╝ ╩ ╩ ╩╩╚═ ╩";
 
-    private static final String message2 =
-                    "╔═╗╦  ╔═╗╦ ╦  ╔═╗╔═╗╦═╗  ╔═╗╦═╗╔═╗╔═╗┬┬┬\n" +
-                    "╠═╝║  ╠═╣╚╦╝  ╠╣ ║ ║╠╦╝  ╠╣ ╠╦╝║╣ ║╣ │││\n" +
-                    "╩  ╩═╝╩ ╩ ╩   ╚  ╚═╝╩╚═  ╚  ╩╚═╚═╝╚═╝ooo";
+    private static final String serverBusy =
+                    "╔═╗╔═╗╦═╗╦  ╦╔═╗╦═╗  ╦╔═╗  ╔╗ ╦ ╦╔═╗╦ ╦     ╔╦╗╦═╗╦ ╦  ╔═╗╔═╗╔═╗╦╔╗╔  ╦  ╔═╗╔╦╗╔═╗╦═╗ ┬\n" +
+                    "╚═╗║╣ ╠╦╝╚╗╔╝║╣ ╠╦╝  ║╚═╗  ╠╩╗║ ║╚═╗╚╦╝      ║ ╠╦╝╚╦╝  ╠═╣║ ╦╠═╣║║║║  ║  ╠═╣ ║ ║╣ ╠╦╝ │\n" +
+                    "╚═╝╚═╝╩╚═ ╚╝ ╚═╝╩╚═  ╩╚═╝  ╚═╝╚═╝╚═╝ ╩ ooo   ╩ ╩╚═ ╩   ╩ ╩╚═╝╩ ╩╩╝╚╝  ╩═╝╩ ╩ ╩ ╚═╝╩╚═ o";
+
 
     private static final int titlePosX = 5;
     private static final int titlePosY = 5;
@@ -61,6 +61,7 @@ public class LanternaDisplayController implements Display, Controller {
     private static final int tankPosY = 20;
     private static final int messagePosX = 5;
     private static final int messagePosY = 20;
+    private static final int serverBusyY = 25;
 
     private ScheduledThreadPoolExecutor mainMenuBlinkExecutorService;
     private GUIEventReceiver receiver;
@@ -73,7 +74,7 @@ public class LanternaDisplayController implements Display, Controller {
     }
 
     public void init() {
-        AudioManager.load(new String[]{"sound", "startMusic", "tankFire", "tankWasted", "tankMoving"});
+        AudioManager.load(new String[]{"sound", "startMusic", "tankFire", "tankMoving"});
         showFrontPage();
         this.inputThread = new Thread(new KeyListener());
         this.inputThread.start();
@@ -86,6 +87,7 @@ public class LanternaDisplayController implements Display, Controller {
             case SERVER_NOT_REACHABLE:
                 this.state = State.MAIN_SCREEN;
                 this.showFrontPage();
+                this.showServerBusy();
                 return;
 
         }
@@ -208,7 +210,6 @@ public class LanternaDisplayController implements Display, Controller {
         switch (key.getCharacter()) {
             case ' ':
                 AudioManager.stopAll();
-
                 return GUIEvent.Key.KEY_SPACE;
             case 'q':
                 return GUIEvent.Key.KEY_Q;
@@ -250,28 +251,42 @@ public class LanternaDisplayController implements Display, Controller {
                     continue;
                 }
 
-                if (LanternaDisplayController.this.state == State.MAIN_SCREEN) {
+                k = translateKey(key);
 
-                    AudioManager.stopAll();
-                    AudioManager.start("sound");
-                    LanternaDisplayController.this.mainMenuBlinkExecutorService.shutdownNow();
-
-                    try {
-                        Thread.sleep(1500);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
-                    AudioManager.stopAll();
-
-                    LanternaDisplayController.this.state = State.IN_GAME;
-                    receiver.receiveGUIEvent(GUIEvent.connect());
+                if (k == null) {
                     continue;
                 }
 
-                k = translateKey(key);
-
                 switch (k) {
+                    case KEY_SPACE:
+
+                        if (LanternaDisplayController.this.state == State.MAIN_SCREEN) {
+
+                            AudioManager.stopAll();
+                            AudioManager.start("sound");
+                            LanternaDisplayController.this.mainMenuBlinkExecutorService.shutdownNow();
+
+                            try {
+                                Thread.sleep(1500);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+
+                            AudioManager.stopAll();
+
+                            LanternaDisplayController.this.state = State.IN_GAME;
+                            receiver.receiveGUIEvent(GUIEvent.connect());
+                            continue;
+                        }
+                        break;
+                    case KEY_ARROWUP:
+                        break;
+                    case KEY_ARROWDOWN:
+                        break;
+                    case KEY_ARROWLEFT:
+                        break;
+                    case KEY_ARROWRIGHT:
+                        break;
                     case KEY_Q:
                         receiver.receiveGUIEvent(GUIEvent.disconnect());
                         LanternaDisplayController.this.shutdown();
@@ -280,11 +295,12 @@ public class LanternaDisplayController implements Display, Controller {
                         LanternaDisplayController.this.receiver.receiveGUIEvent(GUIEvent.disconnect());
                         LanternaDisplayController.this.showFrontPage();
                         continue;
+                    case KEY_M:
+                        break;
                 }
 
                 System.out.println("key " + k + " pressed!");
                 receiver.receiveGUIEvent(GUIEvent.keyboardInput(k));
-
             }
         }
     }
@@ -303,10 +319,9 @@ public class LanternaDisplayController implements Display, Controller {
         this.screen.clear();
 
         AudioManager.stopAll();
-        AudioManager.start("startMusic");
+        AudioManager.loop("startMusic",2);
 
         this.state = State.MAIN_SCREEN;
-
 
         createScreenElements(titlePosX, titlePosY, title, Terminal.Color.WHITE);
         createScreenElements(tankPosX, tankPosY, tank, Terminal.Color.GREEN);
@@ -351,6 +366,9 @@ public class LanternaDisplayController implements Display, Controller {
         }
     }
 
+    private void showServerBusy() {
+        createScreenElements(messagePosX, serverBusyY, serverBusy, Terminal.Color.RED);
+    }
 
     private void initializeScreen() {
         screen = TerminalFacade.createScreen();
