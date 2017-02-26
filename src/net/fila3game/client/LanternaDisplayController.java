@@ -207,6 +207,8 @@ public class LanternaDisplayController implements Display, Controller {
                 return GUIEvent.Key.KEY_Q;
             case 'r':
                 return GUIEvent.Key.KEY_R;
+            case 'm':
+                return GUIEvent.Key.KEY_M;
             default:
                 System.out.println("Something went terribly wrong");
         }
