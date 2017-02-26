@@ -195,7 +195,7 @@ public class GameClient implements GUIEventReceiver {
         switch (event.getType()) {
 
             case CLIENT_CONNECT_SERVER:
-                this.connect("localhost");
+                this.connect("192.168.0.132");
                 this.state = State.CONNECTED;
                 break;
             case CLIENT_DISCONNECT_SERVER:

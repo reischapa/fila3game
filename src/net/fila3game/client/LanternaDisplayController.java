@@ -53,9 +53,9 @@ public class LanternaDisplayController implements Display, Controller {
                     "╩  ╩╚═╚═╝╚═╝╚═╝  ╩ ╩╝╚╝ ╩   ╩ ╩╚═╝ ╩    ╩ ╚═╝  ╚═╝ ╩ ╩ ╩╩╚═ ╩ ";
 
     private static final String message2 =
-            "╔═╗╦  ╔═╗╦ ╦  ╔═╗╔═╗╦═╗  ╔═╗╦═╗╔═╗╔═╗┬┬┬\n" +
-            "╠═╝║  ╠═╣╚╦╝  ╠╣ ║ ║╠╦╝  ╠╣ ╠╦╝║╣ ║╣ │││\n" +
-            "╩  ╩═╝╩ ╩ ╩   ╚  ╚═╝╩╚═  ╚  ╩╚═╚═╝╚═╝ooo";
+                    "╔═╗╦  ╔═╗╦ ╦  ╔═╗╔═╗╦═╗  ╔═╗╦═╗╔═╗╔═╗┬┬┬\n" +
+                    "╠═╝║  ╠═╣╚╦╝  ╠╣ ║ ║╠╦╝  ╠╣ ╠╦╝║╣ ║╣ │││\n" +
+                    "╩  ╩═╝╩ ╩ ╩   ╚  ╚═╝╩╚═  ╚  ╩╚═╚═╝╚═╝ooo";
 
     private static final int titlePosX = 5;
     private static final int titlePosY = 5;
@@ -70,7 +70,7 @@ public class LanternaDisplayController implements Display, Controller {
     private State state = State.MAIN_SCREEN;
 
     public void init() {
-        AudioManager.load(new String[]{"sound", "startMusic","tankFire", "tankWasted"});
+        AudioManager.load(new String[]{"sound", "startMusic", "tankFire", "tankWasted"});
         showFrontPage();
         AudioManager.start("startMusic");
         Thread t = new Thread(new KeyListener());
@@ -104,21 +104,37 @@ public class LanternaDisplayController implements Display, Controller {
                 actualChar = ' ';
                 break;
             case 'A':
+
+                AudioManager.stop("tankFire");
+                AudioManager.start("tankFire");
+
                 back = Terminal.Color.BLACK;
                 front = Terminal.Color.MAGENTA;
                 actualChar = 'A';
                 break;
             case 'V':
+
+                AudioManager.stop("tankFire");
+                AudioManager.start("tankFire");
+
                 back = Terminal.Color.BLACK;
                 front = Terminal.Color.MAGENTA;
                 actualChar = 'V';
                 break;
             case '<':
+
+                AudioManager.stop("tankFire");
+                AudioManager.start("tankFire");
+
                 back = Terminal.Color.BLACK;
                 front = Terminal.Color.MAGENTA;
                 actualChar = '<';
                 break;
             case '>':
+
+                AudioManager.stop("tankFire");
+                AudioManager.start("tankFire");
+
                 back = Terminal.Color.BLACK;
                 front = Terminal.Color.MAGENTA;
                 actualChar = '>';
@@ -186,10 +202,8 @@ public class LanternaDisplayController implements Display, Controller {
     private GUIEvent.Key getNormalKeyCharacter(Key key) {
         switch (key.getCharacter()) {
             case ' ':
-                AudioManager.start("tankFire");
                 return GUIEvent.Key.KEY_SPACE;
             case 'q':
-                //TODO MORE SOUNDS - GIULIANO
                 return GUIEvent.Key.KEY_Q;
             case 'r':
                 return GUIEvent.Key.KEY_R;
@@ -285,7 +299,6 @@ public class LanternaDisplayController implements Display, Controller {
         mainMenuBlinkExecutorService.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                //TODO BACKGROUND SOUND - GIULIANO
 
                 createScreenElements(messagePosX, messagePosY, message, Terminal.Color.YELLOW);
                 screen.refresh();
@@ -316,5 +329,4 @@ public class LanternaDisplayController implements Display, Controller {
             y++;
         }
     }
-
 }
