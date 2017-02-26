@@ -5,14 +5,8 @@ package net.fila3game.server;
  */
 public class Instruction {
 
-    public static void main(String[] args) {
-        Instruction i = new Instruction("1 D");
-        System.out.println(i.getType());
-        System.out.println(i.getPlayerNumber());
-    }
-
     public enum Type {
-        U,D,R,L,S,M
+        U,D,R,L,M,S
     }
 
     private int playerNumber;

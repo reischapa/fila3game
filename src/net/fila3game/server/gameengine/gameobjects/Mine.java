@@ -16,10 +16,10 @@ public class Mine implements GameObject {
     private RepresentationFactory.Orientation defaultOrientation;
     private boolean alive;
 
-    public Mine(int x, int y) {
+    public Mine(int x, int y, int player) {
         this.x = x;
         this.y = y;
-        player = 0;
+        this.player = player;
         defaultOrientation = RepresentationFactory.Orientation.NORTH;
         alive = true;
     }
