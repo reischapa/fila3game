@@ -83,6 +83,14 @@ public class LanternaDisplayController implements Display, Controller {
     @Override
     public void receiveData(GameState state) {
 
+        switch (state.getStatus()) {
+            case SERVER_NOT_REACHABLE:
+                this.state = State.MAIN_SCREEN;
+                this.showFrontPage();
+                return;
+
+        }
+
         String[] lines = state.getFieldString().split("\n");
 
         for (int y = 0; y < lines.length; y++) {

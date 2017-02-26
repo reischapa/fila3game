@@ -15,8 +15,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class GameClient implements GUIEventReceiver {
 
-    private enum State {
-        WAITING, CONNECTED,
+    private enum ConnectionState {
+        DISCONNECTED, CONNECTED,
     }
 
 
@@ -28,6 +28,8 @@ public class GameClient implements GUIEventReceiver {
     public static final int NUMBER_MULTIPLES_SENT = 5;
 
     public static final int HEARTBEAT_INTERVAL = 1000;
+    public static final String SERVER_IP_ADDRESS = "localhost";
+    public static final int CONNECTION_TIMEOUT_MILLIS = 2000;
 
     public static void main(String[] args) {
         GameClient gc = new GameClient();
@@ -57,25 +59,25 @@ public class GameClient implements GUIEventReceiver {
     private String playerIdentifier;
     private int playerNumber;
 
-    private State state = State.WAITING;
+    private ConnectionState connectionState = ConnectionState.DISCONNECTED;
 
     public GameClient() {
     }
 
     public void connect(String address) {
 
-        if (this.state == State.CONNECTED) {
+        if (this.connectionState == ConnectionState.CONNECTED) {
             return;
         }
 
         try {
             this.serverAddress = InetAddress.getByName(address);
 
-            this.socket = new Socket(this.serverAddress, SERVER_TCP_CONNECTION_PORT);
+            this.socket = new Socket();
+
+            this.socket.connect( new InetSocketAddress(this.serverAddress,SERVER_TCP_CONNECTION_PORT), CONNECTION_TIMEOUT_MILLIS);
 
             this.initializeTCPStreams();
-
-            //TODO client side handshake with server?
 
             this.receiveInitialConfiguration();
 
@@ -84,14 +86,23 @@ public class GameClient implements GUIEventReceiver {
             this.initializeUDPSockets();
 
             this.scheduleWorkers();
+
             this.startHeartbeatSender();
 
         } catch (UnknownHostException e) {
             System.out.println("HOST NOT AVAILABLE");
             e.printStackTrace();
+            return;
         } catch (IOException e) {
+            System.out.println("ESTE ROUTER Ë UMA MERDA");
+            this.disconnect();
+            this.display.receiveData(GameState.serverNotAvailable());
             e.printStackTrace();
+            return;
         }
+
+        this.connectionState = ConnectionState.CONNECTED;
+
 
     }
 
@@ -158,25 +169,44 @@ public class GameClient implements GUIEventReceiver {
 
     private void disconnect() {
 
-        try {
-            this.stopHeartbeatSender();
-            this.workerExecutorService.shutdownNow();
-            this.reader.close();
-            this.writer.close();
-            this.socket.close();
-
-            this.incomingDatagramSocket.close();
-            this.outgoingDatagramSocket.close();
-
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.stopHeartbeatSender();
+        this.stopExecutorService();
+        this.closeTCPSocket();
+        this.closeUDPSockets();
+        this.connectionState = ConnectionState.DISCONNECTED;
 
         System.out.println("Disconnected");
 
     }
 
+    private void stopExecutorService() {
+        if (this.workerExecutorService == null) {
+            return;
+        }
+
+        this.workerExecutorService.shutdownNow();
+    }
+
+    private void closeTCPSocket() {
+        try {
+
+            if (this.socket != null) {
+                this.socket.close();
+            }
+
+        } catch (IOException e) {
+        }
+    }
+
+    private void closeUDPSockets() {
+        if (this.incomingDatagramSocket != null) {
+            this.incomingDatagramSocket.close();
+        }
+
+        if (this.outgoingDatagramSocket != null) {
+            this.outgoingDatagramSocket.close();
+        }
+    }
 
     private void tcpSend(String message) throws IOException {
         this.writer.write(message + "\n");
@@ -199,12 +229,10 @@ public class GameClient implements GUIEventReceiver {
         switch (event.getType()) {
 
             case CLIENT_CONNECT_SERVER:
-                this.connect("localhost");
-                this.state = State.CONNECTED;
+                this.connect(SERVER_IP_ADDRESS);
                 break;
             case CLIENT_DISCONNECT_SERVER:
                 this.disconnect();
-                this.state = State.WAITING;
                 break;
             case CLIENT_KEYBOARD_INPUT:
                 ServerSenderWorker s = new ServerSenderWorker(this.multiplyCommands(this.constructInstructionString(event.getKey())));
@@ -298,7 +326,7 @@ public class GameClient implements GUIEventReceiver {
 
                     GameState state = new GameState(string);
 
-//                System.out.println("Transmitting state to display");
+//                System.out.println("Transmitting connectionState to display");
 
                     GameClient.this.display.receiveData(state);
                 }
