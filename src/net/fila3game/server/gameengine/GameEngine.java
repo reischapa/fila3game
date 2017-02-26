@@ -1,14 +1,9 @@
 package net.fila3game.server.gameengine;
 
 import net.fila3game.server.Instruction;
-import net.fila3game.server.gameengine.gameobjects.Bullet;
-import net.fila3game.server.gameengine.gameobjects.GameObject;
-import net.fila3game.server.gameengine.gameobjects.RepresentationFactory;
-import net.fila3game.server.gameengine.gameobjects.Tank;
+import net.fila3game.server.gameengine.gameobjects.*;
 
 import java.util.LinkedList;
-
-import static net.fila3game.server.gameengine.gameobjects.RepresentationFactory.Orientation.NORTH;
 
 /**
  * Created by Luizord on 2/21/17.
@@ -26,7 +21,8 @@ public class GameEngine {
         BULLET_R('>'),
         BULLET_L('<'),
         BULLET_U('A'),
-        BULLET_D('V');
+        BULLET_D('V'),
+        HEART('♥');
 
         private char symbol;
 
@@ -100,7 +96,7 @@ public class GameEngine {
 
             } else if (i.getType().equals(Instruction.Type.U)) {
 
-                tank.setOrientation(NORTH);
+                tank.setOrientation(RepresentationFactory.Orientation.NORTH);
                 moveTank(tank, 0, -1);
 
             } else if (i.getType().equals(Instruction.Type.D)) {
@@ -161,7 +157,7 @@ public class GameEngine {
 
         } else {
 
-            bullet = new Bullet(tank.getPlayer(), tank.getX() + 1, tank.getY() - 1, NORTH);
+            bullet = new Bullet(tank.getPlayer(), tank.getX() + 1, tank.getY() - 1, RepresentationFactory.Orientation.NORTH);
 
         }
 
@@ -513,6 +509,39 @@ public class GameEngine {
         }
 
         return mainField;
+
+    }
+
+    public void drawHeart(){
+
+        int randomX = (int)Math.round(Math.random() * this.battlefield.getWidth() - 4 ) + 4;
+        int randomY = (int)Math.round(Math.random() * this. battlefield.getHeight() - 4 ) + 4;
+
+        Heart heart = new Heart (randomX,randomY);
+
+        if(!checkTankCollision(heart) && !checkBulletCollision(heart) && !checkHeartCollision(heart)){
+
+            this.battlefield.addField(heart.getRepresentation(), heart.getX(),heart.getY());
+
+        }
+    }
+
+    private synchronized boolean checkHeartCollision(GameObject object){
+
+        for (int i = object.getX(); i < object.getX() + object.getWidth(); i++) {
+
+            for (int j = object.getY(); j < object.getY() + object.getHeight(); j++) {
+
+                if (this.battlefield.get(i, j) == Tiletypes.HEART.getSymbol()) {
+
+                    System.out.println("Heart Collision");
+                    return true;
+
+                }
+            }
+        }
+
+        return false;
 
     }
 

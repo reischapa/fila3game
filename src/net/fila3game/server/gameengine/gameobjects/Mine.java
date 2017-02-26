@@ -7,8 +7,8 @@ import net.fila3game.server.gameengine.Field;
  */
 public class Mine implements GameObject {
 
-    public static final int MINE_WIDTH = 2;
-    public static final int MINE_HEIGHT = 2;
+    public static final int MINE_WIDTH = 1;
+    public static final int MINE_HEIGHT = 1;
 
     private int player;
     private int x;

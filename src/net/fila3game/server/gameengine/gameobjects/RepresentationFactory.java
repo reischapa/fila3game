@@ -83,11 +83,11 @@ public class RepresentationFactory {
                 break;
             case HEART:
                 fieldRepresentation = new Field(Heart.HEART_WIDTH, Heart.HEART_HEIGHT);
-                fieldRepresentation.constructFromString("♥♥♥♥");
+                fieldRepresentation.constructFromString("♥♥\n♥♥");
                 break;
             case MINE:
                 fieldRepresentation = new Field(Mine.MINE_WIDTH, Mine.MINE_HEIGHT);
-                fieldRepresentation.constructFromString("@\n@");
+                fieldRepresentation.constructFromString("@");
                 break;
             default:
                 System.out.println("Something went terribly wrong");
