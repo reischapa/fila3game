@@ -134,24 +134,17 @@ public class LanternaDisplayController implements Display, Controller {
                 actualChar = ' ';
                 break;
             case '1':
-                back = Terminal.Color.BLACK;
-                front = Terminal.Color.GREEN;
-                actualChar = '1';
-                break;
             case '2':
-                back = Terminal.Color.BLACK;
-                front = Terminal.Color.GREEN;
-                actualChar = '2';
-                break;
             case '3':
-                back = Terminal.Color.BLACK;
-                front = Terminal.Color.GREEN;
-                actualChar = '3';
-                break;
             case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
                 back = Terminal.Color.BLACK;
                 front = Terminal.Color.GREEN;
-                actualChar = '4';
+                actualChar = c;
                 break;
             case '♥':
                 back = Terminal.Color.BLACK;

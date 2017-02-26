@@ -17,7 +17,7 @@ import static net.fila3game.server.gameengine.gameobjects.RepresentationFactory.
  */
 public class GameEngine {
 
-    private static final int MAX_NUMBER_TANKS = 4;
+    private static final int MAX_NUMBER_TANKS = 9;
     public static final int DEFAULT_BATTLEFIELD_COLUMNS = 50;
     public static final int DEFAULT_BATTLEFIELD_ROWS = 30;
 
@@ -68,36 +68,50 @@ public class GameEngine {
 
     public synchronized void receiveInstruction(Instruction i) {
 
-        if(!tankList.isEmpty()) {
-            Tank tank = tankList.get(i.getPlayerNumber()-1);
-            if(tank.isAlive()) {
+        if (tankList.isEmpty()) {
+            return;
+        }
 
-                if (i.getType().equals(Instruction.Type.R)) {
-                    tank.setOrientation(RepresentationFactory.Orientation.EAST);
-                    moveTank(tank, 1, 0);
+        Tank tank = null;
 
-                } else if (i.getType().equals(Instruction.Type.L)) {
-                    tank.setOrientation(RepresentationFactory.Orientation.WEST);
-                    moveTank(tank, -1, 0);
-
-                } else if (i.getType().equals(Instruction.Type.U)) {
-                    tank.setOrientation(NORTH);
-                    moveTank(tank, 0, -1);
-
-                } else if (i.getType().equals(Instruction.Type.D)) {
-                    tank.setOrientation(RepresentationFactory.Orientation.SOUTH);
-                    moveTank(tank, 0, 1);
-
-                } else if (i.getType().equals(Instruction.Type.S)) {
-
-                    if(!bulletExists(tank.getPlayer())) {
-                        Bullet bullet = createBullet(tank);
-                        bullets.add(bullet);
-                    }
-
-                }
+        for (int x =0; x < tankList.size(); x++) {
+            if (i.getPlayerNumber() == tankList.get(x).getPlayer()) {
+                tank = tankList.get(x);
             }
         }
+
+        if (tank == null) {
+            return;
+        }
+
+        if(tank.isAlive()) {
+
+            if (i.getType().equals(Instruction.Type.R)) {
+                tank.setOrientation(RepresentationFactory.Orientation.EAST);
+                moveTank(tank, 1, 0);
+
+            } else if (i.getType().equals(Instruction.Type.L)) {
+                tank.setOrientation(RepresentationFactory.Orientation.WEST);
+                moveTank(tank, -1, 0);
+
+            } else if (i.getType().equals(Instruction.Type.U)) {
+                tank.setOrientation(NORTH);
+                moveTank(tank, 0, -1);
+
+            } else if (i.getType().equals(Instruction.Type.D)) {
+                tank.setOrientation(RepresentationFactory.Orientation.SOUTH);
+                moveTank(tank, 0, 1);
+
+            } else if (i.getType().equals(Instruction.Type.S)) {
+
+                if(!bulletExists(tank.getPlayer())) {
+                    Bullet bullet = createBullet(tank);
+                    bullets.add(bullet);
+                }
+
+            }
+        }
+
     }
 
     private boolean bulletExists(int tankID) {
@@ -276,18 +290,25 @@ public class GameEngine {
 
     public synchronized int addTank() {
 
-
-
         Tank t = null;
 
-        int newTankX = RandomGen.getBoundedRandomInt(1, battlefield.getWidth() - 2 - RepresentationFactory.TANK_WIDTH);
-        int newTankY = RandomGen.getBoundedRandomInt(1, battlefield.getHeight() - 2 - RepresentationFactory.TANK_HEIGHT);
-        t = new Tank(tankList.size() + 1, newTankX, newTankY, RepresentationFactory.Orientation.NORTH);
+        int newTankX;
+        int newTankY;
+        int newPlayerNumber = 1;
+
+        for (int i = 1; i <= MAX_NUMBER_TANKS; i++) {
+            for (int j=0; j < this.tankList.size(); j++ ) {
+                if (this.tankList.get(j).getPlayer() == i) {
+                    continue;
+                }
+                newPlayerNumber = i;
+            }
+        }
 
         do{
             newTankX = RandomGen.getBoundedRandomInt(1, battlefield.getWidth() - 2 - RepresentationFactory.TANK_WIDTH);
             newTankY = RandomGen.getBoundedRandomInt(1, battlefield.getHeight() - 2 - RepresentationFactory.TANK_HEIGHT);
-            t = new Tank(tankList.size() + 1, newTankX, newTankY, RepresentationFactory.Orientation.NORTH);
+            t = new Tank(newPlayerNumber, newTankX, newTankY, RepresentationFactory.Orientation.NORTH);
         } while (this.createTank(t) < 0);
 
         if (t == null) {
@@ -313,7 +334,9 @@ public class GameEngine {
             Tank t = this.tankList.get(i);
 
             if (t.getPlayer() == playerNumber) {
-                this.tankList.remove(i);
+                this.tankList.remove(t);
+                this.battlefield.addField(this.EMPTYMASK,t.getX(),t.getY());
+                this.numberOfTanks--;
             }
         }
 
