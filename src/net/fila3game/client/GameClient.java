@@ -19,7 +19,7 @@ public class GameClient implements GUIEventReceiver {
         DISCONNECTED, CONNECTED,
     }
 
-    public static final String SERVER_IP_ADDRESS = "192.168.0.132";
+    public static final String SERVER_IP_ADDRESS = "localhost";
 
     public static final int CLIENT_TCP_CONNECTION_PORT = 8080;
     public static final int CLIENT_RECEIVING_UDP_PORT = 55356;
@@ -266,6 +266,7 @@ public class GameClient implements GUIEventReceiver {
 
         result = this.appendMovementInstruction(result, key);
         result = this.appendShootInstruction(result, key);
+        result = this.appendMineInstruction(result, key);
         return result;
     }
 
@@ -308,6 +309,15 @@ public class GameClient implements GUIEventReceiver {
                 return base;
 
         }
+    }
+
+
+    public String appendMineInstruction(String base, GUIEvent.Key key) {
+        if (key == GUIEvent.Key.KEY_M) {
+            return base + " " + Instruction.Type.M.toString();
+        }
+
+        return base;
     }
 
 

@@ -12,7 +12,7 @@ public class Instruction {
     }
 
     public enum Type {
-        U,D,R,L,S
+        U,D,R,L,S,M
     }
 
     private int playerNumber;
