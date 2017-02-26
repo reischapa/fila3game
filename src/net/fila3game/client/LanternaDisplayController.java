@@ -6,6 +6,7 @@ import com.googlecode.lanterna.terminal.Terminal;
 import com.googlecode.lanterna.screen.Screen;
 import net.fila3game.AudioManager;
 
+import javax.swing.*;
 import java.util.Scanner;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -19,7 +20,7 @@ public class LanternaDisplayController implements Display, Controller {
     public static final int INPUT_SCAN_DELAY = 5;
 
     private enum State {
-        MAIN_SCREEN, IN_GAME, GAME_OVER
+        MAIN_SCREEN, IN_GAME, GAME_OVER, CREDITS
     }
 
 
@@ -93,8 +94,25 @@ public class LanternaDisplayController implements Display, Controller {
     public void init() {
         AudioManager.load(new String[]{"sound", "startMusic", "tankFire", "tankMoving"});
         showFrontPage();
+        this.initializeInputThread();
+    }
+
+    private void initializeInputThread() {
+        if (this.inputThread != null) {
+            this.inputThread.interrupt();
+        }
+
         this.inputThread = new Thread(new KeyListener());
         this.inputThread.start();
+    }
+
+    private void stopInputThread() {
+        if (this.inputThread == null) {
+            return;
+        }
+
+        this.inputThread.interrupt();
+
     }
 
     @Override
@@ -278,35 +296,6 @@ public class LanternaDisplayController implements Display, Controller {
                 }
 
                 switch (k) {
-                    case KEY_SPACE:
-
-                        if (LanternaDisplayController.this.state == State.MAIN_SCREEN) {
-
-                            AudioManager.stopAll();
-                            AudioManager.start("sound");
-                            LanternaDisplayController.this.mainMenuBlinkExecutorService.shutdownNow();
-
-                            try {
-                                Thread.sleep(1500);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-
-                            AudioManager.stopAll();
-
-                            LanternaDisplayController.this.state = State.IN_GAME;
-                            receiver.receiveGUIEvent(GUIEvent.connect());
-                            continue;
-                        }
-                        break;
-                    case KEY_ARROWUP:
-                        break;
-                    case KEY_ARROWDOWN:
-                        break;
-                    case KEY_ARROWLEFT:
-                        break;
-                    case KEY_ARROWRIGHT:
-                        break;
                     case KEY_Q:
                         receiver.receiveGUIEvent(GUIEvent.disconnect());
                         LanternaDisplayController.this.shutdown();
@@ -315,11 +304,32 @@ public class LanternaDisplayController implements Display, Controller {
                         LanternaDisplayController.this.receiver.receiveGUIEvent(GUIEvent.disconnect());
                         LanternaDisplayController.this.showFrontPage();
                         continue;
-                    case KEY_M:
-                        break;
                 }
 
-//                System.out.println("key " + k + " pressed!");
+
+                switch (LanternaDisplayController.this.state) {
+                    case MAIN_SCREEN:
+                        AudioManager.stopAll();
+                        AudioManager.start("sound");
+                        LanternaDisplayController.this.mainMenuBlinkExecutorService.shutdownNow();
+
+                        try {
+                            Thread.sleep(1500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
+                        AudioManager.stopAll();
+
+                        LanternaDisplayController.this.state = State.IN_GAME;
+                        receiver.receiveGUIEvent(GUIEvent.connect());
+                        continue;
+                    case GAME_OVER:
+                    case IN_GAME:
+
+                }
+
+
                 receiver.receiveGUIEvent(GUIEvent.keyboardInput(k));
             }
         }
@@ -328,7 +338,14 @@ public class LanternaDisplayController implements Display, Controller {
     private void shutdown() {
         AudioManager.stopAll();
         this.mainMenuBlinkExecutorService.shutdownNow();
-        this.screen.stopScreen();
+        this.stopInputThread();
+
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                screen.stopScreen();
+            }
+        });
     }
 
     private void showFrontPage() {
