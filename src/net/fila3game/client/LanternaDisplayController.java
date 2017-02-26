@@ -19,12 +19,12 @@ public class LanternaDisplayController implements Display, Controller {
     public static final int INPUT_SCAN_DELAY = 5;
 
     private enum State {
-        MAIN_SCREEN, IN_GAME,
+        MAIN_SCREEN, IN_GAME, GAME_OVER
     }
 
 
     private static final String title =
-                    "██╗    ██╗ ██████╗ ██████╗ ██╗     ██████╗  \n" +
+            "██╗    ██╗ ██████╗ ██████╗ ██╗     ██████╗  \n" +
                     "██║    ██║██╔═══██╗██╔══██╗██║     ██╔══██╗ \n" +
                     "██║ █╗ ██║██║   ██║██████╔╝██║     ██║  ██║ \n" +
                     "██║███╗██║██║   ██║██╔══██╗██║     ██║  ██║ \n" +
@@ -39,21 +39,38 @@ public class LanternaDisplayController implements Display, Controller {
                     "   ╚═════╝ ╚═╝            ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝╚══════╝\n" +
                     "                                                                    ";
     private static final String tank =
-                    "░░░░░░███████ ]▄▄▄▄▄▄▄▄▃\n" +
+            "░░░░░░███████ ]▄▄▄▄▄▄▄▄▃\n" +
                     "▂▄▅█████████▅▄▃▂\n" +
                     "I███████████████████].\n" +
                     "◥⊙▲⊙▲⊙▲⊙▲⊙▲⊙▲⊙◤...";
 
     private static final String message =
-                    "╔═╗╦═╗╔═╗╔═╗╔═╗  ╔═╗╔═╗╔═╗╔═╗╔═╗  ╔╦╗╔═╗  ╔═╗╔╦╗╔═╗╦═╗╔╦╗\n" +
+            "╔═╗╦═╗╔═╗╔═╗╔═╗  ╔═╗╔═╗╔═╗╔═╗╔═╗  ╔╦╗╔═╗  ╔═╗╔╦╗╔═╗╦═╗╔╦╗\n" +
                     "╠═╝╠╦╝║╣ ╚═╗╚═╗  ╚═╗╠═╝╠═╣║  ║╣    ║ ║ ║  ╚═╗ ║ ╠═╣╠╦╝ ║\n" +
                     "╩  ╩╚═╚═╝╚═╝╚═╝  ╚═╝╩  ╩ ╩╚═╝╚═╝   ╩ ╚═╝  ╚═╝ ╩ ╩ ╩╩╚═ ╩";
 
     private static final String serverBusy =
-                    "╔═╗╔═╗╦═╗╦  ╦╔═╗╦═╗  ╦╔═╗  ╔╗ ╦ ╦╔═╗╦ ╦     ╔╦╗╦═╗╦ ╦  ╔═╗╔═╗╔═╗╦╔╗╔  ╦  ╔═╗╔╦╗╔═╗╦═╗ ┬\n" +
+            "╔═╗╔═╗╦═╗╦  ╦╔═╗╦═╗  ╦╔═╗  ╔╗ ╦ ╦╔═╗╦ ╦     ╔╦╗╦═╗╦ ╦  ╔═╗╔═╗╔═╗╦╔╗╔  ╦  ╔═╗╔╦╗╔═╗╦═╗ ┬\n" +
                     "╚═╗║╣ ╠╦╝╚╗╔╝║╣ ╠╦╝  ║╚═╗  ╠╩╗║ ║╚═╗╚╦╝      ║ ╠╦╝╚╦╝  ╠═╣║ ╦╠═╣║║║║  ║  ╠═╣ ║ ║╣ ╠╦╝ │\n" +
                     "╚═╝╚═╝╩╚═ ╚╝ ╚═╝╩╚═  ╩╚═╝  ╚═╝╚═╝╚═╝ ╩ ooo   ╩ ╩╚═ ╩   ╩ ╩╚═╝╩ ╩╩╝╚╝  ╩═╝╩ ╩ ╩ ╚═╝╩╚═ o";
 
+    private static final String messageToRestart =
+            "╔═╗╦═╗╔═╗╔═╗╔═╗  ╦═╗  ╔╦╗╔═╗  ╦═╗╔═╗╔═╗╔╦╗╔═╗╦═╗╔╦╗\n" +
+                    "╠═╝╠╦╝║╣ ╚═╗╚═╗  ╠╦╝   ║ ║ ║  ╠╦╝║╣ ╚═╗ ║ ╠═╣╠╦╝ ║ \n" +
+                    "╩  ╩╚═╚═╝╚═╝╚═╝  ╩╚═   ╩ ╚═╝  ╩╚═╚═╝╚═╝ ╩ ╩ ╩╩╚═ ╩ ";
+
+
+    private static final String gameOver =
+            "  ▄████  ▄▄▄       ███▄ ▄███▓▓█████     ▒█████   ██▒   █▓▓█████  ██▀███  \n" +
+                    " ██▒ ▀█▒▒████▄    ▓██▒▀█▀ ██▒▓█   ▀    ▒██▒  ██▒▓██░   █▒▓█   ▀ ▓██ ▒ ██▒\n" +
+                    "▒██░▄▄▄░▒██  ▀█▄  ▓██    ▓██░▒███      ▒██░  ██▒ ▓██  █▒░▒███   ▓██ ░▄█ ▒\n" +
+                    "░▓█  ██▓░██▄▄▄▄██ ▒██    ▒██ ▒▓█  ▄    ▒██   ██░  ▒██ █░░▒▓█  ▄ ▒██▀▀█▄  \n" +
+                    "░▒▓███▀▒ ▓█   ▓██▒▒██▒   ░██▒░▒████▒   ░ ████▓▒░   ▒▀█░  ░▒████▒░██▓ ▒██▒\n" +
+                    " ░▒   ▒  ▒▒   ▓▒█░░ ▒░   ░  ░░░ ▒░ ░   ░ ▒░▒░▒░    ░ ▐░  ░░ ▒░ ░░ ▒▓ ░▒▓░\n" +
+                    "  ░   ░   ▒   ▒▒ ░░  ░      ░ ░ ░  ░     ░ ▒ ▒░    ░ ░░   ░ ░  ░  ░▒ ░ ▒░\n" +
+                    "░ ░   ░   ░   ▒   ░      ░      ░      ░ ░ ░ ▒       ░░     ░     ░░   ░ \n" +
+                    "      ░       ░  ░       ░      ░  ░       ░ ░        ░     ░  ░   ░     \n" +
+                    "                                                     ░                   \n";
 
     private static final int titlePosX = 5;
     private static final int titlePosY = 5;
@@ -319,7 +336,7 @@ public class LanternaDisplayController implements Display, Controller {
         this.screen.clear();
 
         AudioManager.stopAll();
-        AudioManager.loop("startMusic",2);
+        AudioManager.loop("startMusic", 2);
 
         this.state = State.MAIN_SCREEN;
 
@@ -353,6 +370,37 @@ public class LanternaDisplayController implements Display, Controller {
                 }
             }
         }, 0, 500, TimeUnit.MILLISECONDS);
+    }
+
+    private void showGameOverScreen() {
+
+        this.screen.clear();
+
+        createScreenElements(titlePosX, titlePosY, gameOver, Terminal.Color.RED);
+
+        this.mainMenuBlinkExecutorService.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+
+                createScreenElements(messagePosX, messagePosY, messageToRestart, Terminal.Color.YELLOW);
+                screen.refresh();
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    System.out.println(e.getMessage());
+                }
+                createScreenElements(messagePosX, messagePosY, messageToRestart, Terminal.Color.BLACK);
+                screen.refresh();
+
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    System.out.println(e.getMessage());
+                }
+            }
+        }, 0, 500, TimeUnit.MILLISECONDS);
+
+        this.screen.refresh();
     }
 
     private void createScreenElements(int x, int y, String text, Terminal.Color color) {
