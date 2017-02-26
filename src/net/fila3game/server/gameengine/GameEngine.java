@@ -372,6 +372,17 @@ public class GameEngine {
         System.out.println("Tank removed");
     }
 
+    public synchronized boolean isPlayerDead(int playerNumber) {
+
+        for (Tank t : this.tankList) {
+            if (t.getPlayer() == playerNumber) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private int createTank(Tank tank){
 
         if(!checkTankCollision(tank)){

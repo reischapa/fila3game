@@ -19,8 +19,6 @@ public class GameState {
 
 
     private String fieldString;
-
-
     private ConnectionStatus status;
 
 

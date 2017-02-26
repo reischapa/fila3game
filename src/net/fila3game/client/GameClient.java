@@ -19,17 +19,16 @@ public class GameClient implements GUIEventReceiver {
         DISCONNECTED, CONNECTED,
     }
 
-
-    public static final int SERVER_TCP_CONNECTION_PORT = 8080;
-    public static final int RECEIVING_UDP_CONNECTION_PORT = 55356;
-    public static final int SENDING_UDP_CONNECTION_PORT = 55355;
-    public static final String STRING_ENCODING = "UTF-8";
-    public static final int CLIENT_LISTEN_INTERVAL_MILLIS = 10;
-    public static final int NUMBER_MULTIPLES_SENT = 5;
-
-    public static final int HEARTBEAT_INTERVAL = 1000;
     public static final String SERVER_IP_ADDRESS = "localhost";
-    public static final int CONNECTION_TIMEOUT_MILLIS = 2000;
+
+    public static final int CLIENT_TCP_CONNECTION_PORT = 8080;
+    public static final int CLIENT_RECEIVING_UDP_PORT = 55356;
+    public static final int CLIENT_SENDING_UDP_PORT = 55355;
+    public static final int CLIENT_N_COMMAND_COPIES_SENT = 5;
+    public static final String CLIENT_STRING_BYTE_ENCODING = "UTF-8";
+
+    public static final int CLIENT_HEARTBEAT_INTERVAL_MILLIS = 1000;
+    public static final int CLIENT_CONNECTION_TIMEOUT_MILLIS = 2000;
 
     public static void main(String[] args) {
         GameClient gc = new GameClient();
@@ -37,12 +36,10 @@ public class GameClient implements GUIEventReceiver {
         ln.setInputReceiver(gc);
         gc.setDisplay(ln);
         ln.init();
-//        gc.connect("192.168.0.132");
 
     }
 
     private Display display;
-
 
     private InetAddress serverAddress;
     private Socket socket;
@@ -54,7 +51,7 @@ public class GameClient implements GUIEventReceiver {
     private DatagramSocket outgoingDatagramSocket;
 
     private ExecutorService workerExecutorService;
-    private ScheduledThreadPoolExecutor heartbeatExecutor;
+    private ScheduledThreadPoolExecutor statusExcecutor;
 
     private String playerIdentifier;
     private int playerNumber;
@@ -75,7 +72,7 @@ public class GameClient implements GUIEventReceiver {
 
             this.socket = new Socket();
 
-            this.socket.connect( new InetSocketAddress(this.serverAddress,SERVER_TCP_CONNECTION_PORT), CONNECTION_TIMEOUT_MILLIS);
+            this.socket.connect( new InetSocketAddress(this.serverAddress, CLIENT_TCP_CONNECTION_PORT), CLIENT_CONNECTION_TIMEOUT_MILLIS);
 
             this.initializeTCPStreams();
 
@@ -87,7 +84,7 @@ public class GameClient implements GUIEventReceiver {
 
             this.scheduleWorkers();
 
-            this.startHeartbeatSender();
+            this.startStatusReceiver();
 
         } catch (UnknownHostException e) {
             System.out.println("HOST NOT AVAILABLE");
@@ -117,7 +114,7 @@ public class GameClient implements GUIEventReceiver {
     }
 
     private void initializeUDPSockets() throws IOException {
-        this.incomingDatagramSocket = new DatagramSocket(RECEIVING_UDP_CONNECTION_PORT);
+        this.incomingDatagramSocket = new DatagramSocket(CLIENT_RECEIVING_UDP_PORT);
         this.outgoingDatagramSocket = new DatagramSocket();
     }
 
@@ -132,44 +129,50 @@ public class GameClient implements GUIEventReceiver {
     }
 
 
-    private void startHeartbeatSender() {
-        if (this.heartbeatExecutor != null) {
-            this.heartbeatExecutor.shutdownNow();
+    private void startStatusReceiver() {
+        if (this.statusExcecutor != null) {
+            this.statusExcecutor.shutdownNow();
         }
 
-        this.heartbeatExecutor = new ScheduledThreadPoolExecutor(4);
+        this.statusExcecutor = new ScheduledThreadPoolExecutor(4);
 
-        this.heartbeatExecutor.scheduleAtFixedRate(new Runnable() {
+        this.statusExcecutor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
                 try {
-                    GameClient.this.tcpSend(GameClient.this.getHeartbeatMessage());
-                    GameClient.this.tcpReceive();
+                    GameClient.this.tcpSend(GameClient.this.getStatusMessage());
+
+                    int newPlayerIdentifier = Integer.parseInt(GameClient.this.tcpReceive());
+
+                    if (newPlayerIdentifier < 0) {
+                        GameClient.this.disconnect();
+                    }
+
                 } catch (IOException e) {
                     e.printStackTrace();
                     GameClient.this.disconnect();
                 }
             }
-        }, 0, HEARTBEAT_INTERVAL, TimeUnit.MILLISECONDS);
+        }, 0, CLIENT_HEARTBEAT_INTERVAL_MILLIS, TimeUnit.MILLISECONDS);
 
     }
 
-    private String getHeartbeatMessage() {
+    private String getStatusMessage() {
         return this.playerIdentifier;
     }
 
-    private void stopHeartbeatSender() {
-        if (this.heartbeatExecutor == null) {
+    private void stopStatusReceiver() {
+        if (this.statusExcecutor == null) {
             return;
         }
 
-        this.heartbeatExecutor.shutdownNow();
+        this.statusExcecutor.shutdownNow();
 
     }
 
     private void disconnect() {
 
-        this.stopHeartbeatSender();
+        this.stopStatusReceiver();
         this.stopExecutorService();
         this.closeTCPSocket();
         this.closeUDPSockets();
@@ -236,7 +239,7 @@ public class GameClient implements GUIEventReceiver {
                 break;
             case CLIENT_KEYBOARD_INPUT:
                 ServerSenderWorker s = new ServerSenderWorker(this.multiplyCommands(this.constructInstructionString(event.getKey())));
-                this.heartbeatExecutor.execute(s);
+                this.statusExcecutor.execute(s);
                 break;
         }
 
@@ -298,8 +301,8 @@ public class GameClient implements GUIEventReceiver {
     private String[] multiplyCommands(String in) {
         Long time = System.currentTimeMillis();
         in = in.concat(" " + Long.toString(time));
-        String[] result = new String[NUMBER_MULTIPLES_SENT];
-        for (int i = 0; i < NUMBER_MULTIPLES_SENT; i++) {
+        String[] result = new String[CLIENT_N_COMMAND_COPIES_SENT];
+        for (int i = 0; i < CLIENT_N_COMMAND_COPIES_SENT; i++) {
             result[i] = in;
         }
         System.out.println(result[0]);
@@ -322,7 +325,7 @@ public class GameClient implements GUIEventReceiver {
                 while (true) {
 //                System.out.println("Receiving message:");
                     GameClient.this.incomingDatagramSocket.receive(packet);
-                    String string = new String(packet.getData(), 0, packet.getLength(), STRING_ENCODING);
+                    String string = new String(packet.getData(), 0, packet.getLength(), CLIENT_STRING_BYTE_ENCODING);
 
                     GameState state = new GameState(string);
 
@@ -356,9 +359,9 @@ public class GameClient implements GUIEventReceiver {
             try {
 
                 for (String s : this.data) {
-                    byte[] bytes = s.getBytes(STRING_ENCODING);
+                    byte[] bytes = s.getBytes(CLIENT_STRING_BYTE_ENCODING);
 //                    System.out.println(s);
-                    DatagramPacket packet = new DatagramPacket(bytes, bytes.length, GameClient.this.serverAddress, GameClient.SENDING_UDP_CONNECTION_PORT);
+                    DatagramPacket packet = new DatagramPacket(bytes, bytes.length, GameClient.this.serverAddress, GameClient.CLIENT_SENDING_UDP_PORT);
 
                     GameClient.this.outgoingDatagramSocket.send(packet);
                 }

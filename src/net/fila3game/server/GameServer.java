@@ -1,5 +1,6 @@
 package net.fila3game.server;
 
+import net.fila3game.client.GameClient;
 import net.fila3game.server.gameengine.GameEngine;
 //import net.jchapa.chapautils.FileIOManager;
 
@@ -15,28 +16,24 @@ public class GameServer {
     public static final int SEND_INTERVAL = 25;
     public static final int GAME_ENGINE_SENDING_INTERVAL = 50;
     public static final int KEEPALIVE_INTERVAL = 100;
+    public static final int SERVER_TCP_CONNECTION_PORT = 8080;
+    public static final int SERVER_RECEIVING_UDP_PORT = 55355;
+    public static final int SERVER_SENDING_UDP_PORT = 55356;
+
+    public static final int SERVER_N_CLIENT_EXECUTOR_SERVICE_THREADS = 10;
+    public static final int SERVER_N_SCHEDULED_EXECUTOR_SERVICE_THREADS = 10;
+
     public static final String KEEPALIVE_MESSAGE = "a";
-    public static final int TCP_CONNECTION_PORT = 8080;
-    public static final int RECEIVING_UDP_CONNECTION_PORT = 55355;
-    public static final int SENDING_UDP_CONNECTION_PORT = 55356;
     public static final String STRING_ENCODING = "UTF-8";
     public static final String COMMAND_TOKEN_SEPARATOR = " ";
 
 
-    //debug toggles
-    private static boolean D_REQUIRE_ENGINE = false;
 
 
     public static void main(String[] args) {
-        GameServer gm = null;
-        try {
-            gm = new GameServer();
-            gm.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-        }
-
+        GameServer gm = new GameServer();
+        gm.setEngine(new GameEngine());
+        gm.start();
     }
 
     private ServerSocket serverSocket;
@@ -45,54 +42,80 @@ public class GameServer {
     private GameEngine engine;
     private ConcurrentMap<String, ClientStatusWorker> currentClients;
     private final ConcurrentMap<String, Instruction> currentInstructions;
-    private ExecutorService normalExecutorService;
+    private ExecutorService clientExecutorService;
     private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
 
 
-    public GameServer() throws IOException {
-        this.serverSocket = new ServerSocket(TCP_CONNECTION_PORT);
+    public GameServer() {
         this.currentClients = new ConcurrentHashMap<>();
         this.currentInstructions = new ConcurrentHashMap<>();
-        this.normalExecutorService = Executors.newFixedThreadPool(100);
-        this.scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(4);
-        this.engine = new GameEngine();
     }
 
-    private void start() throws IOException {
+    private void start() {
 
-        if (D_REQUIRE_ENGINE && this.engine == null) {
+        if (this.engine == null) {
             throw new IllegalStateException("no engine");
         }
 
-        this.initializeGeneralUDPSockets();
-        this.scheduleGeneralUDPWorkers();
+        try {
+
+            this.serverSocket = new ServerSocket(SERVER_TCP_CONNECTION_PORT);
+
+            this.initializeGeneralUDPSockets();
+            this.initializeExecutorServices();
+
+            this.scheduleGeneralUDPWorkers();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
 
 
         while (true) {
-            this.acceptClient();
+            try {
+                this.acceptClient();
+            } catch (IOException e) {
+                System.out.println("client failed to connect");
+                e.printStackTrace();
+            }
         }
 
     }
 
 
     private void initializeGeneralUDPSockets() throws IOException{
-        this.incomingDatagramSocket = new DatagramSocket(RECEIVING_UDP_CONNECTION_PORT);
+        this.incomingDatagramSocket = new DatagramSocket(SERVER_RECEIVING_UDP_PORT);
         this.outgoingDatagramSocket = new DatagramSocket();
     }
 
 
+    private void initializeExecutorServices() {
+
+        if (this.scheduledThreadPoolExecutor != null) {
+            this.scheduledThreadPoolExecutor.shutdownNow();
+        }
+
+        if (this.clientExecutorService != null) {
+            this.clientExecutorService.shutdownNow();
+        }
+
+        this.clientExecutorService = Executors.newFixedThreadPool(SERVER_N_CLIENT_EXECUTOR_SERVICE_THREADS);
+        this.scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(SERVER_N_SCHEDULED_EXECUTOR_SERVICE_THREADS);
+    }
+
     private void scheduleGeneralUDPWorkers() {
+
         this.scheduledThreadPoolExecutor.scheduleAtFixedRate(new ClientBroadcastWorker(), 0, SEND_INTERVAL, TimeUnit.MILLISECONDS);
         this.scheduledThreadPoolExecutor.scheduleAtFixedRate(new InstructionTableCleaner(), 0, GAME_ENGINE_SENDING_INTERVAL, TimeUnit.MILLISECONDS);
-        this.normalExecutorService.execute(new ClientReceiverWorker());
+        this.clientExecutorService.execute(new ClientReceiverWorker());
     }
 
 
 
-    private void acceptClient() throws IOException {
+    private void acceptClient() throws IOException{
         Socket socket = this.serverSocket.accept();
-//            System.out.println("Server accepted connection");
-        this.normalExecutorService.execute(new ClientStatusWorker(socket));
+        this.clientExecutorService.execute(new ClientStatusWorker(socket));
     }
 
     public void setEngine(GameEngine engine) {
@@ -107,9 +130,10 @@ public class GameServer {
         private BufferedReader reader;
         private BufferedWriter writer;
 
-        private ExecutorService heartbeatExecutor;
+        private ExecutorService statusExecutor;
 
         private String identifier;
+        private int assignedPlayerNumber;
 
         public ClientStatusWorker(Socket socket) throws UnknownHostException {
             this.socket = socket;
@@ -126,20 +150,18 @@ public class GameServer {
                     int playerNumber = this.addGameEnginePlayerReference();
 
                     if (playerNumber < 1) {
-//                        Thread.sleep(1000);
-//                        this.run();
-//                        return;
+                        //TODO wait queue
                         throw new IOException();
                     }
 
                     System.out.println(playerNumber);
 
-                    this.constructClientIdentifier(playerNumber);
+                    this.constructClientIdentifier();
+                    this.assignedPlayerNumber = playerNumber;
                     this.sendInitialConfiguration();
-                    System.out.println("test");
 
                     this.registerSelfToActiveClientList();
-                    this.startHeartbeatReceiver();
+                    this.startStatusTransmitter();
 
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -152,7 +174,7 @@ public class GameServer {
 
         private void sendInitialConfiguration() throws IOException{
             this.tcpSend(this.identifier + "");
-            this.tcpSend(this.getEnginePlayerNumberFromId() + "");
+            this.tcpSend(this.assignedPlayerNumber + "");
             System.out.println("configuration sent");
         }
 
@@ -161,38 +183,28 @@ public class GameServer {
         }
 
         private void removeGameEnginePlayerReference() {
-            GameServer.this.engine.removeTankOfPlayerNumber(this.getEnginePlayerNumberFromId());
+            GameServer.this.engine.removeTankOfPlayerNumber(this.assignedPlayerNumber);
         }
 
-        private int getEnginePlayerNumberFromId() {
-            try {
-                return Integer.parseInt(this.identifier.split(" ")[0]);
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
-                System.out.println("WRONG PLAYER IN COMMAND FORMAT");
-                System.exit(0);
-            }
-            return -4;
-        }
-
-
-        private void constructClientIdentifier(int playerNumber) {
-            this.identifier = playerNumber + " " + this.clientIPAddress.toString().concat(" " + Long.toString(System.currentTimeMillis()));
+        private void constructClientIdentifier() {
+            this.identifier = this.clientIPAddress.toString().concat(" " + Long.toString(System.currentTimeMillis()));
             System.out.println(this.identifier);
         }
 
-        private void startHeartbeatReceiver() {
-            if (this.heartbeatExecutor == null) {
-                this.heartbeatExecutor = Executors.newFixedThreadPool(1);
+        private void startStatusTransmitter() {
+            if (this.statusExecutor != null) {
+                this.statusExecutor.shutdownNow();
             }
 
-            this.heartbeatExecutor.execute(new Runnable() {
+            this.statusExecutor = Executors.newFixedThreadPool(1);
+
+            this.statusExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
                     while (true) {
                         try {
-                            String heartBeat = ClientStatusWorker.this.tcpReceive();
-                            ClientStatusWorker.this.tcpSend(ClientStatusWorker.this.getHeartbeatMessage());
+                            ClientStatusWorker.this.tcpReceive();
+                            ClientStatusWorker.this.tcpSend(ClientStatusWorker.this.getStatusMessage());
                         } catch (IOException e) {
                             ClientStatusWorker.this.safelyShutdownClientConnection();
                             break;
@@ -204,16 +216,21 @@ public class GameServer {
         }
 
 
-        private String getHeartbeatMessage() {
-            return KEEPALIVE_MESSAGE;
+        private String getStatusMessage() {
+
+            if (GameServer.this.engine.isPlayerDead(this.assignedPlayerNumber)) {
+                return -1 + "";
+            }
+
+            return Integer.toString(this.assignedPlayerNumber);
         }
 
-        private void stopHeartbeatReceiver() {
-            if (this.heartbeatExecutor == null) {
+        private void stopStatusTransmitter() {
+            if (this.statusExecutor == null) {
                 return;
             }
 
-            this.heartbeatExecutor.shutdownNow();
+            this.statusExecutor.shutdownNow();
         }
 
         private void tcpSend(String msg) throws IOException {
@@ -234,7 +251,7 @@ public class GameServer {
         private void safelyShutdownClientConnection() {
             this.removeGameEnginePlayerReference();
             this.deRegisterSelfFromActiveClientList();
-            this.stopHeartbeatReceiver();
+            this.stopStatusTransmitter();
             this.safelyShutdownTCP();
             System.out.println("Client " + this.identifier + " has disconnected.");
         }
@@ -359,7 +376,7 @@ public class GameServer {
 //                String message = "hello";
 
                 byte[] b = message.getBytes();
-                DatagramPacket p = new DatagramPacket(b, 0, b.length, worker.getClientIPAddress(), SENDING_UDP_CONNECTION_PORT);
+                DatagramPacket p = new DatagramPacket(b, 0, b.length, worker.getClientIPAddress(), SERVER_SENDING_UDP_PORT);
                 try {
                     GameServer.this.outgoingDatagramSocket.send(p);
                 } catch (IOException e) {
@@ -382,31 +399,28 @@ public class GameServer {
         @Override
         public void run() {
 
-
-            synchronized (GameServer.this.currentInstructions) {
-                StringBuilder sb = new StringBuilder();
                 Iterator<String> iter = GameServer.this.currentInstructions.keySet().iterator();
                 while (iter.hasNext()) {
                     String elem = iter.next();
-                    sb.append(elem);
 
                     Instruction i = GameServer.this.currentInstructions.get(elem);
 
-//                    System.out.println(i.getPlayerNumber());
+                    if (i == null) {
+                        continue;
+                    }
 
                     GameServer.this.engine.receiveInstruction(i);
                 }
 
-//                if (sb.length() > 0) {
-//                    System.out.println(sb.toString());
-//                }
-
-
                 GameServer.this.currentInstructions.clear();
-            }
+
 
         }
+
     }
 
 
+
 }
+
+
