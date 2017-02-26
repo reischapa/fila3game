@@ -5,9 +5,7 @@ import net.fila3game.server.gameengine.gameobjects.Bullet;
 import net.fila3game.server.gameengine.gameobjects.GameObject;
 import net.fila3game.server.gameengine.gameobjects.RepresentationFactory;
 import net.fila3game.server.gameengine.gameobjects.Tank;
-import net.jchapa.chapautils.RandomGen;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 
 import static net.fila3game.server.gameengine.gameobjects.RepresentationFactory.Orientation.NORTH;
@@ -54,6 +52,7 @@ public class GameEngine {
         this.battlefield = battlefield;
         numberOfTanks = 0;
         tankList = new LinkedList<>();
+        bullets = new LinkedList<>();
 
     }
 
@@ -147,7 +146,7 @@ public class GameEngine {
 
         }
 
-        if(!checkWallColistion(bullet) && !checkBulletCollision(bullet)){
+        if(!checkWallCollision(bullet) && !checkBulletCollision(bullet)){
 
             battlefield.addField(bullet.getRepresentation(),bullet.getX(),bullet.getY());
         }
@@ -182,30 +181,41 @@ public class GameEngine {
 
         bullet.move(bullet.getX()+x,bullet.getY()+y);
 
-        for(Tank t : tankList) {
 
-            battlefield.addField(EMPTYMASK,t.getX(),t.getY());
+        //Does not work
 
-            if (checkBulletCollision(t)) {
+        if (checkBulletTankCollision(bullet)) {
 
-                System.out.println("colidiu");
-                battlefield.addField(EMPTYMASK,t.getX(), t.getY());
-                battlefield.addField(EMPTYBULLET,bullet.getX(),bullet.getY());
-                tankList.remove(t);
-                t.die();
-                bullet.die();
-                bullets.remove(bullet);
-                numberOfTanks--;
-                return;
+            System.out.println("colidiu");
+            battlefield.addField(bullet.getRepresentation(),bullet.getX(),bullet.getY());
+
+            for(Tank t : tankList){
+
+                if(checkBulletCollision(t)){
+
+                    System.out.println("gotcha bitch");
+                    battlefield.addField(EMPTYMASK,t.getX(),t.getY());
+                    t.die();
+                    tankList.remove(t);
+                    numberOfTanks--;
+
+                }
             }
 
-            battlefield.addField(t.getRepresentation(),t.getX(),t.getY());
+            battlefield.addField(EMPTYBULLET,bullet.getX(),bullet.getY());
+            bullet.die();
+            bullets.remove(bullet);
+            return;
+
         }
 
         for(Bullet otherbullet : bullets){
+
             if(otherbullet.getPlayer() != bullet.getPlayer()){
-                if(checkBulletCollision(otherbullet)){
-                    System.out.println("bullet on bullet collision");
+
+                if(checkBulletCollision(bullet)){
+
+                    battlefield.addField(bullet.getRepresentation(),bullet.getX(),bullet.getY());
                     battlefield.addField(EMPTYBULLET,bullet.getX(), bullet.getY());
                     battlefield.addField(EMPTYBULLET,otherbullet.getX(), otherbullet.getY());
                     bullet.die();
@@ -217,7 +227,7 @@ public class GameEngine {
             }
         }
 
-        if(checkWallColistion(bullet)){
+        if(checkWallCollision(bullet)){
 
             System.out.println("bitch");
             Field wallField = new Field(1,1);
@@ -256,6 +266,7 @@ public class GameEngine {
     }
 
     //TODO Tanques teem que morrer e o server teem que saber;
+    //TODO matar o chapa sem que ninguem saiba...
 
 
 //    public synchronized int addTank(){
@@ -298,16 +309,18 @@ public class GameEngine {
 
 
             for (int j =0; j<this.tankList.size(); j++) {
+
                 while (this.tankList.get(j).getPlayer() == newPlayerNumber) {
                     newPlayerNumber++;
                 }
+
             }
-
-
-
+        System.out.println("player: "+newPlayerNumber);
         do{
-            newTankX = RandomGen.getBoundedRandomInt(1, battlefield.getWidth() - 2 - RepresentationFactory.TANK_WIDTH);
-            newTankY = RandomGen.getBoundedRandomInt(1, battlefield.getHeight() - 2 - RepresentationFactory.TANK_HEIGHT);
+            //newTankX = RandomGen.getBoundedRandomInt(1, battlefield.getWidth() - 2 - RepresentationFactory.TANK_WIDTH);
+            //newTankY = RandomGen.getBoundedRandomInt(1, battlefield.getHeight() - 2 - RepresentationFactory.TANK_HEIGHT);
+            newTankX = (int) Math.round(Math.random() * battlefield.getWidth() - RepresentationFactory.TANK_WIDTH ) + 2;
+            newTankY = (int)  Math.round(Math.random() * battlefield.getHeight() - RepresentationFactory.TANK_HEIGHT ) + 2 ;
             t = new Tank(newPlayerNumber, newTankX, newTankY, RepresentationFactory.Orientation.NORTH);
         } while (this.createTank(t) < 0);
 
@@ -386,7 +399,7 @@ public class GameEngine {
         return false;
     }
 
-    private synchronized boolean checkWallColistion(Bullet bullet){
+    private synchronized boolean checkWallCollision(Bullet bullet){
 
         for(int i = bullet.getX(); i < bullet.getX()+bullet.getWidth(); i++) {
 
@@ -401,14 +414,26 @@ public class GameEngine {
         return false;
     }
 
+    private synchronized boolean checkBulletTankCollision(GameObject object){
+        for(int i = object.getX(); i < object.getX()+object.getWidth(); i++) {
+
+            for (int j = object.getY(); j < object.getY() + object.getHeight(); j++) {
+
+                if (battlefield.get(i, j) == Tiletypes.TANK.getSymbol()) {
+                    System.out.println("Tank Collision");
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
     private synchronized boolean checkBulletCollision(GameObject object){
 
         for(int i = object.getX(); i < object.getX()+object.getWidth(); i++) {
 
             for(int j = object.getY(); j < object.getY()+object.getHeight(); j++) {
-
-//                System.out.println(i);
-//                System.out.println(j);
 
                 if (battlefield.get(i,j) == Tiletypes.BULLET_D.getSymbol() || battlefield.get(i,j) == Tiletypes.BULLET_U.getSymbol() ||
                         battlefield.get(i,j) == Tiletypes.BULLET_L.getSymbol() || battlefield.get(i,j) == Tiletypes.BULLET_R.getSymbol()) {
