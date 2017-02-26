@@ -11,6 +11,7 @@ import java.util.LinkedList;
 public class GameEngine {
 
     private static final int MAX_NUMBER_TANKS = 9;
+    public static final int MAX_MINE_NUMBER = 3;
     public static final int DEFAULT_BATTLEFIELD_COLUMNS = 50;
     public static final int DEFAULT_BATTLEFIELD_ROWS = 30;
 
@@ -39,6 +40,7 @@ public class GameEngine {
     private int numberOfTanks;
     private LinkedList<Tank> tankList;
     private LinkedList<Bullet> bullets;
+    private LinkedList<Mine> mineList;
     private final Field EMPTYMASK = new Field(RepresentationFactory.TANK_WIDTH, RepresentationFactory.TANK_HEIGHT);
     private final Field EMPTYBULLET = new Field(1, 1);
 
@@ -49,6 +51,7 @@ public class GameEngine {
         this.numberOfTanks = 0;
         this.tankList = new LinkedList<>();
         this.bullets = new LinkedList<>();
+        this.mineList = new LinkedList<>();
 
     }
 
@@ -58,6 +61,7 @@ public class GameEngine {
         this.numberOfTanks = 0;
         this.tankList = new LinkedList<>();
         this.bullets = new LinkedList<>();
+        this.mineList = new LinkedList<>();
 
     }
 
@@ -113,6 +117,29 @@ public class GameEngine {
                     if (bullet.isAlive()) {
 
                         this.bullets.add(bullet);
+
+                    }
+                }
+
+            } else if (i.getType().equals(Instruction.Type.M)){
+
+                if(!this.mineList.isEmpty()) {
+
+                    int mineNumber = 0;
+
+                    for (Mine m : this.mineList) {
+
+                        if(m.getPlayer() == i.getPlayerNumber()){
+
+                            mineNumber++;
+
+                        }
+
+                    }
+
+                    if(mineNumber < this.MAX_MINE_NUMBER){
+
+                        dropMine(tank);
 
                     }
                 }
@@ -543,6 +570,42 @@ public class GameEngine {
 
         return false;
 
+    }
+
+    private synchronized void dropMine(Tank tank){
+
+        Mine mine = null;
+
+        if (tank.getOrientation().equals(RepresentationFactory.Orientation.EAST)) {
+
+            mine = new Mine(tank.getX() - 1, tank.getY() + 1, tank.getPlayer());
+
+        } else if (tank.getOrientation().equals(RepresentationFactory.Orientation.WEST)) {
+
+            mine = new Mine(tank.getX() + 3, tank.getY() + 1, tank.getPlayer());
+
+        } else if (tank.getOrientation().equals(RepresentationFactory.Orientation.NORTH)) {
+
+            mine = new Mine(tank.getX() + 1, tank.getY() + 3, tank.getPlayer());
+
+        } else {
+
+            mine = new Mine(tank.getX() + 1, tank.getY() - 1, tank.getPlayer());
+
+        }
+
+        if (!checkTankCollision(mine)) {
+
+            this.battlefield.addField(mine.getRepresentation(), mine.getX(), mine.getY());
+
+        } else {
+
+            mine.die();
+            System.out.println("wtfbooom");
+            return;
+
+        }
+        mineList.add(mine);
     }
 
 }
