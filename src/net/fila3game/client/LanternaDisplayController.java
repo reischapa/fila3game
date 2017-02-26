@@ -89,6 +89,10 @@ public class LanternaDisplayController implements Display, Controller {
                 this.showFrontPage();
                 this.showServerBusy();
                 return;
+            case SERVER_FORCED_DISCONNECT:
+                this.state = State.MAIN_SCREEN;
+                this.showFrontPage();
+                return;
 
         }
 
@@ -332,7 +336,7 @@ public class LanternaDisplayController implements Display, Controller {
 
         this.mainMenuBlinkExecutorService = new ScheduledThreadPoolExecutor(2);
 
-        mainMenuBlinkExecutorService.scheduleAtFixedRate(new Runnable() {
+        this.mainMenuBlinkExecutorService.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
 

@@ -27,7 +27,7 @@ public class GameClient implements GUIEventReceiver {
     public static final int CLIENT_N_COMMAND_COPIES_SENT = 5;
     public static final String CLIENT_STRING_BYTE_ENCODING = "UTF-8";
 
-    public static final int CLIENT_HEARTBEAT_INTERVAL_MILLIS = 1000;
+    public static final int CLIENT_HEARTBEAT_INTERVAL_MILLIS = 5;
     public static final int CLIENT_CONNECTION_TIMEOUT_MILLIS = 2000;
 
     public static void main(String[] args) {
@@ -51,7 +51,10 @@ public class GameClient implements GUIEventReceiver {
     private DatagramSocket outgoingDatagramSocket;
 
     private ExecutorService workerExecutorService;
-    private ScheduledThreadPoolExecutor statusExcecutor;
+    private ScheduledThreadPoolExecutor statusExecutor;
+
+    private Thread inputSendingThread;
+
 
     private String playerIdentifier;
     private int playerNumber;
@@ -82,7 +85,7 @@ public class GameClient implements GUIEventReceiver {
 
             this.initializeUDPSockets();
 
-            this.scheduleWorkers();
+            this.initializeWorkerExecutorService();
 
             this.startStatusReceiver();
 
@@ -118,25 +121,25 @@ public class GameClient implements GUIEventReceiver {
         this.outgoingDatagramSocket = new DatagramSocket();
     }
 
-    private void scheduleWorkers() {
+    private void initializeWorkerExecutorService() {
         if (this.workerExecutorService != null) {
             this.workerExecutorService.shutdownNow();
         }
 
-        this.workerExecutorService = Executors.newFixedThreadPool(4);
+        this.workerExecutorService = Executors.newFixedThreadPool(100);
 
         this.workerExecutorService.execute(new ServerReceiverWorker());
     }
 
 
     private void startStatusReceiver() {
-        if (this.statusExcecutor != null) {
-            this.statusExcecutor.shutdownNow();
+        if (this.statusExecutor != null) {
+            this.statusExecutor.shutdownNow();
         }
 
-        this.statusExcecutor = new ScheduledThreadPoolExecutor(4);
+        this.statusExecutor = new ScheduledThreadPoolExecutor(4);
 
-        this.statusExcecutor.scheduleAtFixedRate(new Runnable() {
+        this.statusExecutor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -146,6 +149,7 @@ public class GameClient implements GUIEventReceiver {
 
                     if (newPlayerIdentifier < 0) {
                         GameClient.this.disconnect();
+                        GameClient.this.display.receiveData(GameState.serverForcedDisconnect());
                     }
 
                 } catch (IOException e) {
@@ -162,11 +166,11 @@ public class GameClient implements GUIEventReceiver {
     }
 
     private void stopStatusReceiver() {
-        if (this.statusExcecutor == null) {
+        if (this.statusExecutor == null) {
             return;
         }
 
-        this.statusExcecutor.shutdownNow();
+        this.statusExecutor.shutdownNow();
 
     }
 
@@ -174,6 +178,11 @@ public class GameClient implements GUIEventReceiver {
 
         this.stopStatusReceiver();
         this.stopExecutorService();
+
+        if (this.inputSendingThread != null) {
+            this.inputSendingThread.interrupt();
+        }
+
         this.closeTCPSocket();
         this.closeUDPSockets();
         this.connectionState = ConnectionState.DISCONNECTED;
@@ -238,14 +247,16 @@ public class GameClient implements GUIEventReceiver {
                 this.disconnect();
                 break;
             case CLIENT_KEYBOARD_INPUT:
-                ServerSenderWorker s = new ServerSenderWorker(this.multiplyCommands(this.constructInstructionString(event.getKey())));
-                this.statusExcecutor.execute(s);
+
+                this.inputSendingThread = new Thread(new ServerSenderWorker(this.multiplyCommands(this.constructInstructionString(event.getKey()))));
+                this.inputSendingThread.run();
                 break;
         }
 
-
-
     }
+
+
+
 
 
     private String constructInstructionString(GUIEvent.Key key) {

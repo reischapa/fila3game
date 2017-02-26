@@ -9,12 +9,16 @@ public class GameState {
         return new GameState(ConnectionStatus.SERVER_NOT_REACHABLE);
     }
 
+    public static GameState serverForcedDisconnect() {
+        return new GameState(ConnectionStatus.SERVER_FORCED_DISCONNECT);
+    }
+
     public static void main(String[] args) {
         GameState state = new GameState("1 0\r\nTTT\nTTT\n0T0\n");
     }
 
     public enum ConnectionStatus {
-        OK, SERVER_NOT_REACHABLE, SERVER_INVALID_ADDRESS,
+        OK, SERVER_NOT_REACHABLE, SERVER_INVALID_ADDRESS, SERVER_FORCED_DISCONNECT
     }
 
 
