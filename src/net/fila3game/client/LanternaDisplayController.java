@@ -259,6 +259,9 @@ public class LanternaDisplayController implements Display, Controller {
 
                 switch (k) {
                     case KEY_SPACE:
+
+                        if (LanternaDisplayController.this.state == State.MAIN_SCREEN) {
+
                             AudioManager.stopAll();
                             AudioManager.start("sound");
                             LanternaDisplayController.this.mainMenuBlinkExecutorService.shutdownNow();
@@ -274,6 +277,8 @@ public class LanternaDisplayController implements Display, Controller {
                             LanternaDisplayController.this.state = State.IN_GAME;
                             receiver.receiveGUIEvent(GUIEvent.connect());
                             continue;
+                        }
+                        break;
                     case KEY_ARROWUP:
                         break;
                     case KEY_ARROWDOWN:
