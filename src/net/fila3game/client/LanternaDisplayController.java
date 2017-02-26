@@ -102,13 +102,12 @@ public class LanternaDisplayController implements Display, Controller {
 
         switch (state.getStatus()) {
             case SERVER_NOT_REACHABLE:
-                this.state = State.MAIN_SCREEN;
                 this.showFrontPage();
                 this.showServerBusy();
                 return;
             case SERVER_FORCED_DISCONNECT:
-                this.state = State.MAIN_SCREEN;
-                this.showFrontPage();
+                this.showGameOverScreen();
+                System.out.println("Game Over");
                 return;
 
         }
@@ -197,14 +196,14 @@ public class LanternaDisplayController implements Display, Controller {
                 front = Terminal.Color.CYAN;
                 actualChar = '@';
             default:
-                System.out.println("Something went terribly wrong");
+//                System.out.println("Something went terribly wrong");
         }
 
         this.screen.putString(x, y, "" + actualChar + actualChar, back, front);
     }
 
     private GUIEvent.Key translateKey(Key key) {
-        System.out.println("got key! " + key);
+//        System.out.println("got key! " + key);
         switch (key.getKind()) {
             case ArrowDown:
                 AudioManager.start("tankMoving");
@@ -221,7 +220,7 @@ public class LanternaDisplayController implements Display, Controller {
             case NormalKey:
                 return getNormalKeyCharacter(key);
             default:
-                System.out.println("Something went terribly wrong");
+//                System.out.println("Something went terribly wrong");
         }
 
         return null;
@@ -239,10 +238,10 @@ public class LanternaDisplayController implements Display, Controller {
             case 'm':
                 return GUIEvent.Key.KEY_M;
             default:
-                System.out.println("Something went terribly wrong");
+//                System.out.println("Something went terribly wrong");
         }
 
-        System.err.println("Keystroke is not mapped, returning null...");
+//        System.err.println("Keystroke is not mapped, returning null...");
         return null;
     }
 
@@ -320,7 +319,7 @@ public class LanternaDisplayController implements Display, Controller {
                         break;
                 }
 
-                System.out.println("key " + k + " pressed!");
+//                System.out.println("key " + k + " pressed!");
                 receiver.receiveGUIEvent(GUIEvent.keyboardInput(k));
             }
         }
@@ -374,37 +373,23 @@ public class LanternaDisplayController implements Display, Controller {
                 }
             }
         }, 0, 500, TimeUnit.MILLISECONDS);
+        this.state = State.MAIN_SCREEN;
     }
 
     private void showGameOverScreen() {
 
+        if (this.screen == null) {
+            this.initializeScreen();
+        }
+
         this.screen.clear();
+        System.out.println("Game Over");
 
         createScreenElements(titlePosX, titlePosY, gameOver, Terminal.Color.RED);
-
-        this.mainMenuBlinkExecutorService.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-
-                createScreenElements(messagePosX, messagePosY, messageToRestart, Terminal.Color.YELLOW);
-                screen.refresh();
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    System.out.println(e.getMessage());
-                }
-                createScreenElements(messagePosX, messagePosY, messageToRestart, Terminal.Color.BLACK);
-                screen.refresh();
-
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    System.out.println(e.getMessage());
-                }
-            }
-        }, 0, 500, TimeUnit.MILLISECONDS);
-
+        createScreenElements(messagePosX, messagePosY, messageToRestart, Terminal.Color.YELLOW);
         this.screen.refresh();
+
+        this.state = State.GAME_OVER;
     }
 
     private void createScreenElements(int x, int y, String text, Terminal.Color color) {
@@ -430,5 +415,9 @@ public class LanternaDisplayController implements Display, Controller {
         screen.setCursorPosition(99, 29);
         screen.getTerminal().setCursorVisible(false);
     }
+
+
+
+
 
 }

@@ -150,6 +150,7 @@ public class GameClient implements GUIEventReceiver {
 
                     if (newPlayerIdentifier < 0) {
                         GameClient.this.disconnect();
+                        System.out.println("LDKjsdlkjflskdf");
                         GameClient.this.display.receiveData(GameState.serverForcedDisconnect());
                     }
 
