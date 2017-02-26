@@ -296,14 +296,14 @@ public class GameEngine {
         int newTankY;
         int newPlayerNumber = 1;
 
-        for (int i = 1; i <= MAX_NUMBER_TANKS; i++) {
-            for (int j=0; j < this.tankList.size(); j++ ) {
-                if (this.tankList.get(j).getPlayer() == i) {
-                    continue;
+
+            for (int j =0; j<this.tankList.size(); j++) {
+                while (this.tankList.get(j).getPlayer() == newPlayerNumber) {
+                    newPlayerNumber++;
                 }
-                newPlayerNumber = i;
             }
-        }
+
+
 
         do{
             newTankX = RandomGen.getBoundedRandomInt(1, battlefield.getWidth() - 2 - RepresentationFactory.TANK_WIDTH);
