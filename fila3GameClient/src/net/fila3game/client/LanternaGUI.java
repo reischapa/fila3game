@@ -4,7 +4,6 @@ import com.googlecode.lanterna.TerminalFacade;
 import com.googlecode.lanterna.input.Key;
 import com.googlecode.lanterna.terminal.Terminal;
 import com.googlecode.lanterna.screen.Screen;
-import net.fila3game.AudioManager;
 
 import javax.swing.*;
 import java.util.Scanner;

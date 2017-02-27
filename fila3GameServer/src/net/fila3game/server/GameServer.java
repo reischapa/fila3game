@@ -1,5 +1,6 @@
 package net.fila3game.server;
 
+import net.fila3game.commons.Instruction;
 import net.fila3game.server.gameengine.GameEngine;
 //import net.jchapa.chapautils.FileIOManager;
 

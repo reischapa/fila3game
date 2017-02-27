@@ -1,7 +1,5 @@
 package net.fila3game.client;
 
-import com.googlecode.lanterna.input.Key;
-
 /**
  * Created by codecadet on 2/25/17.
  */

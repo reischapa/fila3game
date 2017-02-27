@@ -1,6 +1,4 @@
-package net.fila3game;
-
-import net.fila3game.client.GameClient;
+package net.fila3game.client;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;

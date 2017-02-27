@@ -1,7 +1,6 @@
 package net.fila3game.server.gameengine;
 
-import net.fila3game.AudioManager;
-import net.fila3game.server.Instruction;
+import net.fila3game.commons.Instruction;
 import net.fila3game.server.gameengine.gameobjects.*;
 
 import java.util.Collections;

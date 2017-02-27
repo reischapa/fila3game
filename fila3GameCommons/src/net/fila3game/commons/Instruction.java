@@ -1,4 +1,4 @@
-package net.fila3game.server;
+package net.fila3game.commons;
 
 /**
  * Created by codecadet on 2/21/17.

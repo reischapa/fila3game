@@ -1,8 +1,8 @@
 package net.fila3game.client;
 
 
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
-import net.fila3game.server.Instruction;
+
+import net.fila3game.commons.Instruction;
 
 import java.io.*;
 import java.net.*;
