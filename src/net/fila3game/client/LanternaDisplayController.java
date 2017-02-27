@@ -176,6 +176,7 @@ public class LanternaDisplayController implements Display, Controller {
                 return;
             case SERVER_FORCED_DISCONNECT:
                 this.showGameOverScreen();
+                AudioManager.start("tankWasted");
                 System.out.println("Game Over");
                 return;
 
@@ -303,6 +304,7 @@ public class LanternaDisplayController implements Display, Controller {
             case 'q':
                 return GUIEvent.Key.KEY_Q;
             case 'r':
+                AudioManager.stopAll();
                 return GUIEvent.Key.KEY_R;
             case 'm':
                 return GUIEvent.Key.KEY_M;
@@ -489,6 +491,7 @@ public class LanternaDisplayController implements Display, Controller {
         createScreenElements(giuliX, giuliY, giuli, Terminal.Color.CYAN);
 
         this.screen.refresh();
+        AudioManager.start("creditsTheme");
         this.state = State.CREDITS;
     }
 
