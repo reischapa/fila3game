@@ -319,7 +319,6 @@ public class GameEngine {
             this.tankList.remove(tank);
             this.battlefield.addField(this.EMPTYMASK, tank.getX(), tank.getY());
             this.numberOfTanks--;
-            AudioManager.start("tankWasted");
             return;
 
         }

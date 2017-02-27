@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by codecadet on 2/21/17.
  */
-public class LanternaDisplayController implements Display, Controller {
+public class LanternaGUI implements GUI, GUIEventSender {
 
     public static final int INPUT_SCAN_DELAY = 5;
 
@@ -138,7 +138,7 @@ public class LanternaDisplayController implements Display, Controller {
     private State state = State.MAIN_SCREEN;
     private Thread inputThread;
 
-    public LanternaDisplayController() {
+    public LanternaGUI() {
         this.mainMenuBlinkExecutorService = new ScheduledThreadPoolExecutor(100);
     }
 
@@ -315,7 +315,7 @@ public class LanternaDisplayController implements Display, Controller {
     }
 
     @Override
-    public void setInputReceiver(GUIEventReceiver receiver) {
+    public void setGUIEventReceiver(GUIEventReceiver receiver) {
         this.receiver = receiver;
     }
 
@@ -349,20 +349,20 @@ public class LanternaDisplayController implements Display, Controller {
                 switch (k) {
                     case KEY_Q:
                         receiver.receiveGUIEvent(GUIEvent.disconnect());
-                        LanternaDisplayController.this.shutdown();
+                        LanternaGUI.this.shutdown();
                         return;
                     case KEY_R:
-                        LanternaDisplayController.this.receiver.receiveGUIEvent(GUIEvent.disconnect());
-                        LanternaDisplayController.this.showFrontPage();
+                        LanternaGUI.this.receiver.receiveGUIEvent(GUIEvent.disconnect());
+                        LanternaGUI.this.showFrontPage();
                         continue;
                 }
 
 
-                switch (LanternaDisplayController.this.state) {
+                switch (LanternaGUI.this.state) {
                     case MAIN_SCREEN:
                         AudioManager.stopAll();
                         AudioManager.start("sound");
-                        LanternaDisplayController.this.mainMenuBlinkExecutorService.shutdownNow();
+                        LanternaGUI.this.mainMenuBlinkExecutorService.shutdownNow();
 
                         try {
                             Thread.sleep(1500);
@@ -372,11 +372,11 @@ public class LanternaDisplayController implements Display, Controller {
 
                         AudioManager.stopAll();
 
-                        LanternaDisplayController.this.state = State.IN_GAME;
+                        LanternaGUI.this.state = State.IN_GAME;
                         receiver.receiveGUIEvent(GUIEvent.connect());
                         continue;
                     case GAME_OVER:
-                        LanternaDisplayController.this.showCreditsScreen();
+                        LanternaGUI.this.showCreditsScreen();
                         continue;
                     case IN_GAME:
                     case CREDITS:

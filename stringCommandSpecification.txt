@@ -1,2 +1,0 @@
-Shooting: <player number> S
-Movement: <player number> M <direction> : Direction can be one of: N (North), S (South), E (East), W (West)

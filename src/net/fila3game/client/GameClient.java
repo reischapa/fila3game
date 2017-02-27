@@ -33,14 +33,14 @@ public class GameClient implements GUIEventReceiver {
 
     public static void main(String[] args) {
         GameClient gc = new GameClient();
-        LanternaDisplayController ln = new LanternaDisplayController();
-        ln.setInputReceiver(gc);
-        gc.setDisplay(ln);
+        LanternaGUI ln = new LanternaGUI();
+        ln.setGUIEventReceiver(gc);
+        gc.setGUI(ln);
         ln.init();
 
     }
 
-    private Display display;
+    private GUI GUI;
 
     private InetAddress serverAddress;
     private Socket socket;
@@ -97,7 +97,7 @@ public class GameClient implements GUIEventReceiver {
         } catch (IOException e) {
             System.out.println("ESTE ROUTER Ë UMA MERDA");
             this.disconnect();
-            this.display.receiveData(GameState.serverNotAvailable());
+            this.GUI.receiveData(GameState.serverNotAvailable());
             e.printStackTrace();
             return;
         }
@@ -151,7 +151,7 @@ public class GameClient implements GUIEventReceiver {
                     if (newPlayerIdentifier < 0) {
                         GameClient.this.disconnect();
                         System.out.println("LDKjsdlkjflskdf");
-                        GameClient.this.display.receiveData(GameState.serverForcedDisconnect());
+                        GameClient.this.GUI.receiveData(GameState.serverForcedDisconnect());
                     }
 
                 } catch (IOException e) {
@@ -352,9 +352,9 @@ public class GameClient implements GUIEventReceiver {
 
                     GameState state = new GameState(string);
 
-//                System.out.println("Transmitting connectionState to display");
+//                System.out.println("Transmitting connectionState to GUI");
 
-                    GameClient.this.display.receiveData(state);
+                    GameClient.this.GUI.receiveData(state);
                 }
 
             } catch (IOException e) {
@@ -396,8 +396,8 @@ public class GameClient implements GUIEventReceiver {
     }
 
 
-    public void setDisplay(Display display) {
-        this.display = display;
+    public void setGUI(GUI GUI) {
+        this.GUI = GUI;
     }
 
 
