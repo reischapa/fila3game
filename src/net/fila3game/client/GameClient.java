@@ -19,7 +19,7 @@ public class GameClient implements GUIEventReceiver {
         DISCONNECTED, CONNECTED,
     }
 
-    public static final String SERVER_IP_ADDRESS = "localhost";
+    public static final String DEFAULT_SERVER_IP_ADDRESS = "localhost";
 
     public static final int CLIENT_TCP_CONNECTION_PORT = 8080;
     public static final int CLIENT_RECEIVING_UDP_PORT = 55356;
@@ -32,7 +32,16 @@ public class GameClient implements GUIEventReceiver {
     public static final int CLIENT_CONNECTION_TIMEOUT_MILLIS = 2000;
 
     public static void main(String[] args) {
-        GameClient gc = new GameClient();
+        GameClient gc = null;
+
+        if (args.length > 0) {
+            gc = new GameClient(args[0]);
+        }
+
+        if (gc == null) {
+            gc = new GameClient();
+        }
+
         LanternaGUI ln = new LanternaGUI();
         ln.setGUIEventReceiver(gc);
         gc.setGUI(ln);
@@ -62,7 +71,13 @@ public class GameClient implements GUIEventReceiver {
 
     private ConnectionState connectionState = ConnectionState.DISCONNECTED;
 
+    private String serverAddressString;
+
     public GameClient() {
+    }
+
+    public GameClient(String serverAddressString) {
+        this.serverAddressString = serverAddressString;
     }
 
     public void connect(String address) {
@@ -150,7 +165,6 @@ public class GameClient implements GUIEventReceiver {
 
                     if (newPlayerIdentifier < 0) {
                         GameClient.this.disconnect();
-                        System.out.println("LDKjsdlkjflskdf");
                         GameClient.this.GUI.receiveData(GameState.serverForcedDisconnect());
                     }
 
@@ -243,7 +257,11 @@ public class GameClient implements GUIEventReceiver {
         switch (event.getType()) {
 
             case CLIENT_CONNECT_SERVER:
-                this.connect(SERVER_IP_ADDRESS);
+                if (this.serverAddressString == null) {
+                    this.connect(DEFAULT_SERVER_IP_ADDRESS);
+                } else {
+                    this.connect(this.serverAddressString);
+                }
                 break;
             case CLIENT_DISCONNECT_SERVER:
                 this.disconnect();
