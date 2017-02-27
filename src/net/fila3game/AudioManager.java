@@ -1,5 +1,7 @@
 package net.fila3game;
 
+import net.fila3game.client.GameClient;
+
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
@@ -24,14 +26,15 @@ public class AudioManager {
                 soundClips.put(soundName, AudioSystem.getClip());
 
                 // load sound from jar
-                String pathStr = "/resources/" + soundName + ".wav";
-                URL soundURL = AudioManager.class.getResource(pathStr);
+                String pathStr =  soundName + ".wav";
+                URL soundURL = GameClient.class.getClassLoader().getResource(pathStr);
 
                 if (soundURL == null) {
-                    // load sound from source code
-                    File file = new File("resources/" + soundName + ".wav");
-                    soundURL = file.toURI().toURL();
+                    File f = new File( "resources" + File.separator + soundName + ".wav");
+                    soundURL = f.toURI().toURL();
+
                 }
+
 
                 inputStream = AudioSystem.getAudioInputStream(soundURL);
                 soundClips.get(soundName).open(inputStream);
