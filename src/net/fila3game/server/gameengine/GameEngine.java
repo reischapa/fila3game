@@ -123,11 +123,11 @@ public class GameEngine {
                     }
                 }
 
-            } else if (i.getType().equals(Instruction.Type.M)){
+            } else if (i.getType().equals(Instruction.Type.M)) {
 
                 int mineNumber = 0;
 
-                if(!this.mineList.isEmpty()) {
+                if (!this.mineList.isEmpty()) {
 
                     for (Mine m : this.mineList) {
 
@@ -141,7 +141,7 @@ public class GameEngine {
 
                 }
 
-                if(mineNumber < this.MAX_MINE_NUMBER){
+                if (mineNumber < this.MAX_MINE_NUMBER) {
 
                     dropMine(tank);
 
@@ -298,11 +298,11 @@ public class GameEngine {
 
         }
 
-        if(checkMineCollision(bullet)){
+        if (checkMineCollision(bullet)) {
 
-            battlefield.addField(EMPTYBULLET,bullet.getX(),bullet.getY());
+            this.battlefield.addField(this.EMPTYBULLET, bullet.getX(), bullet.getY());
             bullet.die();
-            bullets.remove();
+            this.bullets.remove();
             return;
         }
 
@@ -321,7 +321,7 @@ public class GameEngine {
 
         }
 
-        if(checkMineCollision(tank)){
+        if (checkMineCollision(tank)) {
 
             tank.die();
             this.tankList.remove(tank);
@@ -460,11 +460,11 @@ public class GameEngine {
             }
         }
 
-        if(!this.mineList.isEmpty()){
+        if (!this.mineList.isEmpty()) {
 
-            for(Mine mine : mineList){
+            for (Mine mine : mineList) {
 
-                if(battlefield.get(mine.getX(),mine.getY()) != Tiletypes.MINE.getSymbol()){
+                if (battlefield.get(mine.getX(), mine.getY()) != Tiletypes.MINE.getSymbol()) {
 
                     mineList.remove(mine);
 
@@ -568,21 +568,21 @@ public class GameEngine {
 
     }
 
-    public void drawHeart(){
+    public void drawHeart() {
 
-        int randomX = (int)Math.round(Math.random() * this.battlefield.getWidth() - 4 ) + 4;
-        int randomY = (int)Math.round(Math.random() * this. battlefield.getHeight() - 4 ) + 4;
+        int randomX = (int) Math.round(Math.random() * this.battlefield.getWidth() - 4) + 4;
+        int randomY = (int) Math.round(Math.random() * this.battlefield.getHeight() - 4) + 4;
 
-        Heart heart = new Heart (randomX,randomY);
+        Heart heart = new Heart(randomX, randomY);
 
-        if(!checkTankCollision(heart) && !checkBulletCollision(heart) && !checkHeartCollision(heart)){
+        if (!checkTankCollision(heart) && !checkBulletCollision(heart) && !checkHeartCollision(heart)) {
 
-            this.battlefield.addField(heart.getRepresentation(), heart.getX(),heart.getY());
+            this.battlefield.addField(heart.getRepresentation(), heart.getX(), heart.getY());
 
         }
     }
 
-    private synchronized boolean checkHeartCollision(GameObject object){
+    private synchronized boolean checkHeartCollision(GameObject object) {
 
         for (int i = object.getX(); i < object.getX() + object.getWidth(); i++) {
 
@@ -601,7 +601,7 @@ public class GameEngine {
 
     }
 
-    private synchronized void dropMine(Tank tank){
+    private synchronized void dropMine(Tank tank) {
 
         Mine mine = null;
 
@@ -636,7 +636,7 @@ public class GameEngine {
         mineList.add(mine);
     }
 
-    private synchronized boolean checkMineCollision(GameObject object){
+    private synchronized boolean checkMineCollision(GameObject object) {
 
         for (int i = object.getX(); i < object.getX() + object.getWidth(); i++) {
 
@@ -644,7 +644,7 @@ public class GameEngine {
 
                 if (this.battlefield.get(i, j) == Tiletypes.MINE.getSymbol()) {
 
-                    this.battlefield.addField(EMPTYBULLET,i,j);
+                    this.battlefield.addField(EMPTYBULLET, i, j);
                     System.out.println("Mine Collision");
                     return true;
 
