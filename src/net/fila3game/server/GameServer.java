@@ -13,7 +13,7 @@ import java.util.concurrent.*;
  */
 public class GameServer {
     public static final int SERVER_BROADCAST_INTERVAL = 34;
-    public static final int SERVER_GAME_ENGINE_QUERY_INTERVAL = 25;
+    public static final int SERVER_GAME_ENGINE_QUERY_INTERVAL = 17;
     public static final int SERVER_TCP_CONNECTION_PORT = 8080;
     public static final int SERVER_RECEIVING_UDP_PORT = 55355;
     public static final int SERVER_SENDING_UDP_PORT = 55356;
@@ -163,8 +163,6 @@ public class GameServer {
                 } catch (IOException e) {
                     e.printStackTrace();
                     this.safelyShutdownClientConnection();
-//                } catch (InterruptedException e) {
-                    e.printStackTrace();
                 }
 
         }
@@ -264,10 +262,16 @@ public class GameServer {
 
 
         private boolean registerSelfToActiveClientList() {
+            if (this.identifier == null) {
+                return false;
+            }
             return GameServer.this.currentClients.put(this.identifier, this) != null;
         }
 
         private void deRegisterSelfFromActiveClientList() {
+            if (this.identifier == null) {
+                return;
+            }
             GameServer.this.currentClients.remove(this.identifier);
         }
 
@@ -369,8 +373,13 @@ public class GameServer {
 
 //                System.out.println("Server sending message:");
 
-                String message =  GameServer.this.engine.calculateState();
-//                String message = "hello";
+                String message = "";
+                try {
+                    message = GameServer.this.engine.calculateState();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    continue;
+                }
 
                 byte[] b = message.getBytes();
                 DatagramPacket p = new DatagramPacket(b, 0, b.length, worker.getClientIPAddress(), SERVER_SENDING_UDP_PORT);

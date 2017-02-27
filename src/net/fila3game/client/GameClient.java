@@ -1,6 +1,7 @@
 package net.fila3game.client;
 
 
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 import net.fila3game.server.Instruction;
 
 import java.io.*;
@@ -107,6 +108,8 @@ public class GameClient implements GUIEventReceiver {
 
         } catch (UnknownHostException e) {
             System.out.println("HOST NOT AVAILABLE");
+            this.disconnect();
+            this.GUI.receiveData(GameState.serverNotAvailable());
             e.printStackTrace();
             return;
         } catch (IOException e) {
@@ -129,7 +132,13 @@ public class GameClient implements GUIEventReceiver {
 
     private void receiveInitialConfiguration() throws IOException                                                                                                                                                                                       {
         this.playerIdentifier = this.tcpReceive();
-        this.playerNumber = Integer.parseInt(this.tcpReceive());
+        int i = 1;
+        try {
+            i = Integer.parseInt(this.tcpReceive());
+        } catch (NumberFormatException nfe) {
+            nfe.printStackTrace();
+        }
+        this.playerNumber = i;
     }
 
     private void initializeUDPSockets() throws IOException {
@@ -242,7 +251,11 @@ public class GameClient implements GUIEventReceiver {
     }
 
     private String tcpReceive() throws  IOException {
-        return this.reader.readLine();
+        String res = this.reader.readLine();
+        if (res == null) {
+            throw new IOException();
+        }
+        return res;
     }
 
     @Override

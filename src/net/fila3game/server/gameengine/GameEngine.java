@@ -4,7 +4,9 @@ import net.fila3game.AudioManager;
 import net.fila3game.server.Instruction;
 import net.fila3game.server.gameengine.gameobjects.*;
 
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Created by Luizord on 2/21/17.
@@ -40,9 +42,9 @@ public class GameEngine {
 
     private Field battlefield;
     private int numberOfTanks;
-    private LinkedList<Tank> tankList;
-    private LinkedList<Bullet> bullets;
-    private LinkedList<Mine> mineList;
+    private List<Tank> tankList;
+    private List<Bullet> bullets;
+    private List<Mine> mineList;
     private final Field EMPTYMASK = new Field(RepresentationFactory.TANK_WIDTH, RepresentationFactory.TANK_HEIGHT);
     private final Field EMPTYBULLET = new Field(1, 1);
 
@@ -61,9 +63,9 @@ public class GameEngine {
 
         this.battlefield = createDefaultField();
         this.numberOfTanks = 0;
-        this.tankList = new LinkedList<>();
-        this.bullets = new LinkedList<>();
-        this.mineList = new LinkedList<>();
+        this.tankList = Collections.synchronizedList( new LinkedList<Tank>());
+        this.bullets = Collections.synchronizedList( new LinkedList<Bullet>());
+        this.mineList = Collections.synchronizedList( new LinkedList<Mine>());
 
     }
 
@@ -302,7 +304,7 @@ public class GameEngine {
 
             this.battlefield.addField(this.EMPTYBULLET, bullet.getX(), bullet.getY());
             bullet.die();
-            this.bullets.remove();
+            this.bullets.remove(bullet);
             return;
         }
 
@@ -336,6 +338,10 @@ public class GameEngine {
 
     public synchronized int addTank() {
 
+        if (this.numberOfTanks >= MAX_NUMBER_TANKS) {
+            return -1;
+        }
+
         Tank t = null;
 
         int newTankX;
@@ -355,10 +361,16 @@ public class GameEngine {
 
         do {
 
-            //newTankX = RandomGen.getBoundedRandomInt(1, this.battlefield.getWidth() - 2 - RepresentationFactory.TANK_WIDTH);
-            //newTankY = RandomGen.getBoundedRandomInt(1, this.battlefield.getHeight() - 2 - RepresentationFactory.TANK_HEIGHT);
-            newTankX = (int) Math.round(Math.random() * this.battlefield.getWidth() - RepresentationFactory.TANK_WIDTH) + 2;
-            newTankY = (int) Math.round(Math.random() * this.battlefield.getHeight() - RepresentationFactory.TANK_HEIGHT) + 2;
+            newTankX = (int) Math.ceil(Math.random() * this.battlefield.getWidth() - 1 )  ;
+            newTankY = (int) Math.ceil(Math.random() * this.battlefield.getHeight() - 1 ) ;
+
+            if (newTankX + RepresentationFactory.TANK_WIDTH > this.battlefield.getWidth()-1) {
+                newTankX -= RepresentationFactory.TANK_WIDTH;
+            }
+
+            if (newTankY + RepresentationFactory.TANK_HEIGHT > this.battlefield.getHeight()-1) {
+                newTankY -= RepresentationFactory.TANK_HEIGHT;
+            }
 
             if (newTankX > this.battlefield.getWidth() / 4 && newTankX < (this.battlefield.getWidth() * 3) / 4) {
 
