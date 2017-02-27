@@ -123,13 +123,13 @@ public class GameEngine {
 
             } else if (i.getType().equals(Instruction.Type.M)){
 
-                if(!this.mineList.isEmpty()) {
+                int mineNumber = 0;
 
-                    int mineNumber = 0;
+                if(!this.mineList.isEmpty()) {
 
                     for (Mine m : this.mineList) {
 
-                        if(m.getPlayer() == i.getPlayerNumber()){
+                        if (m.getPlayer() == i.getPlayerNumber()) {
 
                             mineNumber++;
 
@@ -137,16 +137,15 @@ public class GameEngine {
 
                     }
 
-                    if(mineNumber < this.MAX_MINE_NUMBER){
-
-                        dropMine(tank);
-
-                    }
                 }
 
+                if(mineNumber < this.MAX_MINE_NUMBER){
+
+                    dropMine(tank);
+
+                }
             }
         }
-
     }
 
     private boolean bulletExists(int tankID) {
