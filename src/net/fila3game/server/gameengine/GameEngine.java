@@ -1,5 +1,6 @@
 package net.fila3game.server.gameengine;
 
+import net.fila3game.AudioManager;
 import net.fila3game.server.Instruction;
 import net.fila3game.server.gameengine.gameobjects.*;
 
@@ -23,7 +24,8 @@ public class GameEngine {
         BULLET_L('<'),
         BULLET_U('A'),
         BULLET_D('V'),
-        HEART('♥');
+        HEART('♥'),
+        MINE('@');
 
         private char symbol;
 
@@ -311,6 +313,17 @@ public class GameEngine {
 
         }
 
+        if(checkMineCollision(tank)){
+
+            tank.die();
+            this.tankList.remove(tank);
+            this.battlefield.addField(this.EMPTYMASK, tank.getX(), tank.getY());
+            this.numberOfTanks--;
+            AudioManager.start("tankWasted");
+            return;
+
+        }
+
         this.battlefield.addField(tank.getRepresentation(), tank.getX(), tank.getY());
     }
 
@@ -437,6 +450,18 @@ public class GameEngine {
                 if (bullet.isAlive()) {
 
                     moveBullet(bullet);
+
+                }
+            }
+        }
+
+        if(!this.mineList.isEmpty()){
+
+            for(Mine mine : mineList){
+
+                if(battlefield.get(mine.getX(),mine.getY()) != Tiletypes.MINE.getSymbol()){
+
+                    mineList.remove(mine);
 
                 }
             }
@@ -600,11 +625,30 @@ public class GameEngine {
         } else {
 
             mine.die();
-            System.out.println("wtfbooom");
             return;
 
         }
         mineList.add(mine);
+    }
+
+    private synchronized boolean checkMineCollision(GameObject object){
+
+        for (int i = object.getX(); i < object.getX() + object.getWidth(); i++) {
+
+            for (int j = object.getY(); j < object.getY() + object.getHeight(); j++) {
+
+                if (this.battlefield.get(i, j) == Tiletypes.MINE.getSymbol()) {
+
+                    this.battlefield.addField(EMPTYBULLET,i,j);
+                    System.out.println("Mine Collision");
+                    return true;
+
+                }
+            }
+        }
+
+        return false;
+
     }
 
 }
