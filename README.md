@@ -24,6 +24,6 @@ Commands:
 
 'R' Restart
 
-(on came over screen:)
+(on game over screen:)
 
 'C' Credits
