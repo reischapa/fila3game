@@ -275,16 +275,12 @@ public class LanternaGUI implements GUI, GUIEventSender {
 //        System.out.println("got key! " + key);
         switch (key.getKind()) {
             case ArrowDown:
-                AudioManager.start("tankMoving");
                 return GUIEvent.Key.KEY_ARROWDOWN;
             case ArrowLeft:
-                AudioManager.start("tankMoving");
                 return GUIEvent.Key.KEY_ARROWLEFT;
             case ArrowUp:
-                AudioManager.start("tankMoving");
                 return GUIEvent.Key.KEY_ARROWUP;
             case ArrowRight:
-                AudioManager.start("tankMoving");
                 return GUIEvent.Key.KEY_ARROWRIGHT;
             case NormalKey:
                 return getNormalKeyCharacter(key);
@@ -306,6 +302,8 @@ public class LanternaGUI implements GUI, GUIEventSender {
                 return GUIEvent.Key.KEY_R;
             case 'm':
                 return GUIEvent.Key.KEY_M;
+            case 'c':
+                return GUIEvent.Key.KEY_C;
             default:
 //                System.out.println("Something went terribly wrong");
         }
@@ -376,15 +374,29 @@ public class LanternaGUI implements GUI, GUIEventSender {
                         receiver.receiveGUIEvent(GUIEvent.connect());
                         continue;
                     case GAME_OVER:
-                        LanternaGUI.this.showCreditsScreen();
-                        continue;
+                        switch (k) {
+                            case KEY_C:
+                            LanternaGUI.this.showCreditsScreen();
+                            continue;
+                        }
+                        break;
                     case IN_GAME:
+                        switch (k) {
+                            case KEY_ARROWDOWN:
+                            case KEY_ARROWLEFT:
+                            case KEY_ARROWRIGHT:
+                            case KEY_ARROWUP:
+                                AudioManager.start("tankMoving");
+                                break;
+                        }
+                        break;
                     case CREDITS:
+                        continue;
 
                 }
 
-
                 receiver.receiveGUIEvent(GUIEvent.keyboardInput(k));
+
             }
         }
     }

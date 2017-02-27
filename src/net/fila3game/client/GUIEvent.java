@@ -27,7 +27,7 @@ public class GUIEvent {
     }
 
     public enum Key {
-        KEY_SPACE, KEY_ARROWUP, KEY_ARROWDOWN, KEY_ARROWLEFT, KEY_ARROWRIGHT, KEY_Q, KEY_R, KEY_M
+        KEY_SPACE, KEY_ARROWUP, KEY_ARROWDOWN, KEY_ARROWLEFT, KEY_ARROWRIGHT, KEY_Q, KEY_R, KEY_M, KEY_C
     }
 
     public enum Type {
