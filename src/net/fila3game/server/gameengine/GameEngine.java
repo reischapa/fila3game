@@ -298,6 +298,14 @@ public class GameEngine {
 
         }
 
+        if(checkMineCollision(bullet)){
+
+            battlefield.addField(EMPTYBULLET,bullet.getX(),bullet.getY());
+            bullet.die();
+            bullets.remove();
+            return;
+        }
+
         this.battlefield.addField(bullet.getRepresentation(), bullet.getX(), bullet.getY());
 
     }
@@ -319,15 +327,12 @@ public class GameEngine {
             this.tankList.remove(tank);
             this.battlefield.addField(this.EMPTYMASK, tank.getX(), tank.getY());
             this.numberOfTanks--;
-            AudioManager.start("tankWasted");
             return;
 
         }
 
         this.battlefield.addField(tank.getRepresentation(), tank.getX(), tank.getY());
     }
-
-    //TODO matar o chapa sem que ninguem saiba...
 
     public synchronized int addTank() {
 
