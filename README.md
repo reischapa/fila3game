@@ -5,3 +5,25 @@ Academia de Código Bootcamp Project, Multiplayer/MultiThreaded tank game using 
 Authors: João Chapa, Luis Rodrigues, Ruben Mateus, Giuliano Annunziata.
 
 Special Thanks to Lanterna consultant: Rute Carrapato.
+
+Commands:
+
+↑	Move Upwards
+
+↓	Move Downwards
+
+→	Move Rightwards
+
+←	Move Leftwards
+
+'SPACE' Shoot
+
+'M' Place a mine
+
+'Q' Quit
+
+'R' Restart
+
+(on came over screen:)
+
+'C' Credits
