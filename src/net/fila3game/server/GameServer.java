@@ -1,6 +1,5 @@
 package net.fila3game.server;
 
-import net.fila3game.client.GameClient;
 import net.fila3game.server.gameengine.GameEngine;
 //import net.jchapa.chapautils.FileIOManager;
 
@@ -13,9 +12,8 @@ import java.util.concurrent.*;
  * Created by chapa on 2/18/2017.
  */
 public class GameServer {
-    public static final int SEND_INTERVAL = 25;
-    public static final int GAME_ENGINE_SENDING_INTERVAL = 50;
-    public static final int KEEPALIVE_INTERVAL = 100;
+    public static final int SERVER_BROADCAST_INTERVAL = 34;
+    public static final int SERVER_GAME_ENGINE_QUERY_INTERVAL = 25;
     public static final int SERVER_TCP_CONNECTION_PORT = 8080;
     public static final int SERVER_RECEIVING_UDP_PORT = 55355;
     public static final int SERVER_SENDING_UDP_PORT = 55356;
@@ -23,7 +21,6 @@ public class GameServer {
     public static final int SERVER_N_CLIENT_EXECUTOR_SERVICE_THREADS = 10;
     public static final int SERVER_N_SCHEDULED_EXECUTOR_SERVICE_THREADS = 10;
 
-    public static final String KEEPALIVE_MESSAGE = "a";
     public static final String STRING_ENCODING = "UTF-8";
     public static final String COMMAND_TOKEN_SEPARATOR = " ";
 
@@ -106,8 +103,8 @@ public class GameServer {
 
     private void scheduleGeneralUDPWorkers() {
 
-        this.scheduledThreadPoolExecutor.scheduleAtFixedRate(new ClientBroadcastWorker(), 0, SEND_INTERVAL, TimeUnit.MILLISECONDS);
-        this.scheduledThreadPoolExecutor.scheduleAtFixedRate(new InstructionTableCleaner(), 0, GAME_ENGINE_SENDING_INTERVAL, TimeUnit.MILLISECONDS);
+        this.scheduledThreadPoolExecutor.scheduleAtFixedRate(new ClientBroadcastWorker(), 0, SERVER_BROADCAST_INTERVAL, TimeUnit.MILLISECONDS);
+        this.scheduledThreadPoolExecutor.scheduleAtFixedRate(new InstructionTableCleaner(), 0, SERVER_GAME_ENGINE_QUERY_INTERVAL, TimeUnit.MILLISECONDS);
         this.clientExecutorService.execute(new ClientReceiverWorker());
     }
 
