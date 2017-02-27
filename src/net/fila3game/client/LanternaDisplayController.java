@@ -143,7 +143,7 @@ public class LanternaDisplayController implements Display, Controller {
     }
 
     public void init() {
-        AudioManager.load(new String[]{"sound", "startMusic", "tankFire", "tankMoving"});
+        AudioManager.load(new String[]{"sound", "startMusic", "tankFire", "tankMoving","tankWasted", "creditsTheme"});
         showFrontPage();
         this.initializeInputThread();
     }
