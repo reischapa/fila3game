@@ -143,7 +143,7 @@ public class LanternaGUI implements GUI, GUIEventSender {
     }
 
     public void init() {
-        AudioManager.load(new String[]{"sound", "startMusic", "tankFire", "tankMoving"});
+        AudioManager.load(new String[]{"sound", "startMusic", "tankFire", "tankMoving","tankWasted", "creditsTheme"});
         showFrontPage();
         this.initializeInputThread();
     }
@@ -176,6 +176,7 @@ public class LanternaGUI implements GUI, GUIEventSender {
                 return;
             case SERVER_FORCED_DISCONNECT:
                 this.showGameOverScreen();
+                AudioManager.start("tankWasted");
                 System.out.println("Game Over");
                 return;
 
@@ -299,6 +300,7 @@ public class LanternaGUI implements GUI, GUIEventSender {
             case 'q':
                 return GUIEvent.Key.KEY_Q;
             case 'r':
+                AudioManager.stopAll();
                 return GUIEvent.Key.KEY_R;
             case 'm':
                 return GUIEvent.Key.KEY_M;
@@ -501,6 +503,7 @@ public class LanternaGUI implements GUI, GUIEventSender {
         createScreenElements(giuliX, giuliY, giuli, Terminal.Color.CYAN);
 
         this.screen.refresh();
+        AudioManager.start("creditsTheme");
         this.state = State.CREDITS;
     }
 
