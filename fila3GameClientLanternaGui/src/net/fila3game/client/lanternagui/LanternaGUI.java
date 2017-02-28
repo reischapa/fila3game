@@ -1,9 +1,10 @@
-package net.fila3game.client;
+package net.fila3game.client.lanternagui;
 
 import com.googlecode.lanterna.TerminalFacade;
 import com.googlecode.lanterna.input.Key;
 import com.googlecode.lanterna.terminal.Terminal;
 import com.googlecode.lanterna.screen.Screen;
+import net.fila3game.client.backend.*;
 
 import javax.swing.*;
 import java.util.Scanner;

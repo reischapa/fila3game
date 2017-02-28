@@ -1,4 +1,4 @@
-package net.fila3game.client;
+package net.fila3game.client.backend;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -15,7 +15,14 @@ public class AudioManager {
     public static HashMap<String, Clip> soundClips;
     private static AudioInputStream inputStream;
 
+    private final static boolean ENABLE = false;
+
+
     public static void load(String[] soundNames) {
+
+        if (!ENABLE) {
+            return;
+        }
 
         soundClips = new HashMap<>(soundNames.length);
 
@@ -24,11 +31,11 @@ public class AudioManager {
                 soundClips.put(soundName, AudioSystem.getClip());
 
                 // load sound from jar
-                String pathStr =  soundName + ".wav";
+                String pathStr = soundName + ".wav";
                 URL soundURL = GameClient.class.getClassLoader().getResource(pathStr);
 
                 if (soundURL == null) {
-                    File f = new File( "resources" + File.separator + soundName + ".wav");
+                    File f = new File("resources" + File.separator + soundName + ".wav");
                     soundURL = f.toURI().toURL();
 
                 }
@@ -44,6 +51,11 @@ public class AudioManager {
     }
 
     public static void start(String soundName) {
+
+        if (soundClips == null) {
+            return;
+        }
+
         if (!soundClips.get(soundName).isRunning()) {
             soundClips.get(soundName).start();
             soundClips.get(soundName).setFramePosition(0);
@@ -51,6 +63,11 @@ public class AudioManager {
     }
 
     public static void loop(String soundName, int time) {
+
+        if (soundClips == null) {
+            return;
+        }
+
         if (!soundClips.get(soundName).isRunning()) {
             soundClips.get(soundName).loop(time);
             soundClips.get(soundName).setFramePosition(0);
@@ -58,12 +75,20 @@ public class AudioManager {
     }
 
     public static void stopAll() {
+
+        if (soundClips == null) {
+            return;
+        }
+
         for (String soundName : soundClips.keySet()) {
             soundClips.get(soundName).stop();
         }
     }
 
     public static void stop(String soundName) {
+        if (soundClips == null) {
+            return;
+        }
         soundClips.get(soundName).stop();
     }
 

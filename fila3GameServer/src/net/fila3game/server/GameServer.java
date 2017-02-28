@@ -376,7 +376,7 @@ public class GameServer {
 
                 String message = "";
                 try {
-                    message = GameServer.this.engine.calculateState();
+                    message = GameServer.this.engine.calculateState().getFieldString();
                 } catch (Exception e) {
                     e.printStackTrace();
                     continue;

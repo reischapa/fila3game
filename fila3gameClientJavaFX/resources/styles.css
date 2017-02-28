@@ -1,0 +1,71 @@
+.pane {
+    -fx-text-fill: darkseagreen;
+}
+
+
+.label-input-display {
+    -fx-font-size: 30pt;
+    -fx-font-family: "Segoe UI Semibold";
+    -fx-text-fill: black;
+    -fx-alignment: bottom-right;
+    -fx-background-color: antiquewhite;
+    -fx-background-insets: 2;
+    -fx-background-radius: 5;
+}
+
+.grid-pane-button {
+    -fx-alignment: center;
+    -fx-background-color: black;
+    -fx-padding: 10 10 10 10;
+}
+
+
+
+
+/*
+ * Metro style Push Button
+ * Author: Pedro Duque Vieira
+ * http://pixelduke.wordpress.com/2012/10/23/jmetro-windows-8-controls-on-java/
+ */
+
+.button-calculator {
+    -fx-background-color: cornflowerblue;
+    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-font-size: 12pt;
+    -fx-text-fill: darkslateblue;
+    -fx-focus-traversable: false;
+    -fx-background-insets: 3;
+    -fx-background-radius: 5;
+}
+
+.button-calculator:hover {
+    -fx-background-color: #3a3a3a;
+    -fx-text-fill: antiquewhite;
+}
+
+.button:pressed, .button:default:hover:pressed {
+    -fx-background-color: white;
+    -fx-text-fill: #1d1d1d;
+}
+
+.button:focused {
+    -fx-border-color: white, white;
+    -fx-border-width: 1, 1;
+    -fx-border-radius: 0, 0;
+    -fx-border-insets: 1 1 1 1, 0;
+}
+
+.button:disabled, .button:default:disabled {
+    -fx-opacity: 0.4;
+    -fx-background-color: #1d1d1d;
+    -fx-text-fill: white;
+}
+
+.button:default {
+    -fx-background-color: -fx-focus-color;
+    -fx-text-fill: #ffffff;
+}
+
+.button:default:hover {
+    -fx-background-color: derive(-fx-focus-color,30%);
+}

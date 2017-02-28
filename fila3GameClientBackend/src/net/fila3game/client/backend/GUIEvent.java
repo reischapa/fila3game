@@ -1,4 +1,4 @@
-package net.fila3game.client;
+package net.fila3game.client.backend;
 
 /**
  * Created by codecadet on 2/25/17.

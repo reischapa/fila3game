@@ -457,7 +457,7 @@ public class GameEngine {
     }
 
     //calculate and return the gameState
-    public synchronized String calculateState() {
+    public synchronized GameEngineResponse calculateState() {
 
         if (!this.bullets.isEmpty()) {
 
@@ -483,7 +483,7 @@ public class GameEngine {
             }
         }
 
-        return this.battlefield.returnAsString();
+        return new GameEngineResponse(this.battlefield.returnAsString());
     }
 
     private synchronized boolean checkTankCollision(GameObject object) {

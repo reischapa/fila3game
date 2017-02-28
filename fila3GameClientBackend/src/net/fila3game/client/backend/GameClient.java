@@ -1,4 +1,4 @@
-package net.fila3game.client;
+package net.fila3game.client.backend;
 
 
 
@@ -32,23 +32,23 @@ public class GameClient implements GUIEventReceiver {
     public static final int CLIENT_HEARTBEAT_INTERVAL_MILLIS = 5;
     public static final int CLIENT_CONNECTION_TIMEOUT_MILLIS = 2000;
 
-    public static void main(String[] args) {
-        GameClient gc = null;
-
-        if (args.length > 0) {
-            gc = new GameClient(args[0]);
-        }
-
-        if (gc == null) {
-            gc = new GameClient();
-        }
-
-        LanternaGUI ln = new LanternaGUI();
-        ln.setGUIEventReceiver(gc);
-        gc.setGUI(ln);
-        ln.init();
-
-    }
+//    public static void main(String[] args) {
+//        GameClient gc = null;
+//
+//        if (args.length > 0) {
+//            gc = new GameClient(args[0]);
+//        }
+//
+//        if (gc == null) {
+//            gc = new GameClient();
+//        }
+//
+//        LanternaGUI ln = new LanternaGUI();
+//        ln.setGUIEventReceiver(gc);
+//        gc.setGUI(ln);
+//        ln.init();
+//
+//    }
 
     private GUI GUI;
 
