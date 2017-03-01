@@ -1,71 +1,46 @@
-.pane {
-    -fx-text-fill: darkseagreen;
-}
-
-
-.label-input-display {
-    -fx-font-size: 30pt;
-    -fx-font-family: "Segoe UI Semibold";
-    -fx-text-fill: black;
-    -fx-alignment: bottom-right;
-    -fx-background-color: antiquewhite;
-    -fx-background-insets: 2;
-    -fx-background-radius: 5;
-}
-
-.grid-pane-button {
+.cell-empty {
+    -fx-text-alignment: center;
     -fx-alignment: center;
     -fx-background-color: black;
-    -fx-padding: 10 10 10 10;
 }
 
 
-
-
-/*
- * Metro style Push Button
- * Author: Pedro Duque Vieira
- * http://pixelduke.wordpress.com/2012/10/23/jmetro-windows-8-controls-on-java/
- */
-
-.button-calculator {
-    -fx-background-color: cornflowerblue;
-    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
-    -fx-font-size: 12pt;
-    -fx-text-fill: darkslateblue;
-    -fx-focus-traversable: false;
-    -fx-background-insets: 3;
-    -fx-background-radius: 5;
+.cell-tank{
+    -fx-text-alignment: center;
+    -fx-alignment: center;
+    -fx-background-color: green;
 }
 
-.button-calculator:hover {
-    -fx-background-color: #3a3a3a;
-    -fx-text-fill: antiquewhite;
+.cell-wall {
+    -fx-text-alignment: center;
+    -fx-alignment: center;
+    -fx-background-color: blue;
 }
 
-.button:pressed, .button:default:hover:pressed {
-    -fx-background-color: white;
-    -fx-text-fill: #1d1d1d;
+.cell-bullet {
+    -fx-text-alignment: center;
+    -fx-alignment: center;
+    -fx-background-color: brown;
 }
 
-.button:focused {
-    -fx-border-color: white, white;
-    -fx-border-width: 1, 1;
-    -fx-border-radius: 0, 0;
-    -fx-border-insets: 1 1 1 1, 0;
+.cell-number {
+    -fx-text-alignment: center;
+    -fx-alignment: center;
+    -fx-background-color: lawngreen;
 }
 
-.button:disabled, .button:default:disabled {
-    -fx-opacity: 0.4;
-    -fx-background-color: #1d1d1d;
-    -fx-text-fill: white;
+.cell-mine{
+    -fx-text-alignment: center;
+    -fx-alignment: center;
+    -fx-background-color: gray;
 }
 
-.button:default {
-    -fx-background-color: -fx-focus-color;
-    -fx-text-fill: #ffffff;
+.battlefield {
+    -fx-alignment: center;
 }
 
-.button:default:hover {
-    -fx-background-color: derive(-fx-focus-color,30%);
+.battlefield-debug {
+    -fx-grid-lines-visible: true;
 }
+
+

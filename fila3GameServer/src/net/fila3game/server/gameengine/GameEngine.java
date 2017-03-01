@@ -1,6 +1,7 @@
 package net.fila3game.server.gameengine;
 
 import net.fila3game.commons.Instruction;
+import net.fila3game.commons.Tiletypes;
 import net.fila3game.server.gameengine.gameobjects.*;
 
 import java.util.Collections;
@@ -16,28 +17,6 @@ public class GameEngine {
     public static final int MAX_MINE_NUMBER = 3;
     public static final int DEFAULT_BATTLEFIELD_COLUMNS = 50;
     public static final int DEFAULT_BATTLEFIELD_ROWS = 30;
-
-    public enum Tiletypes {
-
-        WALL('W'),
-        TANK('T'),
-        BULLET_R('>'),
-        BULLET_L('<'),
-        BULLET_U('A'),
-        BULLET_D('V'),
-        HEART('♥'),
-        MINE('@');
-
-        private char symbol;
-
-        Tiletypes(char b) {
-            this.symbol = b;
-        }
-
-        public char getSymbol() {
-            return symbol;
-        }
-    }
 
     private Field battlefield;
     private int numberOfTanks;
